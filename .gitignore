@@ -24,10 +24,6 @@ yarn-error.log*
 # Dependency directories
 /node_modules
 
-# Compiled CSS
-*.css
-*.sass.css
-
 # System Files
 .DS_Store
 Thumbs.db
@@ -37,13 +33,6 @@ Thumbs.db
 /.vscode
 *.sublime-workspace
 *.sublime-project
-
-# Environment files
-.env
-.env.*.local
-
-# Angular environment files
-/src/environments/environment*.ts
 
 # Misc
 /.angular/cache

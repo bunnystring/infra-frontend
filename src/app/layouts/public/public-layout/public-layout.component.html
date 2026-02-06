@@ -1,0 +1,28 @@
+<div class="public-layout">
+  <header class="public-header">
+    <div class="container">
+      <div class="header-content">
+        <div class="logo">
+          <img src="assets/images/logo.png" alt="Grupo ASD" />
+          <span class="app-title">Grupo ASD</span>
+        </div>
+        <nav class="nav-links">
+          <a routerLink="/auth/login" routerLinkActive="active">Iniciar Sesión</a>
+          <a routerLink="/auth/register" routerLinkActive="active">Registrarse</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main class="public-content">
+    <div class="container">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+
+  <footer class="public-footer">
+    <div class="container">
+      <p>&copy; {{ currentYear }} Grupo ASD. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+</div>

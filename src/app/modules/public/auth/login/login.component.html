@@ -1,0 +1,153 @@
+<div class="login-container">
+  <div class="login-card">
+    <!-- Header -->
+    <div class="login-header">
+      <div class="icon-wrapper">
+        <i class="fas fa-lock"></i>
+      </div>
+      <h2>Iniciar Sesión</h2>
+      <p>Sistema de Gestión de Equipos de Infraestructura</p>
+    </div>
+
+    <!-- Formulario -->
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+
+      <!-- Mensaje de error global -->
+      <div class="alert alert-danger" *ngIf="error" role="alert">
+        <i class="fas fa-exclamation-circle"></i>
+        <span>{{ error }}</span>
+      </div>
+
+      <!-- Campo Email -->
+      <div class="form-group">
+        <label for="email">
+          <i class="fas fa-envelope"></i>
+          Email
+        </label>
+        <input
+          type="email"
+          id="email"
+          class="form-control"
+          formControlName="email"
+          [class.is-invalid]="submitted && f['email'].errors"
+          placeholder="Ingrese su email"
+          autocomplete="email"
+          [disabled]="loading"
+        >
+        <div class="invalid-feedback" *ngIf="submitted && f['email'].errors">
+          <small *ngIf="f['email'].errors['required']">
+            <i class="fas fa-exclamation-triangle"></i>
+            El email es requerido
+          </small>
+        </div>
+      </div>
+
+      <!-- Campo Contraseña -->
+      <div class="form-group">
+        <label for="password">
+          <i class="fas fa-key"></i>
+          Contraseña
+        </label>
+        <div class="password-input-wrapper">
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            id="password"
+            class="form-control"
+            formControlName="password"
+            [class.is-invalid]="submitted && f['password'].errors"
+            placeholder="Ingrese su contraseña"
+            autocomplete="current-password"
+            [disabled]="loading"
+          >
+          <button
+            type="button"
+            class="password-toggle"
+            (click)="togglePasswordVisibility()"
+            [disabled]="loading"
+            tabindex="-1"
+            aria-label="Mostrar u ocultar contraseña"
+          >
+            <i [class]="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+          </button>
+        </div>
+        <div class="invalid-feedback" *ngIf="submitted && f['password'].errors">
+          <small *ngIf="f['password'].errors['required']">
+            <i class="fas fa-exclamation-triangle"></i>
+            La contraseña es requerida
+          </small>
+          <small *ngIf="f['password'].errors['minlength']">
+            <i class="fas fa-exclamation-triangle"></i>
+            La contraseña debe tener al menos 6 caracteres
+          </small>
+        </div>
+      </div>
+
+      <!-- Botones de acción -->
+      <div class="form-actions">
+        <!-- Botón de Login -->
+        <button
+          type="submit"
+          class="btn btn-primary btn-block"
+          [disabled]="loading"
+        >
+          <span *ngIf="!loading">
+            <i class="fas fa-sign-in-alt"></i>
+            Ingresar
+          </span>
+          <span *ngIf="loading" class="loading-content">
+            <span class="spinner-border spinner-border-sm"></span>
+            Ingresando...
+          </span>
+        </button>
+
+        <!-- Botón de Limpiar (opcional) -->
+        <button
+          type="button"
+          class="btn btn-secondary btn-block"
+          (click)="resetForm()"
+          [disabled]="loading"
+        >
+          <i class="fas fa-redo"></i>
+          Limpiar
+        </button>
+      </div>
+
+      <!-- Link a Registro -->
+      <div class="text-center mt-4">
+        <p class="register-link">
+          ¿No tienes cuenta?
+          <a routerLink="/auth/register" [class.disabled]="loading">
+            Regístrate aquí
+          </a>
+        </p>
+      </div>
+
+      <!-- Link a recuperar contraseña (opcional) -->
+      <div class="text-center mt-2">
+        <a
+          routerLink="/auth/forgot-password"
+          class="forgot-password-link"
+          [class.disabled]="loading"
+        >
+          ¿Olvidaste tu contraseña?
+        </a>
+      </div>
+    </form>
+
+    <!-- Footer del card (opcional) -->
+    <div class="login-footer">
+      <small class="text-muted">
+        <i class="fas fa-shield-alt"></i>
+        Conexión segura
+      </small>
+    </div>
+  </div>
+
+  <!-- Información adicional (opcional) -->
+  <div class="login-info">
+    <div class="info-card">
+      <i class="fas fa-info-circle"></i>
+      <p>Bienvenido al sistema de gestión de equipos de infraestructura del Grupo ASD</p>
+    </div>
+  </div>
+</div>

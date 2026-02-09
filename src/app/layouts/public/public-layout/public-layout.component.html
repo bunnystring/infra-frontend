@@ -1,28 +1,54 @@
-<div class="public-layout">
-  <header class="public-header">
-    <div class="container">
-      <div class="header-content">
-        <div class="logo">
-          <img src="assets/images/logo.png" alt="Grupo ASD" />
-          <span class="app-title">Grupo ASD</span>
-        </div>
-        <nav class="nav-links">
-          <a routerLink="/auth/login" routerLinkActive="active">Iniciar Sesión</a>
-          <a routerLink="/auth/register" routerLinkActive="active">Registrarse</a>
-        </nav>
+<div class="min-h-screen bg-gradient-to-br from-primary via-secondary to-accent flex flex-col">
+  <!-- Header -->
+  <header class="navbar bg-base-100/10 backdrop-blur-md shadow-lg">
+    <div class="container mx-auto px-4">
+      <div class="flex-1">
+        <a class="flex items-center gap-3" routerLink="/auth/login">
+          <!-- Logo (si tienes imagen) -->
+          <!-- <img src="assets/images/logo.png" alt="Infragest" class="h-10 w-10" /> -->
+          <div class="avatar placeholder">
+            <div class="bg-base-100 text-primary rounded-full w-10">
+              <span class="text-xl font-bold">📱</span>
+            </div>
+          </div>
+          <span class="text-2xl font-bold text-white">Infragest</span>
+        </a>
+      </div>
+      <div class="flex-none">
+        <ul class="menu menu-horizontal px-1 gap-2">
+          <li>
+            <a
+              routerLink="/auth/login"
+              routerLinkActive="bg-base-100/20 text-white"
+              class="text-white hover:bg-base-100/20 transition-colors">
+              Iniciar Sesión
+            </a>
+          </li>
+          <li>
+            <a
+              routerLink="/auth/register"
+              routerLinkActive="bg-base-100/20 text-white"
+              class="text-white hover:bg-base-100/20 transition-colors">
+              Registrarse
+            </a>
+          </li>
+        </ul>
       </div>
     </div>
   </header>
 
-  <main class="public-content">
-    <div class="container">
+  <!-- Main Content -->
+  <main class="flex-1 flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
       <router-outlet></router-outlet>
     </div>
   </main>
 
-  <footer class="public-footer">
-    <div class="container">
-      <p>&copy; {{ currentYear }} Grupo ASD. Todos los derechos reservados.</p>
+  <!-- Footer -->
+  <footer class="footer footer-center p-4 bg-base-100/10 backdrop-blur-md text-white">
+    <div>
+      <p>© {{ currentYear }} <span class="font-bold">Infragest</span> - Sistema de Gestión de Dispositivos</p>
+      <p class="text-xs opacity-70">Desarrollado con ❤️ por Bunnystring</p>
     </div>
   </footer>
 </div>

@@ -1,0 +1,139 @@
+/* ========================================
+   NAVEGACIÓN Y MENÚ
+   ======================================== */
+
+/* Links activos */
+.menu a.active {
+  @apply bg-primary text-primary-content font-semibold;
+}
+
+/* Hover suave en links no activos */
+.menu a:not(.active):hover {
+  @apply bg-base-200;
+}
+
+/* Scroll suave */
+.menu {
+  scroll-behavior: smooth;
+}
+
+/* Scrollbar personalizada */
+.menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.menu::-webkit-scrollbar-thumb {
+  @apply bg-base-300 rounded-full;
+}
+
+.menu::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+/* Asegurar que el dropdown no afecte el layout */
+.dropdown-content {
+  animation: slideDown 0.2s ease-out;
+  position: fixed !important;
+  will-change: transform;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========================================
+   AVATAR
+   ======================================== */
+
+/* Centrado perfecto del avatar */
+.avatar > div {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  transition: transform 0.2s ease;
+}
+
+/* Hover effect en avatar */
+.avatar:hover > div {
+  transform: scale(1.1);
+}
+
+/* Centrado del contenido interno */
+.avatar .w-10 {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  line-height: 2.5rem !important;
+}
+
+/* ========================================
+   DROPDOWN
+   ======================================== */
+
+/* Animación de aparición del dropdown */
+.dropdown-content {
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hover en items del dropdown */
+.dropdown-content li a:hover {
+  @apply bg-base-200 scale-[1.02];
+  transition: all 0.15s ease;
+}
+
+/* Efecto especial en cerrar sesión */
+.dropdown-content li a.text-error:hover {
+  @apply bg-error/10;
+}
+
+/* ========================================
+   MENU TITLE (Usuario en dropdown)
+   ======================================== */
+
+/* Truncar texto del dropdown */
+.menu-title span {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Cursor de ayuda cuando hay tooltip */
+.menu-title span[title]:hover {
+  cursor: help;
+}
+
+/* ========================================
+   DRAWER/SIDEBAR
+   ======================================== */
+
+/* Transición suave del sidebar */
+.drawer-side {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Overlay del drawer */
+.drawer-overlay {
+  transition: opacity 0.3s ease;
+}

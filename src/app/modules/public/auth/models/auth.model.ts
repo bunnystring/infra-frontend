@@ -1,3 +1,5 @@
+import { User } from "./user.model";
+
 /**
  * Modelos relacionados con la autenticación de usuarios
  */
@@ -19,7 +21,7 @@ export interface RegisterRequest {
  * Modelo de respuesta de autenticación
  */
 export interface AuthResponse {
-  user: LoginRequest;
+  user: User;
   accessToken: string;
   refreshToken: string;
 }

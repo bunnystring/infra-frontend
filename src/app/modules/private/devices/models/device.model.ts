@@ -17,8 +17,8 @@ export interface Device {
   brand: string;
   barcode: string;
   status: DeviceStatus;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string | null;
 }
 
 /** Estados posibles de un dispositivo

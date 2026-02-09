@@ -1,1 +1,91 @@
-<p>dashboard works!</p>
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <!-- Total Dispositivos -->
+    <div class="stats shadow-lg hover:shadow-xl transition-shadow">
+      <div class="stat">
+        <div class="stat-figure text-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+          </svg>
+        </div>
+        <div class="stat-title">Total Dispositivos</div>
+        <div class="stat-value text-primary">{{ stats.totalDevices }}</div>
+        <div class="stat-desc">
+          {{ stats.goodCondition }} en buen estado
+        </div>
+      </div>
+    </div>
+
+    <!-- Necesitan Reparación -->
+    <div class="stats shadow-lg hover:shadow-xl transition-shadow">
+      <div class="stat">
+        <div class="stat-figure text-error">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <div class="stat-title">Necesitan Reparación</div>
+        <div class="stat-value text-error">{{ stats.needsRepair }}</div>
+        <div class="stat-desc">
+          {{ getPercentage(stats.needsRepair, stats.totalDevices) }}% del total
+        </div>
+      </div>
+    </div>
+
+    <!-- Ocupados -->
+    <div class="stats shadow-lg hover:shadow-xl transition-shadow">
+      <div class="stat">
+        <div class="stat-figure text-info">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div class="stat-title">Ocupados</div>
+        <div class="stat-value text-info">{{ stats.occupied }}</div>
+        <div class="stat-desc">
+          {{ getPercentage(stats.occupied, stats.totalDevices) }}% en uso
+        </div>
+      </div>
+    </div>
+
+    <!-- Estado Regular -->
+    <div class="stats shadow-lg hover:shadow-xl transition-shadow">
+      <div class="stat">
+        <div class="stat-figure text-warning">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        </div>
+        <div class="stat-title">Estado Regular</div>
+        <div class="stat-value text-warning">{{ stats.fair }}</div>
+        <div class="stat-desc">
+          {{ getPercentage(stats.fair, stats.totalDevices) }}% del total
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <!-- Dispositivos por Marca -->
+  <div *ngIf="!loading && devicesByBrand.length > 0" class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <h2 class="card-title">📊 Top 5 Marcas</h2>
+      <div class="space-y-4">
+        <div *ngFor="let item of devicesByBrand" class="flex items-center gap-4">
+          <div class="font-semibold w-24 text-sm">{{ item.brand }}</div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2">
+              <progress
+                class="progress progress-primary w-full"
+                [value]="item.count"
+                [max]="stats.totalDevices">
+              </progress>
+              <span class="text-xs text-base-content/60">
+                {{ getPercentage(item.count, stats.totalDevices) }}%
+              </span>
+            </div>
+          </div>
+          <div class="badge badge-lg badge-neutral">{{ item.count }}</div>
+        </div>
+      </div>
+    </div>
+  </div>

@@ -1,28 +1,14 @@
-/* ==================== CONTENEDOR PRINCIPAL ==================== */
+/* ========================================
+   ANIMACIONES DE ENTRADA
+   ======================================== */
 
-.login-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  padding: 2rem 1rem;
-  gap: 2rem;
+/* Animación de entrada del card completo */
+:host {
+  display: block;
+  animation: slideInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ==================== CARD DE LOGIN ==================== */
-
-.login-card {
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-  padding: 2.5rem;
-  width: 100%;
-  max-width: 450px;
-  animation: slideUp 0.5s ease-out;
-}
-
-@keyframes slideUp {
+@keyframes slideInUp {
   from {
     opacity: 0;
     transform: translateY(30px);
@@ -33,166 +19,91 @@
   }
 }
 
-/* ==================== HEADER ==================== */
+/* ========================================
+   EFECTOS DE INPUTS
+   ======================================== */
 
-.login-header {
-  text-align: center;
-  margin-bottom: 2rem;
+/* Efecto sutil al enfocar inputs */
+.input:focus {
+  transform: scale(1.01);
+  transition: transform 0.2s ease-in-out;
 }
 
-.icon-wrapper {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  margin-bottom: 1rem;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-}
-
-.icon-wrapper i {
-  font-size: 2rem;
-  color: white;
-}
-
-.login-header h2 {
-  margin: 0.5rem 0;
-  color: #333;
-  font-size: 1.8rem;
-  font-weight: 700;
-}
-
-.login-header p {
-  color: #666;
-  margin: 0;
-  font-size: 0.95rem;
-}
-
-/* ==================== FORMULARIO ==================== */
-
-.form-group {
-  margin-bottom: 1.5rem;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: #333;
-  font-weight: 600;
-  font-size: 0.95rem;
-}
-
-.form-group label i {
-  margin-right: 0.5rem;
-  color: #667eea;
-  width: 16px;
-  text-align: center;
-}
-
-.form-control {
-  width: 100%;
-  padding: 0.875rem 1rem;
-  border: 2px solid #e0e0e0;
-  border-radius: 10px;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  background: #fafafa;
-}
-
-.form-control:focus {
-  outline: none;
-  border-color: #667eea;
-  background: white;
-  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-}
-
-.form-control:disabled {
-  background: #f5f5f5;
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.form-control.is-invalid {
-  border-color: #dc3545;
-  background: #fff5f5;
-}
-
-.form-control.is-invalid:focus {
-  box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.1);
-}
-
-/* ==================== PASSWORD INPUT ==================== */
-
-.password-input-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.password-input-wrapper .form-control {
-  padding-right: 3.5rem;
-}
-
-.password-toggle {
-  position: absolute;
-  right: 0.75rem;
-  background: none;
-  border: none;
-  color: #666;
-  cursor: pointer;
-  padding: 0.5rem;
-  transition: all 0.3s;
-  border-radius: 6px;
-}
-
-.password-toggle:hover:not(:disabled) {
-  color: #667eea;
-  background: rgba(102, 126, 234, 0.1);
-}
-
-.password-toggle:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-/* ==================== VALIDACIONES ==================== */
-
-.invalid-feedback {
-  display: block;
-  color: #dc3545;
-  font-size: 0.875rem;
-  margin-top: 0.5rem;
-  animation: shake 0.3s;
-}
-
-.invalid-feedback i {
-  margin-right: 0.25rem;
+/* Animación suave para errores en inputs */
+.input-error {
+  animation: shake 0.3s ease-in-out;
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  75% { transform: translateX(5px); }
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
 }
 
-/* ==================== ALERTAS ==================== */
-
-.alert {
-  padding: 1rem 1.25rem;
-  border-radius: 10px;
-  margin-bottom: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  animation: slideDown 0.3s ease-out;
+/* Efecto hover en el botón de mostrar/ocultar contraseña */
+.input .btn-ghost:hover {
+  background: rgba(0, 0, 0, 0.05);
 }
 
-@keyframes slideDown {
+/* ========================================
+   BOTONES
+   ======================================== */
+
+/* Deshabilitar pointer events cuando está loading */
+.btn.loading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+/* Efecto ripple en el botón principal */
+.btn-primary {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn-primary:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* Transición suave para estado disabled */
+.btn:disabled {
+  cursor: not-allowed;
+  transition: opacity 0.3s ease;
+}
+
+/* ========================================
+   ALERTAS
+   ======================================== */
+
+/* Animación de entrada para alertas de error */
+.alert-error {
+  animation: slideInDown 0.4s ease-out;
+}
+
+@keyframes slideInDown {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(-20px);
   }
   to {
     opacity: 1;
@@ -200,263 +111,129 @@
   }
 }
 
-.alert-danger {
-  background-color: #fee;
-  border: 1px solid #fcc;
-  color: #c33;
+/* ========================================
+   FORM CONTROLS
+   ======================================== */
+
+/* Espaciado consistente para form-control */
+.form-control + .form-control {
+  margin-top: 1rem;
 }
 
-.alert-danger i {
-  font-size: 1.25rem;
+/* Efecto focus en checkbox */
+.checkbox:focus {
+  outline: 2px solid hsl(var(--p));
+  outline-offset: 2px;
 }
 
-/* ==================== BOTONES ==================== */
+/* ========================================
+   LABELS
+   ======================================== */
 
-.form-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin-top: 2rem;
+/* Transición suave para mensajes de error */
+.label-text-alt {
+  animation: fadeIn 0.3s ease-in;
 }
 
-.btn {
-  padding: 0.875rem 1.5rem;
-  border: none;
-  border-radius: 10px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-.btn-block {
-  width: 100%;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-}
-
-.btn-primary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-}
-
-.btn-primary:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.btn-primary:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.btn-secondary {
-  background: white;
-  color: #667eea;
-  border: 2px solid #667eea;
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background: #667eea;
-  color: white;
-}
-
-.btn-secondary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* ==================== SPINNER ==================== */
-
-.loading-content {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.spinner-border {
-  width: 1rem;
-  height: 1rem;
-  border: 2px solid currentColor;
-  border-right-color: transparent;
-  border-radius: 50%;
-  animation: spinner-rotate 0.75s linear infinite;
-}
-
-@keyframes spinner-rotate {
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
   to {
-    transform: rotate(360deg);
+    opacity: 1;
   }
 }
 
-/* ==================== LINKS ==================== */
+/* ========================================
+   LINKS
+   ======================================== */
 
-.text-center {
-  text-align: center;
+/* Efecto hover en links */
+.link {
+  transition: all 0.2s ease;
 }
 
-.mt-2 {
-  margin-top: 0.5rem;
+.link:hover {
+  transform: translateX(2px);
 }
 
-.mt-4 {
-  margin-top: 1.5rem;
-}
+/* ========================================
+   DIVIDER
+   ======================================== */
 
-.register-link {
-  color: #666;
-  margin: 0;
-  font-size: 0.95rem;
-}
-
-.register-link a,
-.forgot-password-link {
-  color: #667eea;
-  text-decoration: none;
-  font-weight: 600;
-  transition: all 0.3s;
-}
-
-.register-link a:hover,
-.forgot-password-link:hover {
-  color: #764ba2;
-  text-decoration: underline;
-}
-
-.register-link a.disabled,
-.forgot-password-link.disabled {
-  pointer-events: none;
+/* Estilo personalizado para el divider */
+.divider {
   opacity: 0.5;
 }
 
-.forgot-password-link {
-  font-size: 0.9rem;
-  color: #999;
+/* ========================================
+   CARD
+   ======================================== */
+
+/* Sombra dinámica para el card */
+.card {
+  transition: box-shadow 0.3s ease;
 }
 
-/* ==================== FOOTER ==================== */
-
-.login-footer {
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid #eee;
-  text-align: center;
+.card:hover {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 
-.text-muted {
-  color: #999;
-  font-size: 0.85rem;
-}
+/* ========================================
+   RESPONSIVE
+   ======================================== */
 
-.text-muted i {
-  margin-right: 0.5rem;
-  color: #28a745;
-}
-
-/* ==================== INFO CARD ==================== */
-
-.login-info {
-  width: 100%;
-  max-width: 450px;
-}
-
-.info-card {
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 12px;
-  padding: 1.5rem;
-  text-align: center;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-.info-card i {
-  font-size: 2rem;
-  color: #667eea;
-  margin-bottom: 1rem;
-}
-
-.info-card p {
-  margin: 0;
-  color: #555;
-  line-height: 1.6;
-}
-
-/* ==================== RESPONSIVE ==================== */
-
-@media (max-width: 576px) {
-  .login-card {
-    padding: 2rem 1.5rem;
+/* Ajustes para móviles */
+@media (max-width: 640px) {
+  .card-body {
+    padding: 1.5rem;
   }
 
-  .login-header h2 {
-    font-size: 1.5rem;
+  :host {
+    animation: slideInUp 0.3s ease-out;
   }
 
-  .icon-wrapper {
-    width: 70px;
-    height: 70px;
-  }
-
-  .icon-wrapper i {
-    font-size: 1.75rem;
-  }
-
-  .btn {
-    padding: 0.75rem 1.25rem;
-    font-size: 0.95rem;
+  .btn-primary::before {
+    display: none; /* Desactivar ripple en móviles */
   }
 }
 
-@media (max-width: 400px) {
-  .login-container {
-    padding: 1rem 0.5rem;
+/* ========================================
+   ACCESIBILIDAD
+   ======================================== */
+
+/* Mejorar contraste para modo de alto contraste */
+@media (prefers-contrast: high) {
+  .input-error {
+    border-width: 3px;
   }
 
-  .login-card {
-    padding: 1.5rem 1rem;
+  .label-text-alt {
+    font-weight: 600;
   }
 }
 
-/* ==================== DARK MODE (opcional) ==================== */
-
-@media (prefers-color-scheme: dark) {
-  .login-card {
-    background: #1e1e1e;
-    color: #fff;
+/* Respetar preferencia de movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
+}
 
-  .login-header h2,
-  .form-group label {
-    color: #fff;
-  }
+/* ========================================
+   UTILIDADES
+   ======================================== */
 
-  .login-header p {
-    color: #ccc;
-  }
+/* Prevenir selección de texto en botones */
+.btn {
+  user-select: none;
+}
 
-  .form-control {
-    background: #2a2a2a;
-    border-color: #444;
-    color: #fff;
-  }
-
-  .form-control:focus {
-    background: #333;
-  }
-
-  .info-card {
-    background: rgba(30, 30, 30, 0.9);
-    color: #fff;
-  }
-
-  .info-card p {
-    color: #ccc;
-  }
+/* Smooth scroll para navegación */
+:host {
+  scroll-behavior: smooth;
 }

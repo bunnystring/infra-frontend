@@ -20,6 +20,7 @@ import {
 } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
 import { AuthResponse } from '../models/auth.model';
+import { toast } from 'ngx-sonner';
 
 /**
  * Componente de Login
@@ -33,7 +34,7 @@ import { AuthResponse } from '../models/auth.model';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.css'
+  styleUrl: './login.component.css',
 })
 export class LoginComponent implements OnInit, OnDestroy {
   // Formulario reactivo
@@ -61,9 +62,9 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.initForm();
-    this.setupLoginStream();
-    this.checkAuthenticationStatus();
     this.getReturnUrl();
+    this.checkAuthenticationStatus();
+    this.setupLoginStream();
   }
 
   ngOnDestroy(): void {
@@ -84,7 +85,9 @@ export class LoginComponent implements OnInit, OnDestroy {
    * Obtener URL de retorno desde query params
    */
   private getReturnUrl(): void {
-    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/app/dashboard';
+    const urlParam = this.route.snapshot.queryParams['returnUrl'];
+    this.returnUrl = urlParam || '/app/dashboard';
+    console.log('📍 Return URL configurada:', this.returnUrl);
   }
 
   /**
@@ -107,7 +110,7 @@ export class LoginComponent implements OnInit, OnDestroy {
         tap(() => this.startLoading()),
         switchMap(() => this.performLogin()),
         filter((response) => this.isSuccessfulResponse(response)),
-        takeUntil(this.destroy$)
+        takeUntil(this.destroy$),
       )
       .subscribe({
         next: () => this.handleLoginSuccess(),
@@ -115,7 +118,7 @@ export class LoginComponent implements OnInit, OnDestroy {
           // Este error no debería ocurrir ya que catchError lo maneja
           console.error('Error inesperado en el stream:', error);
           this.stopLoading();
-        }
+        },
       });
   }
 
@@ -168,11 +171,18 @@ export class LoginComponent implements OnInit, OnDestroy {
     console.error('Error en login:', error);
 
     // Extraer mensaje de error del backend
-    this.error = error?.error?.message || 'Error de autenticación. Por favor, inténtalo de nuevo.';
+    this.error =
+      error?.error?.message ||
+      'Error de autenticación. Por favor, inténtalo de nuevo.';
+
+    // Mostrar notificación de error usando ngx-sonner
+    toast.error('Error de autenticación', {
+      description: this.error,
+      duration: 4000,
+    });
 
     return of(null);
   }
-
 
   /**
    * Realiza la petición de login al backend
@@ -181,7 +191,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   private performLogin(): Observable<AuthResponse | null> {
     return this.authService.login(this.loginForm.value).pipe(
       catchError((error) => this.handleLoginError(error)),
-      finalize(() => this.stopLoading())
+      finalize(() => this.stopLoading()),
     );
   }
 
@@ -191,7 +201,21 @@ export class LoginComponent implements OnInit, OnDestroy {
    */
   private handleLoginSuccess(): void {
     console.log('Login exitoso - Redirigiendo a:', this.returnUrl);
-    this.router.navigate([this.returnUrl]);
+
+    toast.success('¡Bienvenido!', {
+      description: 'Inicio de sesión exitoso',
+      duration: 2000,
+    });
+
+    setTimeout(() => {
+      this.router.navigateByUrl(this.returnUrl).then((navigated) => {
+        if (navigated) {
+          console.log('✅ Navegación exitosa');
+        } else {
+          console.error('❌ Fallo la navegación');
+        }
+      });
+    }, 500);
   }
 
   /**
@@ -223,5 +247,9 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.loginForm.reset();
     this.submitted = false;
     this.clearError();
+
+    toast.info('Formulario limpiado', {
+      duration: 2000,
+    });
   }
 }

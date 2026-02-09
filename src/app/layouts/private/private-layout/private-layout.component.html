@@ -1,1 +1,165 @@
-<p>private-layout works!</p>
+<div class="drawer lg:drawer-open">
+  <!-- Checkbox para controlar drawer en mobile -->
+  <input id="sidebar-drawer" type="checkbox" class="drawer-toggle" [checked]="isSidebarOpen" />
+
+  <div class="drawer-content flex flex-col">
+    <!-- ========== NAVBAR ========== -->
+    <header class="navbar bg-base-100 shadow-lg z-50">
+      <div class="flex-none lg:hidden">
+        <label for="sidebar-drawer" class="btn btn-square btn-ghost">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+            class="inline-block w-6 h-6 stroke-current">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </label>
+      </div>
+
+      <div class="flex-1 px-2 lg:px-4">
+        <a class="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          📱 Infragest
+        </a>
+      </div>
+
+      <div class="flex-none gap-2">
+        <!-- Theme Toggle -->
+        <div class="dropdown dropdown-end">
+          <label tabindex="0" class="btn btn-ghost btn-circle">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+            </svg>
+          </label>
+          <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-box w-52">
+            <li><a (click)="changeTheme('light')">☀️ Light</a></li>
+            <li><a (click)="changeTheme('dark')">🌙 Dark</a></li>
+            <li><a (click)="changeTheme('infragest')">🎨 Infragest</a></li>
+          </ul>
+        </div>
+
+        <!-- Notifications -->
+        <div class="dropdown dropdown-end">
+          <label tabindex="0" class="btn btn-ghost btn-circle">
+            <div class="indicator">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+              <span class="badge badge-xs badge-primary indicator-item">3</span>
+            </div>
+          </label>
+          <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-box w-80">
+            <li class="menu-title"><span>Notificaciones</span></li>
+            <li><a>📱 Nuevo dispositivo registrado</a></li>
+            <li><a>📦 Orden #1234 completada</a></li>
+            <li><a>⚠️ Dispositivo requiere mantenimiento</a></li>
+          </ul>
+        </div>
+
+        <!-- User Menu -->
+<!-- User Menu -->
+<div class="dropdown dropdown-end">
+  <label tabindex="0" class="btn btn-ghost btn-circle avatar">
+    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-sm shadow-md hover:shadow-lg transition-shadow">
+      {{ getUserInitial() }}
+    </div>
+  </label>
+  <ul tabindex="0"
+    class="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-box w-64 mt-3 border border-base-300">
+    <li class="menu-title px-4 py-2">
+      <span class="font-semibold truncate block" [title]="getUserDisplayName()">
+        {{ getUserDisplayName() }}
+      </span>
+      <span class="text-xs opacity-60 truncate block" [title]="getUserEmail()">
+        {{ getUserEmail() }}
+      </span>
+    </li>
+    <div class="divider my-1"></div>
+    <li><a routerLink="/app/profile" class="flex items-center gap-2">👤 Perfil</a></li>
+    <li><a routerLink="/app/settings" class="flex items-center gap-2">⚙️ Configuración</a></li>
+    <div class="divider my-1"></div>
+    <li><a (click)="logout()" class="text-error font-medium flex items-center gap-2">🚪 Cerrar sesión</a></li>
+  </ul>
+</div>
+      </div>
+    </header>
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main class="flex-1 p-4 lg:p-6 bg-base-200">
+      <router-outlet></router-outlet>
+    </main>
+
+    <!-- ========== FOOTER ========== -->
+    <footer class="footer footer-center p-4 bg-base-100 text-base-content border-t">
+      <div>
+        <p>© 2026 <span class="font-bold text-primary">Infragest</span> - Todos los derechos reservados</p>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ========== SIDEBAR ========== -->
+  <div class="drawer-side z-40">
+    <label for="sidebar-drawer" class="drawer-overlay"></label>
+    <aside class="bg-base-100 w-64 min-h-screen shadow-xl">
+      <!-- Logo -->
+      <div class="p-4 border-b">
+        <h2 class="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          📱 Infragest
+        </h2>
+        <p class="text-xs text-base-content/60">Sistema de gestión</p>
+      </div>
+
+      <!-- Navigation Menu -->
+      <ul class="menu p-4 gap-2">
+        <li>
+          <a routerLink="/app/dashboard" routerLinkActive="active" class="gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+            Dashboard
+          </a>
+        </li>
+
+        <li>
+          <a routerLink="/app/devices" routerLinkActive="active" class="gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+            Dispositivos
+          </a>
+        </li>
+
+        <li class="menu-title"><span>Gestión</span></li>
+
+        <li>
+          <a class="gap-3 opacity-50 cursor-not-allowed">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            Órdenes
+            <span class="badge badge-sm badge-warning">Próximo</span>
+          </a>
+        </li>
+
+        <li>
+          <a class="gap-3 opacity-50 cursor-not-allowed">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+            Empleados
+            <span class="badge badge-sm badge-warning">Próximo</span>
+          </a>
+        </li>
+      </ul>
+    </aside>
+  </div>
+</div>

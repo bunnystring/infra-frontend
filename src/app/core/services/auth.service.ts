@@ -29,16 +29,26 @@ export class AuthService {
   private readonly REFRESH_TOKEN_KEY = 'refresh_token';
   private readonly USER_KEY = 'user_data';
 
-  // BehaviorSubject para mantener el estado del usuario autenticado
+  /**
+   * BehaviorSubject para mantener el estado del usuario autenticado
+   * Inicializa con el usuario almacenado en localStorage (si existe)
+   * @returns BehaviorSubject del usuario autenticado
+   */
   private currentUserSubject = new BehaviorSubject<any>(
     this.getUserFromStorage(),
   );
+
+  /**
+   * Observable para suscribirse a los cambios del usuario autenticado
+   * Permite a otros componentes reaccionar a cambios en el estado de autenticación
+   * @returns Observable del usuario autenticado
+   */
   public currentUser$ = this.currentUserSubject.asObservable();
 
   /**
    * Inicia sesión con las credenciales proporcionadas
    * @param credentials
-   * @returns
+   * @returns Observable<AuthResponse>
    */
   login(credentials: LoginRequest): Observable<AuthResponse> {
     return this.apiService

@@ -246,12 +246,12 @@ export class RegisterComponent implements OnInit, OnDestroy {
    */
   private handleRegisterSuccess(): void {
     toast.success('¡Cuenta creada!', {
-      description: 'Redirigiendo al login...',
+      description: 'Redirigiendo al dashboard...',
       duration: 2000,
     });
 
     setTimeout(() => {
-      this.router.navigate(['/auth/login']);
+      this.router.navigate([this.returnUrl]);
     }, 1000);
   }
 

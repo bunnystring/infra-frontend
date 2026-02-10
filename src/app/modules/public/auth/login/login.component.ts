@@ -347,7 +347,7 @@ export class LoginComponent implements OnInit, OnDestroy {
    * @returns void
    */
   onPasswordAreaBlur(event: FocusEvent): void {
-    
+
     // Si estamos en proceso de toggle, ignorar el blur
     if (this.isTogglingPassword) {
       return;

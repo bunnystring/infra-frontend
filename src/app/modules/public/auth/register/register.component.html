@@ -1,1 +1,260 @@
-<p>register works!</p>
+<div class="card bg-base-100 shadow-2xl">
+  <div class="card-body">
+
+    <!-- Mascota animada -->
+    <app-animated-pet
+      [isPasswordFocused]="isPasswordFocused"
+      [isTextFieldFocused]="isNameFocused || isEmailFocused"
+      [textFieldValue]="isNameFocused ? f['name'].value : f['email'].value"
+      [focusedFieldType]="currentFieldType">
+    </app-animated-pet>
+
+    <!-- Header -->
+    <div class="text-center mb-6">
+      <h2 class="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+        ¡Crea tu cuenta!
+      </h2>
+      <p class="text-base-content/60 mt-2">
+        Completa el formulario para comenzar
+      </p>
+    </div>
+
+    <!-- Register Form -->
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+
+      <!-- Name Field -->
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text font-semibold">Nombre Completo</span>
+        </label>
+        <label class="input input-bordered flex items-center gap-2"
+               [class.input-error]="submitted && f['name'].errors">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 opacity-70">
+            <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12.735 14c.618 0 1.093-.561.872-1.139a6.002 6.002 0 0 0-11.215 0c-.22.578.254 1.139.872 1.139h9.47Z" />
+          </svg>
+          <input
+            type="text"
+            formControlName="name"
+            class="grow"
+            placeholder="Juan Pérez García"
+            [class.input-error]="submitted && f['name'].errors"
+            autocomplete="name"
+            (focus)="onNameFocus()"
+            (blur)="onNameBlur()" />
+        </label>
+        <label class="label" *ngIf="submitted && f['name'].errors">
+          <span class="label-text-alt text-error">
+            <span *ngIf="f['name'].errors['required']">El nombre es requerido</span>
+            <span *ngIf="f['name'].errors['minlength']">Mínimo 3 caracteres</span>
+            <span *ngIf="f['name'].errors['invalidFullName']">Ingresa tu nombre completo (nombre y apellido)</span>
+          </span>
+        </label>
+      </div>
+
+      <!-- Email Field -->
+      <div class="form-control mt-4">
+        <label class="label">
+          <span class="label-text font-semibold">Correo Electrónico</span>
+        </label>
+        <label class="input input-bordered flex items-center gap-2"
+               [class.input-error]="submitted && f['email'].errors">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 opacity-70">
+            <path
+              d="M2.5 3A1.5 1.5 0 0 0 1 4.5v.793c.026.009.051.02.076.032L7.674 8.51c.206.1.446.1.652 0l6.598-3.185A.755.755 0 0 1 15 5.293V4.5A1.5 1.5 0 0 0 13.5 3h-11Z" />
+            <path
+              d="M15 6.954 8.978 9.86a2.25 2.25 0 0 1-1.956 0L1 6.954V11.5A1.5 1.5 0 0 0 2.5 13h11a1.5 1.5 0 0 0 1.5-1.5V6.954Z" />
+          </svg>
+          <input
+            type="email"
+            formControlName="email"
+            class="grow"
+            placeholder="correo@ejemplo.com"
+            [class.input-error]="submitted && f['email'].errors"
+            autocomplete="email"
+            (focus)="onEmailFocus()"
+            (blur)="onEmailBlur()" />
+        </label>
+        <label class="label" *ngIf="submitted && f['email'].errors">
+          <span class="label-text-alt text-error">
+            <span *ngIf="f['email'].errors['required']">El correo es requerido</span>
+            <span *ngIf="f['email'].errors['email']">Ingresa un correo válido</span>
+          </span>
+        </label>
+      </div>
+
+      <!-- Password Field -->
+      <div class="form-control mt-4">
+        <label class="label">
+          <span class="label-text font-semibold">Contraseña</span>
+        </label>
+        <label
+          class="input input-bordered flex items-center gap-2"
+          [class.input-error]="submitted && f['password'].errors"
+          (focusin)="onPasswordAreaFocus()"
+          (focusout)="onPasswordAreaBlur($event)">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 opacity-70">
+            <path fill-rule="evenodd"
+              d="M14 6a4 4 0 0 1-4.899 3.899l-1.955 1.955a.5.5 0 0 1-.353.146H5v1.5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-2.293a.5.5 0 0 1 .146-.353l3.955-3.955A4 4 0 1 1 14 6Zm-4-2a.75.75 0 0 0 0 1.5.5.5 0 0 1 .5.5.75.75 0 0 0 1.5 0 2 2 0 0 0-2-2Z"
+              clip-rule="evenodd" />
+          </svg>
+          <input
+            #passwordInput
+            [type]="showPassword ? 'text' : 'password'"
+            formControlName="password"
+            class="grow"
+            placeholder="••••••••"
+            [class.input-error]="submitted && f['password'].errors"
+            autocomplete="new-password" />
+          <button
+            type="button"
+            (mousedown)="$event.preventDefault()"
+            (click)="togglePasswordVisibility()"
+            class="btn btn-ghost btn-xs"
+            [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+            <svg *ngIf="!showPassword" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+              viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            <svg *ngIf="showPassword" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+            </svg>
+          </button>
+        </label>
+        <label class="label" *ngIf="submitted && f['password'].errors">
+          <span class="label-text-alt text-error">
+            <span *ngIf="f['password'].errors['required']">La contraseña es requerida</span>
+            <span *ngIf="f['password'].errors['minlength']">Mínimo 8 caracteres</span>
+            <span *ngIf="f['password'].errors['weakPassword']">Debe tener mayúsculas, minúsculas y números</span>
+          </span>
+        </label>
+        <!-- Password strength indicator -->
+        <label class="label" *ngIf="f['password'].value && !f['password'].errors">
+          <span class="label-text-alt text-success flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            Contraseña segura
+          </span>
+        </label>
+      </div>
+
+      <!-- Confirm Password Field -->
+      <div class="form-control mt-4">
+        <label class="label">
+          <span class="label-text font-semibold">Confirmar Contraseña</span>
+        </label>
+        <label
+          class="input input-bordered flex items-center gap-2"
+          [class.input-error]="submitted && (f['confirmPassword'].errors || registerForm.errors?.['passwordMismatch'])"
+          [class.input-success]="f['confirmPassword'].value && !f['confirmPassword'].errors && !registerForm.errors?.['passwordMismatch']"
+          (focusin)="onPasswordAreaFocus()"
+          (focusout)="onPasswordAreaBlur($event)">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 opacity-70">
+            <path fill-rule="evenodd"
+              d="M14 6a4 4 0 0 1-4.899 3.899l-1.955 1.955a.5.5 0 0 1-.353.146H5v1.5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-2.293a.5.5 0 0 1 .146-.353l3.955-3.955A4 4 0 1 1 14 6Zm-4-2a.75.75 0 0 0 0 1.5.5.5 0 0 1 .5.5.75.75 0 0 0 1.5 0 2 2 0 0 0-2-2Z"
+              clip-rule="evenodd" />
+          </svg>
+          <input
+            #confirmPasswordInput
+            [type]="showConfirmPassword ? 'text' : 'password'"
+            formControlName="confirmPassword"
+            class="grow"
+            placeholder="••••••••"
+            [class.input-error]="submitted && (f['confirmPassword'].errors || registerForm.errors?.['passwordMismatch'])"
+            autocomplete="new-password" />
+          <button
+            type="button"
+            (mousedown)="$event.preventDefault()"
+            (click)="toggleConfirmPasswordVisibility()"
+            class="btn btn-ghost btn-xs"
+            [attr.aria-label]="showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+            <svg *ngIf="!showConfirmPassword" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+              viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            <svg *ngIf="showConfirmPassword" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+            </svg>
+          </button>
+        </label>
+        <label class="label" *ngIf="submitted && (f['confirmPassword'].errors || registerForm.errors?.['passwordMismatch'])">
+          <span class="label-text-alt text-error">
+            <span *ngIf="f['confirmPassword'].errors?.['required']">Confirma tu contraseña</span>
+            <span *ngIf="registerForm.errors?.['passwordMismatch'] && !f['confirmPassword'].errors?.['required']">Las contraseñas no coinciden</span>
+          </span>
+        </label>
+        <!-- Match indicator -->
+        <label class="label" *ngIf="f['confirmPassword'].value && !registerForm.errors?.['passwordMismatch'] && f['password'].value === f['confirmPassword'].value">
+          <span class="label-text-alt text-success flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            Las contraseñas coinciden
+          </span>
+        </label>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="form-control mt-6">
+        <button type="submit" class="btn btn-primary" [disabled]="loading" [class.loading]="loading">
+          <span *ngIf="!loading" class="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+            </svg>
+            Crear Cuenta
+          </span>
+          <span *ngIf="loading" class="loading loading-spinner loading-md"></span>
+        </button>
+      </div>
+
+      <!-- Reset Button -->
+      <div class="form-control mt-2" *ngIf="submitted && registerForm.dirty">
+        <button type="button" (click)="resetForm()" class="btn btn-ghost btn-sm">
+          Limpiar formulario
+        </button>
+      </div>
+    </form>
+
+    <!-- Divider -->
+    <div class="divider">O</div>
+
+    <!-- Social Register -->
+    <div class="space-y-2">
+      <button class="btn btn-outline w-full gap-2" type="button">
+        <svg class="w-5 h-5" viewBox="0 0 24 24">
+          <path fill="currentColor"
+            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+          <path fill="currentColor"
+            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+          <path fill="currentColor"
+            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+          <path fill="currentColor"
+            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+        </svg>
+        Registrarse con Google
+      </button>
+    </div>
+
+    <!-- Footer Link -->
+    <div class="text-center mt-6">
+      <p class="text-sm text-base-content/60">
+        ¿Ya tienes cuenta?
+        <a routerLink="/auth/login" class="link link-primary font-semibold">
+          Inicia sesión aquí
+        </a>
+      </p>
+    </div>
+  </div>
+</div>

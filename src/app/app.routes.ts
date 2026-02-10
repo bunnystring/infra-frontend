@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { PublicLayoutComponent } from './layouts/public/public-layout/public-layout.component';
 import { PrivateLayoutComponent } from './layouts/private/private-layout/private-layout.component';
 import { authGuard } from './core/guards/auth.guards';
+import { publicAuthGuard } from './core/guards/public-auth.guard';
 
 export const routes: Routes = [
 
@@ -15,11 +16,13 @@ export const routes: Routes = [
   // Rutas publicas
   {
     path: 'auth',
+    canActivate: [publicAuthGuard],
     component: PublicLayoutComponent,
     loadChildren: () => import('./modules/public/auth/auth.routes').then(m => m.AUTH_ROUTES)
   },
   {
     path: 'register',
+    canActivate: [publicAuthGuard],
     component: PublicLayoutComponent,
     loadChildren: () => import('./modules/public/auth/auth.routes').then(m => m.AUTH_ROUTES)
   },

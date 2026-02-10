@@ -68,7 +68,7 @@ export class AuthService {
    */
   register(userData: RegisterRequest): Observable<AuthResponse> {
     return this.apiService
-      .post<AuthResponse>(`${environment.apiUrl}/auth/register`, userData)
+      .post<AuthResponse>(`/auth/register`, userData)
       .pipe(
         tap((response) => {
           this.saveAuthData(response);
@@ -84,7 +84,7 @@ export class AuthService {
   refreshToken(): Observable<AuthResponse> {
     const refreshToken = this.getRefreshToken();
     return this.apiService
-      .post<AuthResponse>(`${environment.apiUrl}/auth/refresh`, {
+      .post<AuthResponse>(`/auth/refresh`, {
         refreshToken,
       })
       .pipe(

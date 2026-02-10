@@ -14,6 +14,7 @@ import player from 'lottie-web';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { loadingInterceptor } from './core/interceptors/loading.interceptor';
+import { ThemeService } from './core/services/theme.service';
 
 export function playerFactory() {
   return player;
@@ -23,6 +24,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
+    ThemeService,
     provideAnimations(),
     provideHttpClient(
       withInterceptors([authInterceptor, errorInterceptor, loadingInterceptor]),

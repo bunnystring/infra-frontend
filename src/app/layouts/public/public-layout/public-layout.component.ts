@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { ThemeService } from '../../../core/services/theme.service';
 
 /**
  * Componente de Layout Público
@@ -17,7 +18,12 @@ import { CommonModule } from '@angular/common';
   styleUrl: './public-layout.component.css'
 })
 export class PublicLayoutComponent {
-  
+
   // Año actual para mostrar en el footer
   currentYear = new Date().getFullYear();
+
+  constructor(
+    private themeService: ThemeService
+  ) {
+  }
 }

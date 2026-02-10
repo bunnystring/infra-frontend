@@ -5,6 +5,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { User } from '../../../modules/public/auth/models/user.model';
 import { Subject, takeUntil } from 'rxjs';
 import { toast } from 'ngx-sonner';
+import { ThemeService, Theme } from '../../../core/services/theme.service';
 
 /**
  * Componente de Layout Privado
@@ -17,29 +18,34 @@ import { toast } from 'ngx-sonner';
   selector: 'app-private-layout',
   imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './private-layout.component.html',
-  styleUrl: './private-layout.component.css'
+  styleUrl: './private-layout.component.css',
 })
 export class PrivateLayoutComponent {
-
   user: User | null = null;
   isSidebarOpen = true;
-  currentTheme: 'light' | 'dark' | 'infragest' = 'infragest';
+  currentTheme: Theme = 'infragest';
 
   private destroy$ = new Subject<void>();
 
   /**
    * Constructor del componente PrivateLayout
    * @param authService
+   * @param themeService
    */
-  constructor(public authService: AuthService) {
-
+  constructor(
+    public authService: AuthService,
+    public themeService: ThemeService,
+  ) {
     /**
-     * Suscribirse al usuario actual para mantener la información del usuario autenticado en el layout
-      * Esto permite mostrar el nombre del usuario, avatar, etc. en la barra de navegación
+     * Suscribirse al tema actual para mantener la preferencia de tema en el layout
+     *
+     * @returns void
      */
-    this.authService.currentUser$.subscribe(user => {
-      this.user = user;
-    });
+    this.themeService.currentTheme$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((theme) => {
+        this.currentTheme = theme;
+      });
   }
 
   /**
@@ -49,7 +55,6 @@ export class PrivateLayoutComponent {
    * @returns void
    */
   ngOnInit(): void {
-    this.loadTheme();
     this.subscribeToUser();
   }
 
@@ -59,18 +64,18 @@ export class PrivateLayoutComponent {
    */
   logout(): void {
     toast.promise(
-    new Promise((resolve) => {
-      setTimeout(() => {
-        this.authService.logout();
-        resolve(true);
-      }, 500);
-    }),
-    {
-      loading: 'Cerrando sesión...',
-      success: '¡Hasta pronto!',
-      error: 'Error al cerrar sesión',
-    }
-  );
+      new Promise((resolve) => {
+        setTimeout(() => {
+          this.authService.logout();
+          resolve(true);
+        }, 500);
+      }),
+      {
+        loading: 'Cerrando sesión...',
+        success: '¡Hasta pronto!',
+        error: 'Error al cerrar sesión',
+      },
+    );
   }
 
   /**
@@ -89,21 +94,7 @@ export class PrivateLayoutComponent {
    * @returns void
    */
   changeTheme(theme: 'light' | 'dark' | 'infragest'): void {
-    this.currentTheme = theme;
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
-  }
-
-  /**
-   * Cargar tema guardado en localStorage al iniciar el componente
-   * @returns void
-   */
-  private loadTheme(): void {
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'infragest';
-    if (savedTheme) {
-      this.currentTheme = savedTheme;
-      document.documentElement.setAttribute('data-theme', savedTheme);
-    }
+    this.themeService.changeTheme(theme);
   }
 
   /**
@@ -113,7 +104,7 @@ export class PrivateLayoutComponent {
   private subscribeToUser(): void {
     this.authService.currentUser$
       .pipe(takeUntil(this.destroy$))
-      .subscribe(user => {
+      .subscribe((user) => {
         this.user = user;
         console.log('👤 Usuario actual:', user);
       });
@@ -147,7 +138,9 @@ export class PrivateLayoutComponent {
    * @returns string
    */
   getUserDisplayName(): string {
-    return this.user?.name || this.user?.username || this.user?.email || 'Usuario';
+    return (
+      this.user?.name || this.user?.username || this.user?.email || 'Usuario'
+    );
   }
 
   /**
@@ -158,5 +151,4 @@ export class PrivateLayoutComponent {
     const user = this.user;
     return user?.email || '';
   }
-
 }

@@ -241,7 +241,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
 
   /**
    * Maneja el registro exitoso
-   * Muestra notificación y redirige al login
+   * Muestra notificación y redirige al dashboard
    * @returns void
    */
   private handleRegisterSuccess(): void {
@@ -315,6 +315,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
    * @returns Observable con la respuesta del registro o null si hay error
    */
   private performRegister(): Observable<AuthResponse | null> {
+
     // Construir el objeto de registro a partir de los valores del formulario
     const registerData: RegisterRequest = {
       name: this.registerForm.value.name,

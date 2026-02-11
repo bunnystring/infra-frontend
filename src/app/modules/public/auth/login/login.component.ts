@@ -92,6 +92,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.getReturnUrl();
     this.checkAuthenticationStatus();
     this.setupLoginStream();
+    this.loadRememberedEmail();
   }
 
   /**
@@ -110,6 +111,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.loginForm = this.formBuilder.group({
       email: ['', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(6)]],
+      rememberMe: [false],
     });
   }
 
@@ -209,7 +211,6 @@ export class LoginComponent implements OnInit, OnDestroy {
    * @returns Observable con null para continuar el flujo
    */
   private handleLoginError(error: any): Observable<null> {
-
     // Extraer mensaje de error del backend
     this.error =
       error?.error?.message ||
@@ -241,6 +242,15 @@ export class LoginComponent implements OnInit, OnDestroy {
    * @returns void
    */
   private handleLoginSuccess(): void {
+    // Manejar "Recordarme"
+    const rememberMe = this.loginForm.get('rememberMe')?.value;
+    const email = this.loginForm.get('email')?.value;
+
+    if (rememberMe) {
+      localStorage.setItem('rememberedEmail', email);
+    } else {
+      localStorage.removeItem('rememberedEmail');
+    }
 
     // Mostrar notificación de éxito usando ngx-sonner
     toast.success('¡Bienvenido!', {
@@ -347,7 +357,6 @@ export class LoginComponent implements OnInit, OnDestroy {
    * @returns void
    */
   onPasswordAreaBlur(event: FocusEvent): void {
-
     // Si estamos en proceso de toggle, ignorar el blur
     if (this.isTogglingPassword) {
       return;
@@ -363,5 +372,38 @@ export class LoginComponent implements OnInit, OnDestroy {
 
     // Si el foco sale completamente
     this.isPasswordFocused = false;
+  }
+
+  /**
+   * Cargar email recordado del localStorage si existe
+   * Esto mejora UX al autocompletar el email en visitas futuras
+   * @returns void
+   */
+  private loadRememberedEmail(): void {
+    const rememberedEmail = localStorage.getItem('rememberedEmail');
+
+    if (rememberedEmail) {
+      this.loginForm.patchValue({
+        email: rememberedEmail,
+        rememberMe: true,
+      });
+    }
+  }
+
+  /**
+   * Manejar cambio en el checkbox "Recordarme"
+   * Muestra feedback visual al usuario
+   * @returns void
+   */
+  onRememberMeChange(event: Event): void {
+    const checkbox = event.target as HTMLInputElement;
+    const isChecked = checkbox.checked;
+
+    if (isChecked) {
+      toast.info('Te recordaremos', {
+        description: 'Tu email se guardará para la próxima vez',
+        duration: 2000,
+      });
+    }
   }
 }

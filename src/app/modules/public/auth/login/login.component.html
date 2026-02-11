@@ -105,7 +105,8 @@
       <!-- Remember Me -->
       <div class="form-control mt-4">
         <label class="label cursor-pointer justify-start gap-2">
-          <input type="checkbox" class="checkbox checkbox-primary checkbox-sm" />
+          <input type="checkbox" class="checkbox checkbox-primary checkbox-sm" formControlName="rememberMe"
+            (change)="onRememberMeChange($event)" />
           <span class="label-text">Recordarme</span>
         </label>
       </div>

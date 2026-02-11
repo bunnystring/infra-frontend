@@ -120,12 +120,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.initParams();
-    console.log('📊 DashboardComponent inicializado');
     this.loadUser();
   }
 
   ngOnDestroy() {
-    console.log('🧹 DashboardComponent destruido, limpiando recursos');
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -149,7 +147,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (devices) => {
-          console.log('✅ Dispositivos cargados:', devices);
+          // console.log('✅ Dispositivos cargados:', devices);
 
           // Calcular estadísticas
           this.calculateStats(devices);
@@ -233,7 +231,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
    */
   private loadUser(): void {
     this.user = this.authService.getCurrentUser();
-    console.log('👤 Usuario en Dashboard:', this.user);
+    // console.log('👤 Usuario en Dashboard:', this.user);
   }
 
   /**

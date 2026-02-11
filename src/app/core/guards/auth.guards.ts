@@ -1,6 +1,7 @@
 import { inject } from '@angular/core';
 import { Router, CanActivateFn } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { catchError, of, map } from 'rxjs';
 
 /**
  * Guard funcional para proteger rutas privadas.
@@ -13,30 +14,46 @@ export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
- console.log('🛡️ AuthGuard activado para:', state.url);
-
   // Verificar si el usuario está autenticado
-  if (authService.isAuthenticated()) {
-    console.log('✅ AuthGuard: Usuario autenticado');
-
-    // Verificar si el token no ha expirado
-    if (!authService.isTokenExpired()) {
-      console.log('✅ AuthGuard: Token válido, acceso permitido');
-      return true;
-    }
-
-    console.warn('⚠️ AuthGuard: Token expirado, redirigiendo al login');
-    // Limpiar sesión expirada
-    authService.logout();
-  } else {
-    console.warn('❌ AuthGuard: Usuario NO autenticado');
+  if (!authService.isAuthenticated()) {
+    router.navigate(['/auth/login'], {
+      queryParams: { returnUrl: state.url },
+    });
+    return false;
   }
 
-  // No autenticado o token expirado - redirigir al login
-  console.log('🔄 Redirigiendo a login con returnUrl:', state.url);
-  router.navigate(['/auth/login'], {
-    queryParams: { returnUrl: state.url }
-  });
+  // Obtener tiempo restante del token para logs más informativos
+  const timeRemaining = authService.getTokenExpirationTime();
+  const minutesRemaining = timeRemaining
+    ? Math.floor(timeRemaining / 60000)
+    : 0;
+  const secondsRemaining = timeRemaining
+    ? Math.floor((timeRemaining % 60000) / 1000)
+    : 0;
 
-  return false;
+  // Si el token ha expirado o está por expirar, intentar refrescarlo
+  if (authService.isTokenExpired() || authService.isTokenExpiringSoon()) {
+    /* console.warn(
+      `⚠️ AuthGuard: Token ${authService.isTokenExpired() ? 'expirado' : 'próximo a expirar'} ` +
+        `(${minutesRemaining}m ${secondsRemaining}s restantes), intentando refrescar...`,
+    ); */
+
+    return authService.refreshToken().pipe(
+      map(() => {
+        // console.log('✅ Token refrescado exitosamente');
+        return true;
+      }),
+      catchError((error) => {
+        console.error('❌ Error al refrescar token:', error);
+        // console.log('🔄 Redirigiendo a login con returnUrl:', state.url);
+
+        router.navigate(['/auth/login'], {
+          queryParams: { returnUrl: state.url },
+        });
+
+        return of(false);
+      }),
+    );
+  }
+  return true;
 };

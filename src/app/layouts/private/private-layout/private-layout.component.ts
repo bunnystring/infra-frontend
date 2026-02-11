@@ -106,7 +106,7 @@ export class PrivateLayoutComponent {
       .pipe(takeUntil(this.destroy$))
       .subscribe((user) => {
         this.user = user;
-        console.log('👤 Usuario actual:', user);
+        // console.log('👤 Usuario actual:', user);
       });
   }
 

@@ -1,8 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject, tap } from 'rxjs';
+import { Observable, BehaviorSubject, tap, throwError, catchError } from 'rxjs';
 import { Router } from '@angular/router';
-import { environment } from '../../../environments/environment';
 import {
   LoginRequest,
   RegisterRequest,
@@ -51,52 +49,31 @@ export class AuthService {
    * @returns Observable<AuthResponse>
    */
   login(credentials: LoginRequest): Observable<AuthResponse> {
-    return this.apiService
-      .post<AuthResponse>(`/auth/login`, credentials)
-      .pipe(
-        tap((response) => {
-          this.saveAuthData(response);
-          this.currentUserSubject.next(response.user);
-        }),
-      );
+    return this.apiService.post<AuthResponse>(`/auth/login`, credentials).pipe(
+      tap((response) => {
+        this.saveAuthData(response);
+        this.currentUserSubject.next(response.user);
+      }),
+    );
   }
 
   /**
    * Registra un nuevo usuario
    * @param userData
-   * @returns
+   * @returns Observable<AuthResponse>
    */
   register(userData: RegisterRequest): Observable<AuthResponse> {
-    return this.apiService
-      .post<AuthResponse>(`/auth/register`, userData)
-      .pipe(
-        tap((response) => {
-          this.saveAuthData(response);
-          this.currentUserSubject.next(response.user);
-        }),
-      );
-  }
-
-  /**
-   * Refresca el token de autenticación
-   * @returns
-   */
-  refreshToken(): Observable<AuthResponse> {
-    const refreshToken = this.getRefreshToken();
-    return this.apiService
-      .post<AuthResponse>(`/auth/refresh`, {
-        refreshToken,
-      })
-      .pipe(
-        tap((response) => {
-          this.saveAuthData(response);
-          this.currentUserSubject.next(response.user);
-        }),
-      );
+    return this.apiService.post<AuthResponse>(`/auth/register`, userData).pipe(
+      tap((response) => {
+        this.saveAuthData(response);
+        this.currentUserSubject.next(response.user);
+      }),
+    );
   }
 
   /**
    * Cierra la sesión del usuario actual
+   * @returns void
    */
   logout(): void {
     this.clearAuthData();
@@ -106,7 +83,7 @@ export class AuthService {
 
   /**
    * Obtiene el token de autenticación almacenado
-   * @returns
+   * @returns Token de autenticación o null si no existe
    */
   getToken(): string | null {
     return localStorage.getItem(this.TOKEN_KEY);
@@ -122,7 +99,7 @@ export class AuthService {
 
   /**
    * Verifica si el usuario está autenticado
-   * @returns
+   * @returns true si el usuario tiene un token válido, false en caso contrario
    */
   isAuthenticated(): boolean {
     return !!this.getToken();
@@ -130,7 +107,7 @@ export class AuthService {
 
   /**
    * Obtiene el usuario actualmente autenticado
-   * @returns
+   * @returns Usuario autenticado o null si no hay ninguno
    */
   getCurrentUser(): any {
     return this.currentUserSubject.value;
@@ -138,7 +115,7 @@ export class AuthService {
 
   /**
    * Verifica si el token de autenticación ha expirado
-   * @returns
+   * @returns true si el token ha expirado o no existe, false si el token es válido
    */
   isTokenExpired(): boolean {
     const token = this.getToken();
@@ -154,8 +131,29 @@ export class AuthService {
   }
 
   /**
+   * Verifica si el token está próximo a expirar (dentro de los próximos 5 minutos)
+   * Útil para refrescar el token de forma proactiva
+   * @returns true si el token expira en menos de 5 minutos
+   */
+  isTokenExpiringSoon(minutes: number = 5): boolean {
+    const token = this.getToken();
+    if (!token) return false;
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const expiry = payload.exp * 1000;
+      const threshold = minutes * 60 * 1000;
+      return Date.now() >= expiry - threshold;
+    } catch (error) {
+      console.error('❌ Error al decodificar token:', error);
+      return false;
+    }
+  }
+
+  /**
    * Guarda los datos de autenticación en el almacenamiento local
    * @param response
+   * @returns void
    */
   private saveAuthData(response: AuthResponse): void {
     localStorage.setItem(this.TOKEN_KEY, response.accessToken);
@@ -169,6 +167,7 @@ export class AuthService {
 
   /**
    * Limpia los datos de autenticación del almacenamiento local
+   * @returns void
    */
   private clearAuthData(): void {
     localStorage.removeItem(this.TOKEN_KEY);
@@ -178,10 +177,64 @@ export class AuthService {
 
   /**
    * Obtiene el usuario almacenado en el almacenamiento local
-   * @returns
+   * @returns Usuario almacenado o null si no existe
    */
   private getUserFromStorage(): any {
     const userStr = localStorage.getItem(this.USER_KEY);
     return userStr ? JSON.parse(userStr) : null;
+  }
+
+  /**
+   * Refresca el token de autenticación
+   * @returns Observable<AuthResponse>
+   */
+  refreshToken(): Observable<AuthResponse> {
+    const refreshToken = this.getRefreshToken();
+
+    if (!refreshToken) {
+      console.error('❌ No hay refresh token disponible');
+      return throwError(() => new Error('No refresh token available'));
+    }
+
+    // console.log('🔄 Solicitando nuevo token...');
+
+    return this.apiService
+      .post<AuthResponse>(`/auth/refresh`, {
+        refreshToken,
+      })
+      .pipe(
+        tap((response) => {
+          // console.log('✅ Refresh token exitoso');
+          this.saveAuthData(response);
+          this.currentUserSubject.next(response.user);
+        }),
+        catchError((error) => {
+          console.error('❌ Error en refresh token:', error);
+          // Si falla el refresh, limpiar datos y hacer logout
+          this.clearAuthData();
+          this.currentUserSubject.next(null);
+          return throwError(() => error);
+        }),
+      );
+  }
+
+  /**
+   * Obtiene el tiempo restante hasta que expire el token
+   * Útil para mostrar información al usuario o para debugging
+   * @returns Tiempo en milisegundos o null si no hay token
+   */
+  getTokenExpirationTime(): number | null {
+    const token = this.getToken();
+    if (!token) return null;
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const expiry = payload.exp * 1000;
+      const timeRemaining = expiry - Date.now();
+      return timeRemaining > 0 ? timeRemaining : 0;
+    } catch (error) {
+      console.error('❌ Error al decodificar token:', error);
+      return null;
+    }
   }
 }

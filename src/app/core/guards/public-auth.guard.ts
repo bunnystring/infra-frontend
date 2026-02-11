@@ -27,8 +27,6 @@ export const publicAuthGuard: CanActivateFn = (route, state) => {
 
     // Token expirado, limpiar sesión y permitir acceso
     authService.logout();
-  } else {
-    console.log('PublicAuthGuard: Usuario NO autenticado, permitiendo acceso');
   }
 
   // No autenticado o token expirado - permitir acceso

@@ -13,18 +13,18 @@ module.exports = {
     themes: [
       {
         infragest: {
-          primary: "#10b981",
+          primary: "#202293",
           "primary-content": "#ffffff",
-          secondary: "#059669",
+          secondary: "#290596",
           "secondary-content": "#ffffff",
-          accent: "#14b8a6",
+          accent: "#2a14b8",
           "accent-content": "#ffffff",
           neutral: "#1f2937",
           "neutral-content": "#f9fafb",
           "base-100": "#ffffff",
           "base-200": "#f0fdf4",
           "base-300": "#dcfce7",
-          "base-content": "#064e3b",
+          "base-content": "#11064e",
           info: "#06b6d4",
           "info-content": "#ffffff",
           success: "#22c55e",

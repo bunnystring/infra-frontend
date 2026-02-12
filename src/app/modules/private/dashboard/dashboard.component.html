@@ -1,3 +1,21 @@
+<!-- Toast de Loading (Opción 1 - Recomendada) -->
+<div *ngIf="loading$ | async" class="toast toast-top toast-center z-50">
+  <div class="alert alert-info gap-2">
+    <span class="loading loading-spinner loading-sm"></span>
+    <span>Actualizando datos...</span>
+  </div>
+</div>
+
+<div class="transition-opacity duration-300" [class.opacity-60]="loading$ | async"
+  [class.pointer-events-none]="loading$ | async">
+  <!-- Encabezado -->
+  <div class="mb-6">
+    <h1 class="text-3xl font-bold">{{ getGreeting() }}</h1>
+    <p class="text-base-content/60 mt-2">
+      Aquí está el resumen de tu sistema
+    </p>
+  </div>
+
   <!-- Stats Cards -->
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
     <!-- Total Dispositivos -->
@@ -5,7 +23,8 @@
       <div class="stat">
         <div class="stat-figure text-primary">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
           </svg>
         </div>
         <div class="stat-title">Total Dispositivos</div>
@@ -21,7 +40,8 @@
       <div class="stat">
         <div class="stat-figure text-error">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
         </div>
         <div class="stat-title">Necesitan Reparación</div>
@@ -37,7 +57,8 @@
       <div class="stat">
         <div class="stat-figure text-info">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
         <div class="stat-title">Ocupados</div>
@@ -65,8 +86,8 @@
     </div>
   </div>
 
-    <!-- Dispositivos por Marca -->
-  <div *ngIf="!loading && devicesByBrand.length > 0" class="card bg-base-100 shadow-xl mt-6">
+  <!-- Dispositivos por Marca -->
+  <div *ngIf="devicesByBrand.length > 0" class="card bg-base-100 shadow-xl mt-6">
     <div class="card-body">
       <h2 class="card-title">📊 Top 5 Marcas</h2>
       <div class="space-y-4">
@@ -74,10 +95,7 @@
           <div class="font-semibold w-24 text-sm">{{ item.brand }}</div>
           <div class="flex-1">
             <div class="flex items-center gap-2">
-              <progress
-                class="progress progress-primary w-full"
-                [value]="item.count"
-                [max]="stats.totalDevices">
+              <progress class="progress progress-primary w-full" [value]="item.count" [max]="stats.totalDevices">
               </progress>
               <span class="text-xs text-base-content/60">
                 {{ getPercentage(item.count, stats.totalDevices) }}%
@@ -90,302 +108,301 @@
     </div>
   </div>
 
-<!-- Stats Cards: Órdenes -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
-  <!-- Total Órdenes -->
-  <div class="stats shadow-lg hover:shadow-xl transition-shadow">
-    <div class="stat">
-      <div class="stat-figure text-secondary">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
+  <!-- Stats Cards: Órdenes -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
+    <!-- Total Órdenes -->
+    <div class="stats shadow-lg hover:shadow-xl transition-shadow">
+      <div class="stat">
+        <div class="stat-figure text-secondary">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+        <div class="stat-title">Total Órdenes</div>
+        <div class="stat-value text-secondary">{{ stats.totalOrders }}</div>
+        <div class="stat-desc">
+          {{ stats.activeOrders }} activas
+        </div>
       </div>
-      <div class="stat-title">Total Órdenes</div>
-      <div class="stat-value text-secondary">{{ stats.totalOrders }}</div>
-      <div class="stat-desc">
-        {{ stats.activeOrders }} activas
+    </div>
+
+    <!-- Órdenes Creadas -->
+    <div class="stats shadow-lg hover:shadow-xl transition-shadow">
+      <div class="stat">
+        <div class="stat-figure text-info">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+        </div>
+        <div class="stat-title">Creadas</div>
+        <div class="stat-value text-info">{{ stats.createdOrders }}</div>
+        <div class="stat-desc">
+          {{ getPercentage(stats.createdOrders, stats.totalOrders) }}% del total
+        </div>
+      </div>
+    </div>
+
+    <!-- Órdenes en Progreso -->
+    <div class="stats shadow-lg hover:shadow-xl transition-shadow">
+      <div class="stat">
+        <div class="stat-figure text-warning">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        </div>
+        <div class="stat-title">En Progreso</div>
+        <div class="stat-value text-warning">{{ stats.inProgressOrders }}</div>
+        <div class="stat-desc">
+          + {{ stats.despatchedOrders }} despachadas
+        </div>
+      </div>
+    </div>
+
+    <!-- Órdenes Finalizadas -->
+    <div class="stats shadow-lg hover:shadow-xl transition-shadow">
+      <div class="stat">
+        <div class="stat-figure text-success">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div class="stat-title">Finalizadas</div>
+        <div class="stat-value text-success">{{ stats.finishedOrders }}</div>
+        <div class="stat-desc">
+          {{ getPercentage(stats.finishedOrders, stats.totalOrders) }}% completadas
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Órdenes Creadas -->
-  <div class="stats shadow-lg hover:shadow-xl transition-shadow">
-    <div class="stat">
-      <div class="stat-figure text-info">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-        </svg>
-      </div>
-      <div class="stat-title">Creadas</div>
-      <div class="stat-value text-info">{{ stats.createdOrders }}</div>
-      <div class="stat-desc">
-        {{ getPercentage(stats.createdOrders, stats.totalOrders) }}% del total
-      </div>
-    </div>
-  </div>
-
-  <!-- Órdenes en Progreso -->
-  <div class="stats shadow-lg hover:shadow-xl transition-shadow">
-    <div class="stat">
-      <div class="stat-figure text-warning">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>
-      </div>
-      <div class="stat-title">En Progreso</div>
-      <div class="stat-value text-warning">{{ stats.inProgressOrders }}</div>
-      <div class="stat-desc">
-        + {{ stats.despatchedOrders }} despachadas
-      </div>
-    </div>
-  </div>
-
-  <!-- Órdenes Finalizadas -->
-  <div class="stats shadow-lg hover:shadow-xl transition-shadow">
-    <div class="stat">
-      <div class="stat-figure text-success">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      </div>
-      <div class="stat-title">Finalizadas</div>
-      <div class="stat-value text-success">{{ stats.finishedOrders }}</div>
-      <div class="stat-desc">
-        {{ getPercentage(stats.finishedOrders, stats.totalOrders) }}% completadas
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Alertas -->
-<div *ngIf="alerts.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
-  <div *ngFor="let alert of alerts"
-       class="alert shadow-lg"
-       [ngClass]="getAlertClass(alert.type)">
-    <div>
-      <span class="text-2xl">{{ alert.icon }}</span>
+  <!-- Alertas -->
+  <div *ngIf="alerts.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
+    <div *ngFor="let alert of alerts" class="alert shadow-lg" [ngClass]="getAlertClass(alert.type)">
       <div>
-        <h3 class="font-bold">{{ alert.title }}</h3>
-        <div class="text-xs">{{ alert.message }}</div>
+        <span class="text-2xl">{{ alert.icon }}</span>
+        <div>
+          <h3 class="font-bold">{{ alert.title }}</h3>
+          <div class="text-xs">{{ alert.message }}</div>
+        </div>
+      </div>
+      <div class="flex-none">
+        <div class="badge badge-lg">{{ alert.count }}</div>
       </div>
     </div>
-    <div class="flex-none">
-      <div class="badge badge-lg">{{ alert.count }}</div>
-    </div>
   </div>
-</div>
 
-<!-- Órdenes Recientes -->
-<div *ngIf="!loading && recentOrders.length > 0" class="card bg-base-100 shadow-xl mt-6">
-  <div class="card-body">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="card-title">📋 Órdenes Recientes</h2>
-      <button class="btn btn-sm btn-ghost" (click)="refreshData()">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-        </svg>
-      </button>
-    </div>
+  <!-- Órdenes Recientes -->
+  <div *ngIf="recentOrders.length > 0" class="card bg-base-100 shadow-xl mt-6">
+    <div class="card-body">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="card-title">📋 Órdenes Recientes</h2>
+        <button class="btn btn-sm btn-ghost gap-2"
+        (click)="refreshData()"
+        [disabled]="loading$ | async">
+        <span *ngIf="loading$ | async" class="loading loading-spinner loading-xs"></span>
+          <svg *ngIf="!(loading$ | async)" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+         <span class="hidden sm:inline">
+            {{ (loading$ | async) ? 'Actualizando...' : 'Actualizar' }}
+          </span>
+        </button>
+      </div>
 
-    <div class="overflow-x-auto">
-      <table class="table table-zebra">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Descripción</th>
-            <th>Dispositivos</th>
-            <th>Asignado</th>
-            <th>Estado</th>
-            <th>Fecha</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let order of recentOrders" class="hover">
-            <!-- ID corto con tooltip -->
-            <td>
-              <div class="tooltip" [attr.data-tip]="order.id">
-                <code class="text-xs">{{ getShortId(order.id) }}</code>
-              </div>
-            </td>
+      <div class="overflow-x-auto">
+        <table class="table table-zebra">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Descripción</th>
+              <th>Dispositivos</th>
+              <th>Asignado</th>
+              <th>Estado</th>
+              <th>Fecha</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let order of recentOrders" class="hover">
+              <!-- ID corto con tooltip -->
+              <td>
+                <div class="tooltip" [attr.data-tip]="order.id">
+                  <code class="text-xs">{{ getShortId(order.id) }}</code>
+                </div>
+              </td>
 
-            <!-- Descripción -->
-            <td>
-              <div class="max-w-xs" [title]="order.description">
-                {{ getTruncatedDescription(order.description, 40) }}
-              </div>
-            </td>
+              <!-- Descripción -->
+              <td>
+                <div class="max-w-xs" [title]="order.description">
+                  {{ getTruncatedDescription(order.description, 40) }}
+                </div>
+              </td>
 
-            <!-- Dispositivos -->
-            <td>
-              <div class="badge badge-neutral badge-lg">
-                {{ getDeviceCount(order) }}
-              </div>
-              <!-- Estados de dispositivos -->
-              <div class="flex gap-1 mt-1">
-                <span
-                  *ngFor="let item of order.items.slice(0, 3)"
-                  class="badge badge-xs"
-                  [ngClass]="getDeviceStateColor(item.originalDeviceState)">
-                  {{ item.originalDeviceState.substring(0, 4) }}
-                </span>
-                <span *ngIf="order.items.length > 3" class="badge badge-xs">
-                  +{{ order.items.length - 3 }}
-                </span>
-              </div>
-            </td>
+              <!-- Dispositivos -->
+              <td>
+                <div class="badge badge-neutral badge-lg">
+                  {{ getDeviceCount(order) }}
+                </div>
+                <!-- Estados de dispositivos -->
+                <div class="flex gap-1 mt-1">
+                  <span *ngFor="let item of order.items.slice(0, 3)" class="badge badge-xs"
+                    [ngClass]="getDeviceStateColor(item.originalDeviceState)">
+                    {{ item.originalDeviceState.substring(0, 4) }}
+                  </span>
+                  <span *ngIf="order.items.length > 3" class="badge badge-xs">
+                    +{{ order.items.length - 3 }}
+                  </span>
+                </div>
+              </td>
 
-            <!-- Asignado -->
-            <td>
-              <div class="flex items-center gap-2">
-                <span class="text-lg">{{ getAssigneeIcon(order.assigneeType) }}</span>
-                <div class="text-sm">
-                  <div class="font-semibold">{{ order.assigneeType }}</div>
-                  <div class="tooltip" [attr.data-tip]="order.assigneeId">
-                    <code class="text-xs opacity-60">{{ getShortId(order.assigneeId) }}</code>
+              <!-- Asignado -->
+              <td>
+                <div class="flex items-center gap-2">
+                  <span class="text-lg">{{ getAssigneeIcon(order.assigneeType) }}</span>
+                  <div class="text-sm">
+                    <div class="font-semibold">{{ order.assigneeType }}</div>
+                    <div class="tooltip" [attr.data-tip]="order.assigneeId">
+                      <code class="text-xs opacity-60">{{ getShortId(order.assigneeId) }}</code>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </td>
+              </td>
 
-            <!-- Estado -->
-            <td>
-              <span class="badge badge-lg" [ngClass]="getOrderStateClass(order.state)">
-                {{ getOrderStateText(order.state) }}
+              <!-- Estado -->
+              <td>
+                <span class="badge badge-lg" [ngClass]="getOrderStateClass(order.state)">
+                  {{ getOrderStateText(order.state) }}
+                </span>
+              </td>
+
+              <!-- Fecha -->
+              <td>
+                <div class="text-sm">
+                  <div class="font-medium">{{ formatDate(order.createdAt) }}</div>
+                  <div class="text-xs opacity-60">{{ getRelativeTime(order.createdAt) }}</div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mensaje si no hay órdenes -->
+      <div *ngIf="recentOrders.length === 0" class="text-center py-8 text-base-content/60">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 opacity-50" fill="none"
+          viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        <p class="text-lg font-semibold">No hay órdenes recientes</p>
+        <p class="text-sm">Las nuevas órdenes aparecerán aquí</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estado de Órdenes (Gráfico de Barras) -->
+  <div *ngIf="stats.totalOrders > 0" class="card bg-base-100 shadow-xl mt-6">
+    <div class="card-body">
+      <h2 class="card-title">📊 Estado de Órdenes</h2>
+      <div class="space-y-4">
+        <!-- Creadas -->
+        <div class="flex items-center gap-4">
+          <div class="font-semibold w-32 text-sm">
+            <span class="badge badge-info">{{ orderStates.CREATED }}</span>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2">
+              <progress class="progress progress-info w-full" [value]="stats.createdOrders" [max]="stats.totalOrders">
+              </progress>
+              <span class="text-xs text-base-content/60">
+                {{ getPercentage(stats.createdOrders, stats.totalOrders) }}%
               </span>
-            </td>
-
-            <!-- Fecha -->
-            <td>
-              <div class="text-sm">
-                <div class="font-medium">{{ formatDate(order.createdAt) }}</div>
-                <div class="text-xs opacity-60">{{ getRelativeTime(order.createdAt) }}</div>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Mensaje si no hay órdenes -->
-    <div *ngIf="recentOrders.length === 0 && !loading" class="text-center py-8 text-base-content/60">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-      </svg>
-      <p class="text-lg font-semibold">No hay órdenes recientes</p>
-      <p class="text-sm">Las nuevas órdenes aparecerán aquí</p>
-    </div>
-  </div>
-</div>
-
-<!-- Estado de Órdenes (Gráfico de Barras) -->
-<div *ngIf="!loading && stats.totalOrders > 0" class="card bg-base-100 shadow-xl mt-6">
-  <div class="card-body">
-    <h2 class="card-title">📊 Estado de Órdenes</h2>
-    <div class="space-y-4">
-      <!-- Creadas -->
-      <div class="flex items-center gap-4">
-        <div class="font-semibold w-32 text-sm">
-          <span class="badge badge-info">{{ orderStates.CREATED }}</span>
-        </div>
-        <div class="flex-1">
-          <div class="flex items-center gap-2">
-            <progress
-              class="progress progress-info w-full"
-              [value]="stats.createdOrders"
-              [max]="stats.totalOrders">
-            </progress>
-            <span class="text-xs text-base-content/60">
-              {{ getPercentage(stats.createdOrders, stats.totalOrders) }}%
-            </span>
+            </div>
           </div>
+          <div class="badge badge-lg badge-neutral">{{ stats.createdOrders }}</div>
         </div>
-        <div class="badge badge-lg badge-neutral">{{ stats.createdOrders }}</div>
-      </div>
 
-      <!-- En Progreso -->
-      <div class="flex items-center gap-4">
-        <div class="font-semibold w-32 text-sm">
-          <span class="badge badge-warning">{{ orderStates.IN_PROGRESS }}</span>
-        </div>
-        <div class="flex-1">
-          <div class="flex items-center gap-2">
-            <progress
-              class="progress progress-warning w-full"
-              [value]="stats.inProgressOrders"
-              [max]="stats.totalOrders">
-            </progress>
-            <span class="text-xs text-base-content/60">
-              {{ getPercentage(stats.inProgressOrders, stats.totalOrders) }}%
-            </span>
+        <!-- En Progreso -->
+        <div class="flex items-center gap-4">
+          <div class="font-semibold w-32 text-sm">
+            <span class="badge badge-warning">{{ orderStates.IN_PROGRESS }}</span>
           </div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2">
+              <progress class="progress progress-warning w-full" [value]="stats.inProgressOrders"
+                [max]="stats.totalOrders">
+              </progress>
+              <span class="text-xs text-base-content/60">
+                {{ getPercentage(stats.inProgressOrders, stats.totalOrders) }}%
+              </span>
+            </div>
+          </div>
+          <div class="badge badge-lg badge-neutral">{{ stats.inProgressOrders }}</div>
         </div>
-        <div class="badge badge-lg badge-neutral">{{ stats.inProgressOrders }}</div>
-      </div>
 
-      <!-- Despachadas -->
-      <div class="flex items-center gap-4">
-        <div class="font-semibold w-32 text-sm">
-          <span class="badge badge-primary">{{ orderStates.DISPATCHED }}</span>
-        </div>
-        <div class="flex-1">
-          <div class="flex items-center gap-2">
-            <progress
-              class="progress progress-primary w-full"
-              [value]="stats.despatchedOrders"
-              [max]="stats.totalOrders">
-            </progress>
-            <span class="text-xs text-base-content/60">
-              {{ getPercentage(stats.despatchedOrders, stats.totalOrders) }}%
-            </span>
+        <!-- Despachadas -->
+        <div class="flex items-center gap-4">
+          <div class="font-semibold w-32 text-sm">
+            <span class="badge badge-primary">{{ orderStates.DISPATCHED }}</span>
           </div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2">
+              <progress class="progress progress-primary w-full" [value]="stats.despatchedOrders"
+                [max]="stats.totalOrders">
+              </progress>
+              <span class="text-xs text-base-content/60">
+                {{ getPercentage(stats.despatchedOrders, stats.totalOrders) }}%
+              </span>
+            </div>
+          </div>
+          <div class="badge badge-lg badge-neutral">{{ stats.despatchedOrders }}</div>
         </div>
-        <div class="badge badge-lg badge-neutral">{{ stats.despatchedOrders }}</div>
-      </div>
 
-      <!-- Finalizadas -->
-      <div class="flex items-center gap-4">
-        <div class="font-semibold w-32 text-sm">
-          <span class="badge badge-success">{{ orderStates.FINISHED }}</span>
-        </div>
-        <div class="flex-1">
-          <div class="flex items-center gap-2">
-            <progress
-              class="progress progress-success w-full"
-              [value]="stats.finishedOrders"
-              [max]="stats.totalOrders">
-            </progress>
-            <span class="text-xs text-base-content/60">
-              {{ getPercentage(stats.finishedOrders, stats.totalOrders) }}%
-            </span>
+        <!-- Finalizadas -->
+        <div class="flex items-center gap-4">
+          <div class="font-semibold w-32 text-sm">
+            <span class="badge badge-success">{{ orderStates.FINISHED }}</span>
           </div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2">
+              <progress class="progress progress-success w-full" [value]="stats.finishedOrders"
+                [max]="stats.totalOrders">
+              </progress>
+              <span class="text-xs text-base-content/60">
+                {{ getPercentage(stats.finishedOrders, stats.totalOrders) }}%
+              </span>
+            </div>
+          </div>
+          <div class="badge badge-lg badge-neutral">{{ stats.finishedOrders }}</div>
         </div>
-        <div class="badge badge-lg badge-neutral">{{ stats.finishedOrders }}</div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- Estadística Adicional: Dispositivos en Órdenes -->
-<div *ngIf="!loading && stats.totalOrders > 0" class="card bg-base-100 shadow-xl mt-6">
-  <div class="card-body">
-    <h2 class="card-title">📱 Dispositivos en Órdenes</h2>
-    <div class="stats stats-vertical lg:stats-horizontal shadow">
-      <div class="stat">
-        <div class="stat-title">Total Dispositivos</div>
-        <div class="stat-value text-primary">{{ stats.totalDevicesInOrders }}</div>
-        <div class="stat-desc">En {{ stats.totalOrders }} órdenes</div>
-      </div>
+  <!-- Estadística Adicional: Dispositivos en Órdenes -->
+  <div *ngIf="stats.totalOrders > 0" class="card bg-base-100 shadow-xl mt-6">
+    <div class="card-body">
+      <h2 class="card-title">📱 Dispositivos en Órdenes</h2>
+      <div class="stats stats-vertical lg:stats-horizontal shadow">
+        <div class="stat">
+          <div class="stat-title">Total Dispositivos</div>
+          <div class="stat-value text-primary">{{ stats.totalDevicesInOrders }}</div>
+          <div class="stat-desc">En {{ stats.totalOrders }} órdenes</div>
+        </div>
 
-      <div class="stat">
-        <div class="stat-title">Promedio por Orden</div>
-        <div class="stat-value text-secondary">{{ stats.averageItemsPerOrder }}</div>
-        <div class="stat-desc">Dispositivos por orden</div>
-      </div>
+        <div class="stat">
+          <div class="stat-title">Promedio por Orden</div>
+          <div class="stat-value text-secondary">{{ stats.averageItemsPerOrder }}</div>
+          <div class="stat-desc">Dispositivos por orden</div>
+        </div>
 
-      <div class="stat">
-        <div class="stat-title">Órdenes Activas</div>
-        <div class="stat-value text-accent">{{ stats.activeOrders }}</div>
-        <div class="stat-desc">{{ getPercentage(stats.activeOrders, stats.totalOrders) }}% del total</div>
+        <div class="stat">
+          <div class="stat-title">Órdenes Activas</div>
+          <div class="stat-value text-accent">{{ stats.activeOrders }}</div>
+          <div class="stat-desc">{{ getPercentage(stats.activeOrders, stats.totalOrders) }}% del total</div>
+        </div>
       </div>
     </div>
   </div>

@@ -6,10 +6,12 @@ import { DevicesService } from '../devices/services/devices.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { User } from '../../public/auth/models/user.model';
 import { forkJoin } from 'rxjs/internal/observable/forkJoin';
+import { Observable } from 'rxjs';
 import { Device, DeviceStatus } from '../devices/models/device.model';
 import { takeUntil } from 'rxjs/internal/operators/takeUntil';
 import { Subject } from 'rxjs/internal/Subject';
 import { OrdersService } from '../orders/services/orders.service';
+import { LoadingService } from '../../../core/services/loading.service';
 
 /**
  * Componente de Dashboard
@@ -28,7 +30,10 @@ import { OrdersService } from '../orders/services/orders.service';
 export class DashboardComponent implements OnInit, OnDestroy {
   // Datos del usuario autenticado
   user: User | null = null;
-  loading = true;
+
+  get loading$(): Observable<boolean> {
+    return this.loadingService.loading$;
+  }
 
   // Estado de carga
   stats = {
@@ -74,13 +79,24 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private devicesService: DevicesService,
     private authService: AuthService,
     private ordersService: OrdersService,
+    private loadingService: LoadingService
   ) {}
 
+  /**
+   * Inicializa el componente cargando los datos necesarios para mostrar en el dashboard, como los dispositivos y las órdenes, y calculando las estadísticas correspondientes
+   *
+   * @return void
+   */
   ngOnInit() {
     this.initParams();
     this.loadUser();
   }
 
+  /**
+   * Limpia las suscripciones para evitar fugas de memoria cuando el componente es destruido
+   *
+   * @return void
+   */
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
@@ -99,8 +115,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
    * @return void
    */
   private loadDashboardData(): void {
-    this.loading = true;
-
     forkJoin({
       devices: this.devicesService.getAllDevices(),
       orders: this.ordersService.getAllOrders(),
@@ -108,8 +122,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: ({ devices, orders }) => {
-          console.log('✅ Dispositivos cargados:', devices);
-          console.log('✅ Órdenes cargadas:', orders);
+          // console.log('✅ Dispositivos cargados:', devices);
+          // console.log('✅ Órdenes cargadas:', orders);
 
           // Calcular estadísticas de dispositivos
           this.calculateDeviceStats(devices);
@@ -129,11 +143,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
           // Actualizar alertas
           this.updateAlerts();
 
-          this.loading = false;
         },
         error: (error) => {
           console.error('❌ Error al cargar datos del dashboard:', error);
-          this.loading = false;
         },
       });
   }
@@ -199,58 +211,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   getGreeting(): string {
     const firstName = this.getFirstName();
     return firstName ? `👋 ¡Bienvenido, ${firstName}!` : '👋 ¡Bienvenido!';
-  }
-
-  /**
-   * Obtener estado de la clase CSS para el estado de la orden
-   * @param status
-   * @returns
-   */
-  getStatusClass(status: string): string {
-    const statusMap: Record<string, string> = {
-      completed: 'badge-success',
-      'in-progress': 'badge-warning',
-      pending: 'badge-info',
-      cancelled: 'badge-error',
-    };
-    return statusMap[status] || 'badge-ghost';
-  }
-
-  /**
-   * Obtener texto para estado
-   * @param status Estado del dispositivo
-   * @returns Texto correspondiente
-   */
-  getStatusText(status: string): string {
-    const statusMap: Record<string, string> = {
-      completed: 'Completado',
-      'in-progress': 'En Progreso',
-      pending: 'Pendiente',
-      cancelled: 'Cancelado',
-    };
-    return statusMap[status] || status;
-  }
-
-  /**
-   * Obtener ícono para tendencia
-   * @param trend Valor de tendencia
-   * @returns Ícono correspondiente
-   */
-  getTrendIcon(trend: number): string {
-    return trend > 0 ? '↗' : trend < 0 ? '↘' : '→';
-  }
-
-  /**
-   * Obtener clase CSS para tendencia
-   * @param trend Valor de tendencia
-   * @returns Clase CSS correspondiente
-   */
-  getTrendClass(trend: number): string {
-    return trend > 0
-      ? 'text-success'
-      : trend < 0
-        ? 'text-error'
-        : 'text-base-content';
   }
 
   /**

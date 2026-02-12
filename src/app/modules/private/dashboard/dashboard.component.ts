@@ -6,7 +6,7 @@ import { DevicesService } from '../devices/services/devices.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { User } from '../../public/auth/models/user.model';
 import { forkJoin } from 'rxjs/internal/observable/forkJoin';
-import { Observable } from 'rxjs';
+import { catchError, Observable, of } from 'rxjs';
 import { Device, DeviceStatus } from '../devices/models/device.model';
 import { takeUntil } from 'rxjs/internal/operators/takeUntil';
 import { Subject } from 'rxjs/internal/Subject';
@@ -73,13 +73,28 @@ export class DashboardComponent implements OnInit, OnDestroy {
     count: number;
   }> = [];
 
+  // Manejo de errores
+  deviceError = false;
+  deviceErrorMessage = '';
+  orderError = false;
+  orderErrorMessage = '';
+  isRetrying = false;
+
+  // Computed property para saber si hay algún error
+  get hasAnyError(): boolean {
+    return this.deviceError || this.orderError;
+  }
+
   destroy$: Subject<void> = new Subject<void>();
+
+  // Bandera para evitar recargas múltiples al inicializar el componente
+  private hasLoadedOnce = false;
 
   constructor(
     private devicesService: DevicesService,
     private authService: AuthService,
     private ordersService: OrdersService,
-    private loadingService: LoadingService
+    private loadingService: LoadingService,
   ) {}
 
   /**
@@ -109,45 +124,212 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.loadDashboardData();
   }
 
+
   /**
-   * Carga los datos necesarios para el dashboard, incluyendo dispositivos y órdenes, y calcula las estadísticas correspondientes
-   *
-   * @return void
+   * Carga los datos del dashboard, incluyendo dispositivos y órdenes,
+   * y maneja los errores de forma individual para cada recurso, permitiendo mostrar
+   * datos previos si una de las cargas falla, y actualizando las estadísticas y alertas en consecuencia
+   * @returns void
    */
   private loadDashboardData(): void {
+    this.deviceError = false;
+    this.deviceErrorMessage = '';
+    this.orderError = false;
+    this.orderErrorMessage = '';
+
     forkJoin({
-      devices: this.devicesService.getAllDevices(),
-      orders: this.ordersService.getAllOrders(),
+      devices: this.devicesService.getAllDevices().pipe(
+        catchError((error) => {
+          console.error(' Error al cargar dispositivos:', error);
+          this.deviceError = true;
+          this.deviceErrorMessage =
+            error.message || 'Error al cargar dispositivos';
+          return of([]);
+        }),
+      ),
+      orders: this.ordersService.getAllOrders().pipe(
+        catchError((error) => {
+          console.error(' Error al cargar órdenes:', error);
+          this.orderError = true;
+          this.orderErrorMessage = error.message || 'Error al cargar órdenes';
+          return of([]);
+        }),
+      ),
     })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: ({ devices, orders }) => {
-          // console.log('✅ Dispositivos cargados:', devices);
-          // console.log('✅ Órdenes cargadas:', orders);
+          // Procesar dispositivos (puede ser [])
+          if (devices.length > 0) {
+            this.calculateDeviceStats(devices);
+            this.recentDevices = this.getRecentDevices(devices, 5);
+            this.devicesByBrand = this.getDevicesByBrand(devices);
+          } else if (!this.deviceError) {
+            this.resetDeviceStats();
+          }
 
-          // Calcular estadísticas de dispositivos
-          this.calculateDeviceStats(devices);
+          // Procesar órdenes (puede ser [])
+          if (orders.length > 0) {
+            this.calculateOrderStats(orders);
+            this.recentOrders = this.getRecentOrders(orders, 5);
+            this.updateAlerts();
+          } else if (!this.orderError) {
+            this.resetOrderStats();
+          }
 
-          // Dispositivos recientes (últimos 5)
-          this.recentDevices = this.getRecentDevices(devices, 5);
-
-          // Dispositivos por marca
-          this.devicesByBrand = this.getDevicesByBrand(devices);
-
-          // Calcular estadísticas de órdenes
-          this.calculateOrderStats(orders);
-
-          // Órdenes recientes (últimas 5)
-          this.recentOrders = this.getRecentOrders(orders, 5);
-
-          // Actualizar alertas
-          this.updateAlerts();
-
+          this.hasLoadedOnce = true;
+          this.isRetrying = false;
         },
         error: (error) => {
-          console.error('❌ Error al cargar datos del dashboard:', error);
+          console.error(' Error inesperado:', error);
         },
       });
+  }
+
+  /**
+   * Extrae un mensaje de error legible para el usuario basado en el error recibido
+   * y el recurso que se intentaba cargar, manejando casos comunes como falta de conexión,
+   * recursos no encontrados o errores del servidor
+   * @param error
+   * @param resource
+   * @returns
+   */
+  private extractErrorMessage(error: any, resource: string): string {
+    if (error.message) {
+      return error.message;
+    }
+
+    if (error.status === 0) {
+      return `No se pudo conectar al servidor de ${resource}`;
+    }
+
+    if (error.status === 404) {
+      return `Servicio de ${resource} no encontrado`;
+    }
+
+    if (error.status >= 500) {
+      return `Error del servidor de ${resource}`;
+    }
+
+    return `Error al cargar ${resource}`;
+  }
+
+  /**
+   * Reintentar cargar los datos del dashboard,
+   * reseteando los estados de error y mostrando el indicador de carga mientras se realiza la nueva solicitud,
+   * permitiendo al usuario intentar recuperar los datos después de un error sin necesidad de recargar toda la página
+   * @returns void
+   */
+  retryLoadData(): void {
+    this.isRetrying = true;
+    this.loadDashboardData();
+  }
+
+  /**
+   * Reintentar solo dispositivos en caso de error,
+   * permitiendo al usuario intentar recuperar los datos de dispositivos sin afectar la sección de órdenes,
+   * y viceversa
+   * @returns void
+   */
+  retryDevices(): void {
+    this.isRetrying = true;
+    this.deviceError = false;
+    this.deviceErrorMessage = '';
+
+    this.devicesService
+      .getAllDevices()
+      .pipe(
+        catchError((error) => {
+          console.error(' Error al cargar dispositivos:', error);
+          this.deviceError = true;
+          this.deviceErrorMessage = this.extractErrorMessage(
+            error,
+            'dispositivos',
+          );
+          this.isRetrying = false;
+          return of([] as Device[]);
+        }),
+      )
+      .subscribe((devices) => {
+        if (devices.length > 0) {
+          this.calculateDeviceStats(devices);
+          this.recentDevices = this.getRecentDevices(devices, 5);
+          this.devicesByBrand = this.getDevicesByBrand(devices);
+        } else {
+          // Si no hay datos y no hay error, resetear
+          if (!this.deviceError) {
+            this.resetDeviceStats();
+            this.recentDevices = [];
+            this.devicesByBrand = [];
+          }
+        }
+        this.isRetrying = false;
+      });
+  }
+
+  /**
+   * Reintentar solo órdenes en caso de error,
+   * permitiendo al usuario intentar recuperar los datos de órdenes sin afectar la sección de dispositivos,
+   * y viceversa
+   * @returns void
+   */
+  retryOrders(): void {
+    this.isRetrying = true;
+    this.orderError = false;
+    this.orderErrorMessage = '';
+
+    this.ordersService
+      .getAllOrders()
+      .pipe(
+        catchError((error) => {
+          console.error(' Error al cargar órdenes:', error);
+          this.orderError = true;
+          this.orderErrorMessage = this.extractErrorMessage(error, 'órdenes');
+          this.isRetrying = false;
+          return of([] as Order[]);
+        }),
+      )
+      .subscribe((orders) => {
+        if (orders.length > 0) {
+          this.calculateOrderStats(orders);
+          this.recentOrders = this.getRecentOrders(orders, 5);
+          this.updateAlerts();
+        } else {
+          if (!this.orderError) {
+            this.resetOrderStats();
+            this.recentOrders = [];
+            this.alerts = [];
+          }
+        }
+        this.isRetrying = false;
+      });
+  }
+
+  /**
+   * Resetear solo estadísticas de dispositivos
+   * @returns void
+   */
+  private resetDeviceStats(): void {
+    this.stats.totalDevices = 0;
+    this.stats.goodCondition = 0;
+    this.stats.occupied = 0;
+    this.stats.needsRepair = 0;
+    this.stats.fair = 0;
+  }
+
+  /**
+   * Resetear solo estadísticas de órdenes
+   * @returns void
+   */
+  private resetOrderStats(): void {
+    this.stats.totalOrders = 0;
+    this.stats.activeOrders = 0;
+    this.stats.createdOrders = 0;
+    this.stats.inProgressOrders = 0;
+    this.stats.despatchedOrders = 0;
+    this.stats.finishedOrders = 0;
+    this.stats.totalDevicesInOrders = 0;
+    this.stats.averageItemsPerOrder = 0;
   }
 
   /**

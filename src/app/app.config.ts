@@ -27,7 +27,7 @@ export const appConfig: ApplicationConfig = {
     ThemeService,
     provideAnimations(),
     provideHttpClient(
-      withInterceptors([authInterceptor, errorInterceptor, loadingInterceptor]),
+      withInterceptors([loadingInterceptor, authInterceptor, errorInterceptor ]),
     ),
     provideLottieOptions({ player: playerFactory }),
   ],

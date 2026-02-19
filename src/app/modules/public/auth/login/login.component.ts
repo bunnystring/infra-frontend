@@ -20,9 +20,11 @@ import {
   catchError,
   of,
   tap,
-  switchMap,
   filter,
   Observable,
+  exhaustMap,
+  timeout,
+  retry
 } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
 import { AuthResponse } from '../models/auth.model';
@@ -62,7 +64,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   loginForm!: FormGroup;
 
   // Estados del componente
-  loading = false;
+  protected loading = false;
   submitted = false;
   error = '';
   showPassword = false;
@@ -146,7 +148,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       .pipe(
         filter(() => this.validateForm()),
         tap(() => this.startLoading()),
-        switchMap(() => this.performLogin()),
+        exhaustMap(() => this.performLogin()),
         filter((response) => this.isSuccessfulResponse(response)),
         takeUntil(this.destroy$),
       )
@@ -185,6 +187,7 @@ export class LoginComponent implements OnInit, OnDestroy {
    */
   private startLoading(): void {
     this.loading = true;
+    this.loginForm.disable();
   }
 
   /**
@@ -194,6 +197,7 @@ export class LoginComponent implements OnInit, OnDestroy {
    */
   private stopLoading(): void {
     this.loading = false;
+    this.loginForm.enable();
   }
 
   /**
@@ -227,10 +231,21 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   /**
    * Realiza la petición de login al backend
-   * @returns Observable con la respuesta del login o null si hay error
+   *
+   * Incluye timeout de 30 segundos, hasta 2 reintentos automáticos,
+   * manejo de errores y limpieza del estado de loading.
+   *
+   * @returns Observable con la respuesta del login (AuthResponse) si es exitoso,
+   *          o null si ocurre algún error
    */
   private performLogin(): Observable<AuthResponse | null> {
     return this.authService.login(this.loginForm.value).pipe(
+      timeout(30000),
+      retry({
+        count: 2,
+        delay: 1000,
+        resetOnSuccess: true,
+      }),
       catchError((error) => this.handleLoginError(error)),
       finalize(() => this.stopLoading()),
     );

@@ -4,6 +4,15 @@ import { PrivateLayoutComponent } from './layouts/private/private-layout/private
 import { authGuard } from './core/guards/auth.guards';
 import { publicAuthGuard } from './core/guards/public-auth.guard';
 
+/**
+ * Rutas principales de la aplicación
+ * Define la estructura de navegación global, incluyendo rutas públicas y privadas
+ * - Las rutas públicas están protegidas por el guard `publicAuthGuard` para evitar acceso de usuarios autenticados
+ * - Las rutas privadas están protegidas por el guard `authGuard` para asegurar que solo usuarios autenticados puedan acceder
+ * - Se utiliza lazy loading para cargar los módulos de forma eficiente
+ * @since 2026-02-19
+ * @author Bunnystring
+ */
 export const routes: Routes = [
 
   // Redirecciones por defecto
@@ -49,11 +58,12 @@ export const routes: Routes = [
         loadChildren: () => import('./modules/private/devices/devices.routes').then(m => m.DEVICES_ROUTES),
         data: { breadcrumb: 'Devices' }
       },
-      /*{
+      {
         path: 'orders',
         loadChildren: () => import('./modules/private/orders/orders.routes').then(m => m.ORDERS_ROUTES),
         data: { breadcrumb: 'Orders' }
-      },
+      }
+      /*
       {
         path: 'employees',
         loadChildren: () => import('./modules/private/employees/employees.routes').then(m => m.EMPLOYEES_ROUTES),

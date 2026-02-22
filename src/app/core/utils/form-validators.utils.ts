@@ -446,3 +446,21 @@ export const noSpecialCharsValidator = (): ValidatorFn => {
     return !validPattern.test(value) ? { specialChars: true } : null;
   };
 };
+
+/**
+ * Validator para archivos Excel (.xls, .xlsx)
+ * Verifica el tipo MIME y la extensión del archivo
+ * @param file - Archivo a validar
+ * @returns boolean - true si el archivo es un Excel válido, false en caso contrario
+ */
+export function isXlsxFile(file: File): boolean {
+  // Accepts .xls, .xlsx mime-types and extension
+  const xlsxMimeTypes = [
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.ms-excel'
+  ];
+  const extensionPattern = /\.xlsx?$/i;
+  return (
+    (file && (xlsxMimeTypes.includes(file.type) || extensionPattern.test(file.name)))
+  );
+}

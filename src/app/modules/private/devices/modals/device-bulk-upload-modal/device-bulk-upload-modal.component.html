@@ -1,0 +1,79 @@
+<!-- Fondo modal -->
+<div class="modal modal-open bg-black/30 fixed inset-0 flex items-center justify-center z-50">
+  <div class="modal-box max-w-md p-6 shadow-xl border border-blue-100 rounded-2xl relative bg-white">
+    <!-- Header -->
+    <div class="flex items-center gap-3 mb-3">
+      <svg class="h-8 w-8 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M8 19h8M12 4v15" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <h2 class="text-2xl font-extrabold">Carga masiva de dispositivos</h2>
+    </div>
+    <div class="text-base-content/70 mb-4 flex items-center gap-2">
+      <svg class="h-5 w-5 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+      </svg>
+      Selecciona un archivo .xlsx o .xls para cargar varios dispositivos a la vez
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="uploadDevices()" class="space-y-3">
+      <!-- Input de archivo -->
+      <div class="flex items-center gap-2 mb-3">
+        <svg class="h-6 w-6 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v6a8 8 0 008 8 8 8 0 008-8V4" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 12v8m0 0l-4-4m4 4l4-4"/>
+        </svg>
+        <input type="file"
+               class="file-input file-input-bordered w-full"
+               (change)="onFileSelect($event)"
+               [disabled]="loading"
+               accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"/>
+      </div>
+      <!-- Nombre archivo -->
+      <div *ngIf="form.get('file')?.value" class="text-blue-700 font-mono text-sm">
+        Archivo seleccionado: <b>{{ form.get('file')?.value.name }}</b>
+      </div>
+      <!-- Errores de validación -->
+      <div *ngIf="fileErrorMsg" class="alert alert-error flex gap-2 mt-2">
+        <svg class="h-5 w-5 text-error" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="12" y1="8" x2="12" y2="12" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="12" y1="16" x2="12" y2="16" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>{{ fileErrorMsg }}</span>
+      </div>
+      <!-- Error de backend -->
+      <div *ngIf="formError" class="alert alert-error flex gap-2 mt-2">
+        <svg class="h-5 w-5 text-error" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="12" y1="8" x2="12" y2="12" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="12" y1="16" x2="12" y2="16" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>{{ formError }}</span>
+      </div>
+      <!-- Loader -->
+      <div *ngIf="loading" class="flex justify-center items-center mt-2">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+      <!-- Botones -->
+      <div class="modal-action flex gap-3 justify-end mt-6">
+        <button class="btn btn-primary btn-lg gap-2"
+                [disabled]="form.invalid || loading">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+          </svg>
+          Cargar
+        </button>
+        <button class="btn btn-ghost btn-lg gap-2"
+                type="button"
+                [disabled]="loading"
+                (click)="closeModal()">
+          <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

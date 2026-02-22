@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import {Observable} from 'rxjs';
+import {Observable, finalize} from 'rxjs';
 import { ApiService } from '../../../../core/services/api.service';
-import { CreateDeviceRq, Device, DeviceStatus, RestoreDevicesRq, UpdateDevicesStateRq } from '../models/device.model';
+import { CreateDeviceRq, Device, DeviceAssignment, DeviceStatus, RestoreDevicesRq, UpdateDevicesStateRq } from '../models/device.model';
+import { LoadingService } from '../../../../core/services/loading.service';
 
 
 /**
@@ -14,6 +15,8 @@ import { CreateDeviceRq, Device, DeviceStatus, RestoreDevicesRq, UpdateDevicesSt
   providedIn: 'root'
 })
 export class DevicesService {
+
+  private loading = inject(LoadingService);
 
   // Injected services
   private apiService = inject(ApiService);
@@ -38,7 +41,7 @@ export class DevicesService {
    * Obtiene un dispositivo por su ID
    * @param id ID del dispositivo
    */
-  getDeviceById(id: number): Observable<Device> {
+  getDeviceById(id: string): Observable<Device> {
     return this.apiService.get<Device>(`/devices/${id}`);
   }
 
@@ -46,8 +49,11 @@ export class DevicesService {
    * Obtiene todos los dispositivos
    */
   getAllDevices(): Observable<Device[]> {
-    return this.apiService.get<Device[]>('/devices');
-  }
+  this.loading.show();
+  return this.apiService.get<Device[]>('/devices').pipe(
+    finalize(() => this.loading.hide())
+  );
+}
 
   /**
    * Obtiene dispositivos por su estado
@@ -121,6 +127,26 @@ export class DevicesService {
    * @param formData FormData que contiene el archivo
    */
   uploadDevicesArchive(formData: FormData): Observable<Device[]> {
+    return this.apiService.postFormData<Device[]>('/devices/batch/upload', formData);
+  }
+
+  /**
+   * Obtiene el historial de asignaciones de un dispositivo por su ID
+   * @param deviceId
+   * @returns Observable con el historial de asignaciones del dispositivo
+   */
+  getDeviceAssignmentHistory(deviceId: string): Observable<any[]> {
+    return this.apiService.get<DeviceAssignment[]>(`/devices-assignments/${deviceId}/history`);
+  }
+
+  /**
+   * Carga masiva de dispositivos a través de un archivo
+   * @param file Archivo que contiene los dispositivos a cargar
+   * @returns Observable con los dispositivos cargados
+   */
+  uploadBulkDevices(file: File): Observable<Device[]> {
+    const formData = new FormData();
+    formData.append('file', file);
     return this.apiService.postFormData<Device[]>('/devices/batch/upload', formData);
   }
 }

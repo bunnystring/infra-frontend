@@ -1,6 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { Order, orderStates } from '../orders/models/Orders';
 import { DevicesService } from '../devices/services/devices.service';
 import { AuthService } from '../../../core/services/auth.service';
@@ -136,7 +135,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.deviceErrorMessage = '';
     this.orderError = false;
     this.orderErrorMessage = '';
-
     forkJoin({
       devices: this.devicesService.getAllDevices().pipe(
         catchError((error) => {

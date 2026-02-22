@@ -98,13 +98,15 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Inicialización del formulario de login con validaciones
+   * Limpieza de recursos al destruir el componente
+   * Se asegura de completar los Subjects para evitar memory leaks y cancelar cualquier suscripción activa
    * @returns void
    */
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
+
   /**
    * Inicializar formulario con validaciones para email y password
    * @returns void

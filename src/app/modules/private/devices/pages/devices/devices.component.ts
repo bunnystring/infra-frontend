@@ -63,7 +63,9 @@ export class DevicesComponent implements OnInit, OnDestroy {
   // Estado de carga y error
   formLoading = false;
   submitted = false;
-  error = '';
+  deviceErrorMessage = '';
+  isRetrying = false;
+  deviceError = false;
 
   // Filtros como BehaviorSubject
   search$ = new BehaviorSubject<string>('');
@@ -168,6 +170,8 @@ export class DevicesComponent implements OnInit, OnDestroy {
    * @returns void
    */
   loadDevices(): void {
+    this.deviceErrorMessage = '';
+    this.deviceError = false;
     this.loading = true;
     this.devicesService
       .getAllDevices()
@@ -181,10 +185,18 @@ export class DevicesComponent implements OnInit, OnDestroy {
           toast.error('Error al obtener dispositivos', {
             description: error.message || '',
           });
+          this.deviceError = true;
+          this.deviceErrorMessage = error.message || 'Error al cargar dispositivos';
           this.devices$.next([]);
           this.loading = false;
+          this.isRetrying = false;
         },
       });
+  }
+
+  retryLoadData(): void {
+    this.isRetrying = true;
+    this.loadDevices();
   }
 
   /**
@@ -406,7 +418,7 @@ export class DevicesComponent implements OnInit, OnDestroy {
    * @returns void
    */
   clearError(): void {
-    this.error = '';
+    this.deviceErrorMessage = '';
   }
 
   /** Limpia el estado del formulario
@@ -415,7 +427,6 @@ export class DevicesComponent implements OnInit, OnDestroy {
   clearFormState(): void {
     this.formLoading = false;
     this.submitted = false;
-    this.error = '';
     this.deviceForm.enable();
   }
 
@@ -468,5 +479,14 @@ export class DevicesComponent implements OnInit, OnDestroy {
     toast.success(`${uploadedDevices.length} dispositivos cargados exitosamente`);
     this.loadDevices();
     this.closeBulkUploadModal();
+  }
+
+  /**
+   * Refrescar datos del dashboard después de una acción que pueda haber cambiado el estado de los dispositivos u órdenes
+   * @returns
+   * void
+   */
+  refreshData(): void {
+    this.loadDevices();
   }
 }

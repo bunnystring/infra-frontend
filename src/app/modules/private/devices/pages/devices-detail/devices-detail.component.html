@@ -1,14 +1,16 @@
+<div *ngIf="loading$ | async" class="toast toast-top toast-center z-50">
+  <div class="alert alert-info gap-2">
+    <span class="loading loading-spinner loading-sm"></span>
+    <span>Actualizando datos...</span>
+  </div>
+</div>
+
 <button class="btn btn-outline btn-primary mb-6 flex items-center gap-2" (click)="goBack()">
   <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
     <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
   </svg>
   Volver a dispositivos
 </button>
-
-<!-- LOADER GLOBAL -->
-<div *ngIf="loading" class="flex justify-center items-center h-80">
-  <span class="loading loading-spinner loading-lg text-blue-400"></span>
-</div>
 
 <!-- ERROR -->
 <div *ngIf="error" class="alert alert-error mt-8 mx-auto w-fit text-lg shadow-lg">
@@ -20,7 +22,7 @@
 
 <!-- DETALLE DEL DISPOSITIVO -->
 <div *ngIf="device$ | async as device"
-  class="mx-auto max-w-2xl bg-white border border-blue-200 rounded-2xl shadow-xl p-8 mt-10">
+  class="mx-auto max-w-4xl bg-white border border-blue-200 rounded-2xl shadow-xl p-8 mt-10">
   <div class="flex items-center gap-4 mb-5">
     <svg class="h-12 w-12 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round"
@@ -52,13 +54,26 @@
 </div>
 
 <!-- HISTORIAL DE ASIGNACIONES -->
-<div class="max-w-2xl mx-auto bg-white border border-blue-100 rounded-2xl shadow-lg p-6 mt-10 mb-16">
-  <h3 class="text-2xl font-semibold mb-4 flex items-center gap-3 text-blue-600">
+<div class="max-w-4xl mx-auto bg-white border border-blue-100 rounded-2xl shadow-lg p-6 mt-10 mb-16">
+  <div class="flex justify-between items-center mb-4">
+      <h3 class="text-2xl font-semibold mb-4 flex items-center gap-3 text-blue-600">
     <svg class="h-6 w-6 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
     </svg>
     Historial de asignaciones
   </h3>
+  <button class="btn btn-ghost gap-2" (click)="refreshData()" [disabled]="loading$ | async">
+    <span *ngIf="loading$ | async" class="loading loading-spinner loading-xs"></span>
+    <svg *ngIf="!(loading$ | async)" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+      stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+    </svg>
+    <span class="hidden sm:inline">
+      {{ (loading$ | async) ? 'Actualizando...' : 'Actualizar' }}
+    </span>
+  </button>
+  </div>
   <ng-container *ngIf="deviceAssignments$ | async as deviceAssignments">
     <table *ngIf="deviceAssignments.length > 0" class="table w-full rounded-xl shadow-md overflow-hidden text-blue-900">
       <thead>
@@ -85,10 +100,10 @@
             <span class="badge badge-info">{{ a.deviceStatus }}</span>
           </td>
           <td>
-            <span class="text-green-700">{{ a.assignedAt | date:'short' }}</span>
+            <span class="text-green-700">{{ a.assignedAt | date }}</span>
           </td>
           <td>
-            <span class="text-amber-700" *ngIf="a.releasedAt">{{ a.releasedAt | date:'short' }}</span>
+            <span class="text-amber-700" *ngIf="a.releasedAt">{{ a.releasedAt | date }}</span>
             <span *ngIf="!a.releasedAt" class="text-gray-400">Sin liberar</span>
           </td>
         </tr>

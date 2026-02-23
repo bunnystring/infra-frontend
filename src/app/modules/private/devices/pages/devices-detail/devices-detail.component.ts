@@ -18,6 +18,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { Location } from '@angular/common';
 import { OrdersService } from '../../../orders/services/orders.service';
+import { LoadingService } from '../../../../../core/services/loading.service';
 
 @Component({
   selector: 'app-devices-detail',
@@ -39,8 +40,13 @@ export class DevicesDetailComponent implements OnInit, OnDestroy {
   });
 
   // Estado de carga y error
-  loading = true;
+  loading = false;
   error = '';
+
+  // Observable para el estado de carga global, se puede usar para mostrar un spinner global mientras se cargan los dispositivos
+  get loading$() {
+    return this.loadingService.loading$;
+  }
 
   // Subject para manejar la destrucción del componente y evitar fugas de memoria
   private destroy$ = new Subject<void>();
@@ -51,8 +57,15 @@ export class DevicesDetailComponent implements OnInit, OnDestroy {
     private location: Location,
     private ordersService: OrdersService,
     private router: Router,
+    private loadingService: LoadingService,
   ) {}
 
+  /**
+   * Inicializa el componente
+   * Llama a initParams para configurar los observables del dispositivo y su historial de asignaciones basado en el ID del dispositivo obtenido de la ruta
+   * Maneja el estado de carga y errores durante la obtención de datos
+   * @returns void
+   */
   ngOnInit() {
     this.initParams();
   }
@@ -198,5 +211,14 @@ export class DevicesDetailComponent implements OnInit, OnDestroy {
   goDetailOrder(orderId: string): void {
     if (!orderId) return;
     this.router.navigate(['/app/orders/', orderId]);
+  }
+
+  /**
+   * Refresca los datos del dispositivo y su historial de asignaciones
+   * Vuelve a llamar a initParams para recargar la información desde el backend, útil después de realizar cambios en el dispositivo o sus asignaciones
+   * @returns void
+   */
+  refreshData(): void {
+    this.initParams();
   }
 }

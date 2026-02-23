@@ -1,11 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import {
-  FormBuilder,
-  FormGroup,
-  Validators,
-  FormsModule,
-} from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
   Subject,
@@ -15,7 +10,7 @@ import {
   combineLatest,
   startWith,
   map,
-  tap
+  tap,
 } from 'rxjs';
 import {
   Device,
@@ -54,14 +49,10 @@ export class DevicesComponent implements OnInit, OnDestroy {
   deviceToEdit: Device | null = null;
   deviceToDelete: Device | null = null;
 
-  // Formulario de dispositivo
-  deviceForm!: FormGroup;
-
   // Modo del formulario: 'create' o 'edit'
   formMode: 'create' | 'edit' = 'create';
 
   // Estado de carga y error
-  formLoading = false;
   submitted = false;
   deviceErrorMessage = '';
   isRetrying = false;
@@ -104,8 +95,7 @@ export class DevicesComponent implements OnInit, OnDestroy {
   DeviceStatusLabels = DeviceStatusLabels;
   DeviceStatusColors = DeviceStatusColors;
 
-  // Estado de carga general (puede ser usado para mostrar un spinner global mientras se cargan los dispositivos)
-  loading = false;
+  // Subject para manejar la destrucción del componente y evitar fugas de memoria
   private readonly destroy$ = new Subject<void>();
 
   // Stats locales
@@ -140,7 +130,6 @@ export class DevicesComponent implements OnInit, OnDestroy {
   constructor(
     private devicesService: DevicesService,
     private loadingService: LoadingService,
-    private formBuilder: FormBuilder,
     private router: Router,
   ) {}
 
@@ -150,7 +139,6 @@ export class DevicesComponent implements OnInit, OnDestroy {
    * @returns void
    */
   ngOnInit(): void {
-    this.initDeviceForm();
     this.loadDevices();
   }
 
@@ -172,23 +160,21 @@ export class DevicesComponent implements OnInit, OnDestroy {
   loadDevices(): void {
     this.deviceErrorMessage = '';
     this.deviceError = false;
-    this.loading = true;
     this.devicesService
       .getAllDevices()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (devices) => {
           this.devices$.next(devices);
-          this.loading = false;
         },
         error: (error) => {
           toast.error('Error al obtener dispositivos', {
             description: error.message || '',
           });
           this.deviceError = true;
-          this.deviceErrorMessage = error.message || 'Error al cargar dispositivos';
+          this.deviceErrorMessage =
+            error.message || 'Error al cargar dispositivos';
           this.devices$.next([]);
-          this.loading = false;
           this.isRetrying = false;
         },
       });
@@ -290,31 +276,15 @@ export class DevicesComponent implements OnInit, OnDestroy {
     );
   }
 
-  /**
-   * Inicializa el formulario de dispositivo con validaciones y valores predeterminados
-   * Se llama en ngOnInit para configurar el formulario al cargar el componente
-   * @returns void
-   */
-  private initDeviceForm(): void {
-    this.deviceForm = this.formBuilder.group({
-      name: ['', [Validators.required]],
-      brand: ['', [Validators.required]],
-      barcode: ['', [Validators.required, Validators.minLength(6)]],
-      status: [DeviceStatus.GOOD_CONDITION, [Validators.required]],
-    });
-  }
-
   /** Abre el modal para crear un nuevo dispositivo
    * Configura el modo del formulario a 'create', resetea el formulario y muestra el modal de creación
    * @returns void
    */
   openCreateModal(): void {
     this.formMode = 'create';
-    this.deviceForm.reset({ status: DeviceStatus.GOOD_CONDITION });
     this.deviceToEdit = null;
     this.showCreateModal = true;
     this.showEditModal = false;
-    this.clearFormState();
   }
 
   /** Abre el modal para editar un dispositivo existente
@@ -325,15 +295,8 @@ export class DevicesComponent implements OnInit, OnDestroy {
   openEditModal(device: Device): void {
     this.formMode = 'edit';
     this.deviceToEdit = device;
-    this.deviceForm.patchValue({
-      name: device.name,
-      brand: device.brand,
-      barcode: device.barcode,
-      status: device.status,
-    });
     this.showEditModal = true;
     this.showCreateModal = false;
-    this.clearFormState();
   }
 
   /**
@@ -379,7 +342,6 @@ export class DevicesComponent implements OnInit, OnDestroy {
     this.showDeleteModal = false;
     this.deviceToEdit = null;
     this.deviceToDelete = null;
-    this.clearFormState();
   }
 
   /**
@@ -396,47 +358,11 @@ export class DevicesComponent implements OnInit, OnDestroy {
     this.closeModals();
   }
 
-  /** Inicia el estado de carga del formulario y deshabilita los campos para evitar cambios durante la operación
-   * Detiene el estado de carga y habilita los campos del formulario después de la operación
-   * Limpia el mensaje de error para que no persista en operaciones futuras
-   * @returns void
-   */
-  startFormLoading(): void {
-    this.formLoading = true;
-    this.deviceForm.disable();
-  }
-
-  /** Detiene el estado de carga del formulario y habilita los campos para permitir cambios después de la operación
-   * @returns void
-   */
-  stopFormLoading(): void {
-    this.formLoading = false;
-    this.deviceForm.enable();
-  }
-
   /** Limpia el mensaje de error
    * @returns void
    */
   clearError(): void {
     this.deviceErrorMessage = '';
-  }
-
-  /** Limpia el estado del formulario
-   * @returns void
-   */
-  clearFormState(): void {
-    this.formLoading = false;
-    this.submitted = false;
-    this.deviceForm.enable();
-  }
-
-  /**
-   * Getter para acceder fácilmente a los controles del formulario en el template
-   * Permite usar f.name, f.brand, etc. en lugar de deviceForm.controls.name, etc.
-   * @returns { [key: string]: AbstractControl } Controles del formulario
-   */
-  get f() {
-    return this.deviceForm.controls;
   }
 
   /** Devuelve la clase CSS para el badge de estado según el estado del dispositivo
@@ -467,16 +393,33 @@ export class DevicesComponent implements OnInit, OnDestroy {
     return Math.ceil(this.totalItems / this.pageSize) || 1;
   }
 
+  /**
+   * Abre el modal de carga masiva de dispositivos
+   * Configura el flag para mostrar el modal de carga masiva
+   * @returns void
+   */
   openBulkUploadModal() {
     this.showBulkUploadModal = true;
   }
 
+  /**
+   * Cierra el modal de carga masiva de dispositivos
+   * Configura el flag para ocultar el modal de carga masiva
+   * @returns void
+   */
   closeBulkUploadModal() {
     this.showBulkUploadModal = false;
   }
 
+  /**
+   * Maneja el resultado exitoso de la carga masiva de dispositivos
+   * Muestra un toast con el número de dispositivos cargados, recarga la lista de dispositivos y cierra el modal de carga masiva
+   * @param uploadedDevices Dispositivos que fueron cargados exitosamente
+   */
   onBulkUploadSuccess(uploadedDevices: Device[]) {
-    toast.success(`${uploadedDevices.length} dispositivos cargados exitosamente`);
+    toast.success(
+      `${uploadedDevices.length} dispositivos cargados exitosamente`,
+    );
     this.loadDevices();
     this.closeBulkUploadModal();
   }

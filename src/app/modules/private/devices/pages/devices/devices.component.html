@@ -40,7 +40,7 @@
 
   <!-- Stats resumen con iconos SVG -->
   <ng-container *ngIf="filteredStats$ | async as stats">
-    <div *ngIf="!deviceError && stats.totalDevices > 0" class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+    <div *ngIf="!deviceError" class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
       <div class="stat shadow-md rounded-lg">
         <div class="stat-figure text-primary">
           <svg class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -121,7 +121,7 @@
 
 
     <!-- FILTROS -->
-    <div *ngIf="!deviceError && stats.totalDevices > 0" class="flex flex-wrap gap-4 items-end mb-8 justify-start">
+    <div *ngIf="!deviceError" class="flex flex-wrap gap-4 items-end mb-8 justify-start">
       <div class="relative w-full sm:w-60">
         <input class="input input-bordered w-full pl-12 bg-white/90 shadow focus:ring-2 focus:ring-blue-400"
           placeholder="Buscar por nombre, marca o código..." [value]="search"
@@ -180,13 +180,9 @@
 
     <!-- TABLA principal de dispositivos -->
     <div *ngIf="!deviceError && stats.totalDevices > 0" class="relative">
-      <div *ngIf="loading" class="absolute inset-0 flex justify-center items-center bg-white/60 z-20">
-        <span class="loading loading-spinner loading-lg text-primary"></span>
-      </div>
-
       <ng-container *ngIf="pagedDevices$ | async as pagedDevices">
         <table class="table w-full table-zebra rounded-xl shadow-lg overflow-hidden"
-          *ngIf="!loading && pagedDevices.length > 0">
+          *ngIf="pagedDevices.length > 0">
           <thead class="bg-blue-100">
             <tr>
               <th>
@@ -265,7 +261,7 @@
         </table>
 
         <!-- Estado vacío -->
-        <div *ngIf="!loading && pagedDevices.length === 0" class="py-12 text-center opacity-80">
+        <div *ngIf="pagedDevices.length === 0" class="py-12 text-center opacity-80">
           <svg class="mx-auto h-20 w-20 text-blue-300" fill="none" stroke="currentColor" stroke-width="2"
             viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round"

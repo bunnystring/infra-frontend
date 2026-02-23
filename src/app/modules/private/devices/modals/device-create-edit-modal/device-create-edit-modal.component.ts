@@ -8,7 +8,7 @@ import {
   SimpleChanges,
   OnDestroy,
   ChangeDetectionStrategy,
-  ChangeDetectorRef
+  ChangeDetectorRef,
 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import {
@@ -23,7 +23,6 @@ import { Subject, takeUntil, finalize } from 'rxjs';
 import { DevicesService } from '../../services/devices.service';
 import { noWhitespaceValidator } from '../../../../../core/utils/form-validators.utils';
 import { toast } from 'ngx-sonner';
-
 
 @Component({
   selector: 'app-device-create-edit-modal',
@@ -198,5 +197,23 @@ export class DeviceCreateEditModalComponent
       current.barcode !== this.device.barcode ||
       current.status !== this.device.status
     );
+  }
+
+  /** Inicia el estado de carga del formulario y deshabilita los campos para evitar cambios durante la operación
+   * Detiene el estado de carga y habilita los campos del formulario después de la operación
+   * Limpia el mensaje de error para que no persista en operaciones futuras
+   * @returns void
+   */
+  startFormLoading(): void {
+    this.formLoading = true;
+    this.deviceForm.disable();
+  }
+
+  /** Detiene el estado de carga del formulario y habilita los campos para permitir cambios después de la operación
+   * @returns void
+   */
+  stopFormLoading(): void {
+    this.formLoading = false;
+    this.deviceForm.enable();
   }
 }

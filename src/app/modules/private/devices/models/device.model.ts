@@ -364,6 +364,6 @@ export interface DeviceAssignment {
 
 // Request para actualizar el estado de múltiples dispositivos
 export interface DeviceUpdateBatchRq {
-  devicesIds: string[];
+  deviceIds: string[];
   state: DeviceStatus;
 }

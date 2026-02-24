@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import {Observable, finalize} from 'rxjs';
 import { ApiService } from '../../../../core/services/api.service';
-import { CreateDeviceRq, Device, DeviceAssignment, DeviceStatus, RestoreDevicesRq, UpdateDevicesStateRq } from '../models/device.model';
+import { CreateDeviceRq, Device, DeviceAssignment, DeviceStatus, DeviceUpdateBatchRq, RestoreDevicesRq, UpdateDevicesStateRq } from '../models/device.model';
 import { LoadingService } from '../../../../core/services/loading.service';
 
 
@@ -148,5 +148,23 @@ export class DevicesService {
     const formData = new FormData();
     formData.append('file', file);
     return this.apiService.postFormData<Device[]>('/devices/batch/upload', formData);
+  }
+
+  /**
+   * Obtiene el estado de asignación activa de un dispositivo por su ID
+   * @param deviceId ID del dispositivo a verificar
+   * @returns Observable con un booleano que indica si el dispositivo tiene una asignación activa
+    */
+  hasActiveAssignment(deviceId: string): Observable<boolean> {
+    return this.apiService.get<boolean>(`/devices-assignments/${deviceId}/active`);
+  }
+
+  /**
+   * Actualiza el estado de múltiples dispositivos por su IDs
+   * @param request Objeto que contiene los IDs de los dispositivos a actualizar y el nuevo estado
+   * @returns Observable con los dispositivos actualizados
+   */
+  updateBatchDevicesState(request: DeviceUpdateBatchRq): Observable<any> {
+    return this.apiService.put<any>('/devices/update-batch', request);
   }
 }

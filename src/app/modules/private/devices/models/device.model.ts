@@ -19,6 +19,8 @@ export interface Device {
   status: DeviceStatus;
   createdAt: string;
   updatedAt: string | null;
+  assignmentActive?: boolean;
+  selected?: boolean;
 }
 
 /** Estados posibles de un dispositivo
@@ -358,4 +360,10 @@ export interface DeviceAssignment {
   deviceStatus: DeviceStatus;
   assignedAt: string;
   releasedAt?: string;
+}
+
+// Request para actualizar el estado de múltiples dispositivos
+export interface DeviceUpdateBatchRq {
+  devicesIds: string[];
+  state: DeviceStatus;
 }

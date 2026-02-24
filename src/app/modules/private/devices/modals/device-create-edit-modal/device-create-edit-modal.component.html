@@ -9,7 +9,8 @@
     </div>
     <div class="px-8 py-10">
       <h3 class="font-bold text-3xl mb-7 text-blue-700 tracking-tight flex items-center gap-3">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-blue-400" fill="none" viewBox="0 0 24 24"
+          stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
         </svg>
@@ -22,26 +23,28 @@
           <div class="relative">
             <input
               class="input input-bordered w-full pr-12 text-lg transition-all focus:ring-2 focus:ring-blue-400 bg-white/70"
-              formControlName="name"
-              placeholder="Nombre completo"
-              [class.input-error]="submitted && deviceForm.get('name')?.invalid"
-              autocomplete="off"
-            />
+              formControlName="name" placeholder="Nombre completo"
+              [class.input-error]="submitted && deviceForm.get('name')?.invalid" autocomplete="off" />
             <svg *ngIf="deviceForm.get('name')?.valid && deviceForm.get('name')?.touched"
-                 class="h-5 w-5 text-success absolute right-5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+              class="h-5 w-5 text-success absolute right-5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor"
+              stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
             </svg>
             <svg *ngIf="submitted && deviceForm.get('name')?.invalid"
-                 class="h-5 w-5 text-error absolute right-5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+              class="h-5 w-5 text-error absolute right-5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor"
+              stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </div>
           <div class="text-xs text-error mt-2 transition-all"
-            *ngIf="submitted && deviceForm.get('name')?.hasError('invalidFullName')">¡Escribe nombre y apellido válidos!</div>
+            *ngIf="submitted && deviceForm.get('name')?.hasError('invalidFullName')">¡Escribe nombre y apellido válidos!
+          </div>
           <div class="text-xs text-error mt-2 transition-all"
-            *ngIf="submitted && deviceForm.get('name')?.hasError('invalidName')">No se permiten números en el nombre.</div>
+            *ngIf="submitted && deviceForm.get('name')?.hasError('invalidName')">No se permiten números en el nombre.
+          </div>
           <div class="text-xs text-error mt-2 transition-all"
-            *ngIf="submitted && deviceForm.get('name')?.hasError('whitespace')">No debe contener solo espacios en blanco.</div>
+            *ngIf="submitted && deviceForm.get('name')?.hasError('whitespace')">No debe contener solo espacios en
+            blanco.</div>
           <div class="text-xs text-error mt-2 transition-all"
             *ngIf="submitted && deviceForm.get('name')?.hasError('required')">Campo obligatorio.</div>
         </div>
@@ -51,24 +54,24 @@
           <div class="relative">
             <input
               class="input input-bordered w-full pr-12 text-lg transition-all focus:ring-2 focus:ring-blue-400 bg-white/70"
-              formControlName="brand"
-              placeholder="Marca"
-              [class.input-error]="submitted && deviceForm.get('brand')?.invalid"
-              autocomplete="off"
-            />
+              formControlName="brand" placeholder="Marca"
+              [class.input-error]="submitted && deviceForm.get('brand')?.invalid" autocomplete="off" />
             <svg *ngIf="deviceForm.get('brand')?.valid && deviceForm.get('brand')?.touched"
-                 class="h-5 w-5 text-success absolute right-5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+              class="h-5 w-5 text-success absolute right-5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor"
+              stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
             </svg>
             <svg *ngIf="submitted && deviceForm.get('brand')?.invalid"
-                 class="h-5 w-5 text-error absolute right-5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+              class="h-5 w-5 text-error absolute right-5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor"
+              stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </div>
           <div class="text-xs text-error mt-2 transition-all"
             *ngIf="submitted && deviceForm.get('brand')?.hasError('required')">Campo obligatorio.</div>
           <div class="text-xs text-error mt-2 transition-all"
-            *ngIf="submitted && deviceForm.get('brand')?.hasError('whitespace')">No debe contener solo espacios en blanco.</div>
+            *ngIf="submitted && deviceForm.get('brand')?.hasError('whitespace')">No debe contener solo espacios en
+            blanco.</div>
         </div>
         <!-- Código de barras -->
         <div>
@@ -76,18 +79,17 @@
           <div class="relative">
             <input
               class="input input-bordered w-full pr-12 text-lg transition-all focus:ring-2 focus:ring-blue-400 bg-white/70"
-              formControlName="barcode"
-              placeholder="Ej: 123456"
-              [class.input-error]="submitted && deviceForm.get('barcode')?.invalid"
-              autocomplete="off"
-            />
+              formControlName="barcode" placeholder="Ej: 123456"
+              [class.input-error]="submitted && deviceForm.get('barcode')?.invalid" autocomplete="off" />
             <svg *ngIf="deviceForm.get('barcode')?.valid && deviceForm.get('barcode')?.touched"
-                 class="h-5 w-5 text-success absolute right-5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+              class="h-5 w-5 text-success absolute right-5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor"
+              stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
             </svg>
             <svg *ngIf="submitted && deviceForm.get('barcode')?.invalid"
-                 class="h-5 w-5 text-error absolute right-5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+              class="h-5 w-5 text-error absolute right-5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor"
+              stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </div>
           <div class="text-xs text-error mt-2 transition-all"
@@ -95,7 +97,8 @@
           <div class="text-xs text-error mt-2 transition-all"
             *ngIf="submitted && deviceForm.get('barcode')?.hasError('minlength')">Mínimo 6 caracteres.</div>
           <div class="text-xs text-error mt-2 transition-all"
-            *ngIf="submitted && deviceForm.get('barcode')?.hasError('whitespace')">No debe contener solo espacios en blanco.</div>
+            *ngIf="submitted && deviceForm.get('barcode')?.hasError('whitespace')">No debe contener solo espacios en
+            blanco.</div>
         </div>
         <!-- Estado -->
         <div>
@@ -106,28 +109,33 @@
             </option>
           </select>
         </div>
-
+        <div *ngIf="device?.assignmentActive"
+          class="bg-blue-100 border border-blue-300 rounded px-3 py-2 mb-2 text-blue-800 text-sm">
+          <strong>Dispositivo asignado:</strong> No puedes editar el estado ni modificar datos mientras el dispositivo
+          esté asignado.
+        </div>
         <!-- Loader y error global -->
         <div *ngIf="formLoading" class="flex justify-center mt-6">
-            <span class="loading loading-spinner loading-lg"></span> {{formLoading}}
+          <span class="loading loading-spinner loading-lg"></span> {{formLoading}}
         </div>
         <div *ngIf="formError" class="text-error text-center mb-4 text-base font-semibold">{{ formError }}</div>
 
         <!-- Botones -->
-        <div class="modal-action flex justify-end gap-4 mt-8">
-          <button type="button" class="btn btn-ghost btn-lg" (click)="closeModal()">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        <div class="modal-action flex justify-center gap-4 mt-8">
+          <button type="button" class="btn btn-ghost btn-lg text-red-600 border-red-400" (click)="closeModal()">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
             Cancelar
           </button>
-          <button type="submit" class="btn btn-primary btn-lg shadow-lg"
-            [disabled]="formLoading || deviceForm.invalid">
+          <button *ngIf="!device?.assignmentActive" type="submit" class="btn btn-primary btn-lg shadow-lg" [disabled]="formLoading || deviceForm.invalid">
             <span *ngIf="formLoading" class="loading loading-spinner loading-xs mr-2"></span>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
             </svg>
-            {{ device ? 'Actualizar' : 'Crear' }}
+            {{ device ? 'Actualizar' : 'Guardar' }}
           </button>
         </div>
       </form>

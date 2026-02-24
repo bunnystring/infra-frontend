@@ -15,6 +15,8 @@ import {
   concatMap,
   of,
   forkJoin,
+  take,
+  exhaustMap,
 } from 'rxjs';
 import {
   Device,
@@ -22,6 +24,7 @@ import {
   DeviceStatusLabels,
   DeviceStatusColors,
   DeviceFormResult,
+  DeviceUpdateBatchRq,
 } from '../../models/device.model';
 import { toast } from 'ngx-sonner';
 import { DeviceCreateEditModalComponent } from '../../modals/device-create-edit-modal/device-create-edit-modal.component';
@@ -120,18 +123,23 @@ export class DevicesComponent implements OnInit, OnDestroy {
   get pagedDevices$(): Observable<Device[]> {
     return this.filteredDevices$.pipe(
       map((devices) =>
-        devices
-          .slice((this.page - 1) * this.pageSize, this.page * this.pageSize)
-          .map((device) => ({
-            ...device,
-            selected: device.selected ?? false,
-          })),
+        devices.slice(
+          (this.page - 1) * this.pageSize,
+          this.page * this.pageSize,
+        ),
       ),
     );
   }
 
+  // Lista de dispositivos filtrados para mostrar en la tabla, se actualiza automáticamente cuando cambian los dispositivos o los filtros
+  filteredDevices: Device[] = [];
+
   // Control para mostrar el modal de carga masiva
   showBulkUploadModal = false;
+
+  // Estado para la actualización masiva de estados
+  bulkStatus: DeviceStatus | null = null;
+  bulkMode = false;
 
   constructor(
     private devicesService: DevicesService,
@@ -195,11 +203,19 @@ export class DevicesComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (devicesWithAssignments) => {
-          this.devices$.next(devicesWithAssignments);
+          this.devices$.next(
+            devicesWithAssignments.map((d) => ({ ...d, selected: false })),
+          );
         },
       });
   }
 
+  /**
+   * Reintenta cargar los dispositivos después de un error
+   * Configura el estado de reintento para mostrar un spinner o mensaje de carga mientras se intenta cargar nuevamente
+   * Llama al método loadDevices para realizar la carga de dispositivos
+   * @returns void
+   */
   retryLoadData(): void {
     this.isRetrying = true;
     this.loadDevices();
@@ -223,7 +239,12 @@ export class DevicesComponent implements OnInit, OnDestroy {
           (filter === 'ALL' || d.status === filter),
       ),
     ),
-    tap((devices) => (this.totalItems = devices.length)),
+    tap(
+      (devices) => (
+        (this.totalItems = devices.length),
+        (this.filteredDevices = devices)
+      ),
+    ),
   );
 
   /**
@@ -294,6 +315,109 @@ export class DevicesComponent implements OnInit, OnDestroy {
       device.brand.toLowerCase().includes(lower) ||
       device.barcode.toLowerCase().includes(lower)
     );
+  }
+
+  /**
+   * Actualiza el estado de múltiples dispositivos seleccionados a través de la interfaz de usuario
+   * Obtiene los dispositivos seleccionados y el nuevo estado a aplicar, luego llama al servicio para actualizar el estado de esos dispositivos
+   * Muestra un toast de éxito o error según corresponda, y recarga la lista de dispositivos después de la actualización
+   * @returns void
+   */
+  updateDevicesStatus(): void {
+    this.pagedDevices$
+      .pipe(
+        take(1),
+        exhaustMap(() => {
+          // Obtener los ids seleccionables de los dispositivos filtrados
+          const selectedIds = this.filteredDevices
+            .filter((d) => d.selected)
+            .map((d) => d.id);
+
+          if (!this.bulkStatus || selectedIds.length === 0) {
+            return of(null);
+          }
+
+          // Construir el request para actualizar el estado de los dispositivos seleccionados
+          const request: DeviceUpdateBatchRq = {
+            deviceIds: selectedIds,
+            state: this.bulkStatus,
+          };
+
+          return this.devicesService.updateBatchDevicesState(request).pipe(
+            catchError((err) => {
+              toast.error('Error al actualizar estados', {
+                description: err.message,
+              });
+              return of(null);
+            }),
+          );
+        }),
+      )
+      .subscribe((result) => {
+        if (result) {
+          toast.success('Estados actualizados correctamente');
+          this.bulkStatus = null;
+          this.bulkMode = false;
+          this.filteredDevices.forEach((d) => (d.selected = false));
+          this.loadDevices();
+        }
+      });
+  }
+
+  /**
+   * Activa el modo de actualización masiva, mostrando opciones para seleccionar múltiples dispositivos y actualizar su estado en lote
+   * Configura el flag bulkMode para mostrar la interfaz de selección masiva en la tabla de dispositivos
+   * @returns void
+   */
+  activateBulkMode(): void {
+    this.bulkMode = true;
+  }
+
+  /**
+   * Cancela el modo de actualización masiva, ocultando las opciones de selección múltiple y restableciendo el estado relacionado con la selección masiva
+   * Configura el flag bulkMode para ocultar la interfaz de selección masiva en la tabla de dispositivos, y limpia cualquier selección realizada en los dispositivos filtrados
+   * @returns void
+   */
+  cancelBulkMode(): void {
+    this.bulkMode = false;
+    this.bulkStatus = null;
+    // Limpia selección en todos los filtrados:
+    this.filteredDevices.forEach((device) => (device.selected = false));
+  }
+
+  /**
+   * Verifica si todos los dispositivos filtrados que son seleccionables (no tienen asignación activa) están seleccionados
+   * @returns boolean Verdadero si todos los dispositivos filtrados están seleccionados, falso en caso contrario
+   */
+  allSelectedFiltered(): boolean {
+    return (
+      this.filteredDevices.length > 0 &&
+      this.filteredDevices
+        .filter((d) => d.assignmentActive)
+        .every((d) => d.selected)
+    );
+  }
+
+  /**
+   * Maneja el evento de cambio del checkbox "Seleccionar todos" para los dispositivos filtrados
+   * Actualiza la propiedad "selected" de cada dispositivo filtrado según el estado del checkbox, pero solo para aquellos dispositivos que no tienen una asignación activa (assignmentActive)
+   * Esto permite seleccionar o deseleccionar todos los dispositivos filtrados que son elegibles para selección masiva, sin afectar aquellos que están actualmente asignados
+   * @param event Evento de cambio del checkbox "Seleccionar todos"
+   * @returns void
+   */
+  toggleSelectAllFiltered(event: Event): void {
+    const checked = (event.target as HTMLInputElement).checked;
+    this.filteredDevices.forEach((device) => {
+      if (!device.assignmentActive) device.selected = checked;
+    });
+  }
+  
+  /**
+   * Cuenta el número de dispositivos seleccionados en la lista de dispositivos filtrados
+   * @returns number Número de dispositivos seleccionados en la lista de dispositivos filtrados
+   */
+  countSelectedDevices(): number {
+    return this.filteredDevices.filter((d) => d.selected).length;
   }
 
   /** Abre el modal para crear un nuevo dispositivo

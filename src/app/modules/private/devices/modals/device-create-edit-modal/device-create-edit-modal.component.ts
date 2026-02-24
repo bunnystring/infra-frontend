@@ -115,6 +115,12 @@ export class DeviceCreateEditModalComponent
         Validators.required,
       ],
     });
+    // Si el dispositivo está asignado, deshabilita el formulario para evitar cambios
+    if (this.device?.assignmentActive) {
+      this.deviceForm.disable();
+    } else {
+      this.deviceForm.enable();
+    }
     this.submitted = false;
     this.formError = '';
     this.formLoading = false;

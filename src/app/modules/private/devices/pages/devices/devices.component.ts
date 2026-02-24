@@ -11,6 +11,10 @@ import {
   startWith,
   map,
   tap,
+  catchError,
+  concatMap,
+  of,
+  forkJoin,
 } from 'rxjs';
 import {
   Device,
@@ -116,10 +120,12 @@ export class DevicesComponent implements OnInit, OnDestroy {
   get pagedDevices$(): Observable<Device[]> {
     return this.filteredDevices$.pipe(
       map((devices) =>
-        devices.slice(
-          (this.page - 1) * this.pageSize,
-          this.page * this.pageSize,
-        ),
+        devices
+          .slice((this.page - 1) * this.pageSize, this.page * this.pageSize)
+          .map((device) => ({
+            ...device,
+            selected: device.selected ?? false,
+          })),
       ),
     );
   }
@@ -162,13 +168,21 @@ export class DevicesComponent implements OnInit, OnDestroy {
     this.deviceError = false;
     this.devicesService
       .getAllDevices()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (devices) => {
-          this.devices$.next(devices);
-        },
-        error: (error) => {
-          toast.error('Error al obtener dispositivos', {
+      .pipe(
+        takeUntil(this.destroy$),
+        concatMap((devices) => {
+          if (!devices || devices.length === 0) {
+            return of([]);
+          }
+          const assignmentsChecks = devices.map((device) =>
+            this.devicesService
+              .hasActiveAssignment(device.id)
+              .pipe(map((active) => ({ ...device, assignmentActive: active }))),
+          );
+          return forkJoin(assignmentsChecks);
+        }),
+        catchError((error) => {
+          toast.error('Error al obtener dispositivos o asignaciones', {
             description: error.message || '',
           });
           this.deviceError = true;
@@ -176,6 +190,12 @@ export class DevicesComponent implements OnInit, OnDestroy {
             error.message || 'Error al cargar dispositivos';
           this.devices$.next([]);
           this.isRetrying = false;
+          return of([]);
+        }),
+      )
+      .subscribe({
+        next: (devicesWithAssignments) => {
+          this.devices$.next(devicesWithAssignments);
         },
       });
   }
@@ -431,5 +451,14 @@ export class DevicesComponent implements OnInit, OnDestroy {
    */
   refreshData(): void {
     this.loadDevices();
+  }
+
+  /**
+   * Devuelve una versión abreviada del texto, limitando a los primeros 8 caracteres
+   * @param texto Texto original
+   * @returns Texto abreviado con los primeros 8 caracteres
+   */
+  getTextoShort(texto: string): string {
+    return texto.substring(0, 15);
   }
 }

@@ -19,6 +19,7 @@ import { CommonModule } from '@angular/common';
 import { Location } from '@angular/common';
 import { OrdersService } from '../../../orders/services/orders.service';
 import { LoadingService } from '../../../../../core/services/loading.service';
+import { toast } from 'ngx-sonner';
 
 @Component({
   selector: 'app-devices-detail',
@@ -111,6 +112,7 @@ export class DevicesDetailComponent implements OnInit, OnDestroy {
     return forkJoin({
       device: this.devicesService.getDeviceById(deviceId).pipe(
         catchError((err) => {
+          toast.error('Error al cargar el dispositivo');
           this.error = err?.error?.message || 'Error al cargar dispositivo';
           return of(null);
         }),

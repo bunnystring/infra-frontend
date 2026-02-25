@@ -3,11 +3,33 @@ import { Location } from '@angular/common';
 import { OrdersService } from '../../services/orders.service';
 import { CommonModule } from '@angular/common';
 import { LoadingService } from '../../../../../core/services/loading.service';
-import { Observable, tap, exhaustMap, catchError, takeUntil, switchMap, of } from 'rxjs';
+import {
+  Observable,
+  tap,
+  exhaustMap,
+  catchError,
+  takeUntil,
+  switchMap,
+  of,
+  concatMap,
+  forkJoin,
+} from 'rxjs';
 import { Subject } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { toast } from 'ngx-sonner';
-import { Order } from '../../models/Orders';
+import {
+  Order,
+  OrderItem,
+  OrderState,
+  orderStateColors,
+  orderStates,
+} from '../../models/Orders';
+import { DevicesService } from '../../../devices/services/devices.service';
+import {
+  DeviceStatus,
+  DeviceStatusLabels,
+  DeviceStatusColors,
+} from '../../../devices/models/device.model';
 
 @Component({
   selector: 'app-orders-detail',
@@ -17,7 +39,6 @@ import { Order } from '../../models/Orders';
   imports: [CommonModule],
 })
 export class OrdersDetailComponent implements OnInit, OnDestroy {
-
   // Modelo de vista para la orden
   order: Order | null = null;
 
@@ -29,6 +50,36 @@ export class OrdersDetailComponent implements OnInit, OnDestroy {
     return this.loadingService.loading$;
   }
 
+  getDeviceStatusLabel(status: string | undefined | null): string {
+    return status && DeviceStatusLabels[status as DeviceStatus]
+      ? DeviceStatusLabels[status as DeviceStatus]
+      : '-';
+  }
+
+  getDeviceStatusColor(status: string | undefined | null): string {
+    return (
+      'badge-' +
+      (status && DeviceStatusColors[status as DeviceStatus]
+        ? DeviceStatusColors[status as DeviceStatus]
+        : 'secondary')
+    );
+  }
+
+  getOrderStateBadge(state?: OrderState | null): string {
+    return (
+      'badge badge-' +
+      (state && orderStateColors[state] ? orderStateColors[state] : 'neutral') +
+      ' text-xl p-4'
+    );
+  }
+
+  getOrderStateLabel(state?: OrderState | null): string {
+    return (state ? orderStates[state] : '-') ?? '-';
+  }
+
+  DeviceStatusLabels = DeviceStatusLabels;
+  DeviceStatusColors = DeviceStatusColors;
+
   // Subject para manejar la destrucción del componente y evitar fugas de memoria
   private readonly destroy$ = new Subject<void>();
 
@@ -37,7 +88,8 @@ export class OrdersDetailComponent implements OnInit, OnDestroy {
     private ordersService: OrdersService,
     private loadingService: LoadingService,
     private route: ActivatedRoute,
-  ) { }
+    private devicesService: DevicesService,
+  ) {}
 
   /**
    * Inicializar el componente y cargar los detalles de la orden
@@ -59,31 +111,66 @@ export class OrdersDetailComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Cargar los detalles de la orden utilizando el ID de la ruta y manejar errores
-   * Obtiene el ID de la orden desde los parámetros de la ruta, luego llama al servicio para obtener los detalles de la orden.
+   * Cargar los detalles de la orden utilizando el ID de la ruta y manejar errores.
+   * Obtiene el ID de la orden desde los parámetros de la ruta, luego llama al servicio
+   * para obtener los detalles de la orden y los devices asociados a cada item, si existen.
    * @returns void
    */
-   getOrderDetail(): void {
-    this.route.params.pipe(
-      takeUntil(this.destroy$),
-      tap(() => {
-        this.error = '';
-      }),
-      switchMap(params =>
-        this.ordersService.getOrderById(params['id']).pipe(
-          tap(order => {
-            this.order = order;
-            console.log('Orden cargada:', order);
-          }),
-          catchError(err => {
-            this.error = err?.error?.message || 'Error al cargar orden';
-            toast.error('Error al cargar la orden', { description: this.error });
-            this.order = null;
+  getOrderDetail(): void {
+    this.route.params
+      .pipe(
+        takeUntil(this.destroy$),
+        tap(() => {
+          this.error = '';
+        }),
+        switchMap((params) =>
+          this.ordersService.getOrderById(params['id']).pipe(
+            tap((order) => {
+              this.order = order;
+              console.log('Orden cargada:', order);
+            }),
+            catchError((err) => {
+              this.error = err?.error?.message || 'Error al cargar orden';
+              toast.error('Error al cargar la orden', {
+                description: this.error,
+              });
+              this.order = null;
+              return of(null);
+            }),
+          ),
+        ),
+       /* concatMap((order) => {
+          if (order?.assigneeType === 'GROUP') {
+
+          }
+        }),*/
+        concatMap((order) => {
+          if (order && Array.isArray(order.items) && order.items.length > 0) {
+            const requests = order.items.map((item) =>
+              this.devicesService.getDeviceById(item.deviceId).pipe(
+                catchError((err) => {
+                  console.error(
+                    `Error al cargar dispositivo con ID ${item.deviceId}:`,
+                    err,
+                  );
+                  return of(null);
+                }),
+              ),
+            );
+            return forkJoin(requests).pipe(
+              tap((devices) => {
+                this.order!.items = this.order!.items.map((item, idx) => ({
+                  ...item,
+                  device: devices[idx],
+                }));
+              }),
+            );
+          } else {
             return of(null);
-          })
-        )
+          }
+        }),
       )
-    ).subscribe();
+      .subscribe(() => {});
   }
 
   /**
@@ -95,4 +182,21 @@ export class OrdersDetailComponent implements OnInit, OnDestroy {
     this.location.back();
   }
 
+  /**
+   * Formatear UUID corto (primeros 8 caracteres)
+   * @param id UUID completo
+   * @returns UUID truncado
+   */
+  getShortId(id: string): string {
+    return id.substring(0, 8);
+  }
+
+  /**
+   * Refrescar los detalles de la orden
+   * Llama al método getOrderDetail para recargar los detalles de la orden, lo que permite al usuario actualizar la información mostrada en la página.
+   * @returns void
+   */
+  refreshData(): void {
+    this.getOrderDetail();
+  }
 }

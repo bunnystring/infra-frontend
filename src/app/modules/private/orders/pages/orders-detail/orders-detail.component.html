@@ -42,7 +42,7 @@
                   <circle cx="12" cy="8" r="4" />
                   <path d="M4 20c0-4 4-6 8-6s8 2 8 6" />
                 </svg>
-                <span class="tracking-wider text-base text-blue-800">{{order?.assigneeId}}</span>
+                <span class="tracking-wider text-base text-blue-800" (click)="goAsignedDetail()">{{order?.assigneeId}}</span>
               </span>
             </div>
           </div>
@@ -122,7 +122,7 @@
             <circle cx="8.5" cy="15.5" r="1.5" class="fill-blue-300" />
             <circle cx="15.5" cy="15.5" r="1.5" class="fill-blue-300" />
           </svg>
-          Dispositivos
+          Dispositivos Alquilados
         </h2>
         <button class="btn btn-ghost gap-2" (click)="refreshData()" [disabled]="loading$ | async">
           <span *ngIf="loading$ | async" class="loading loading-spinner loading-xs"></span>

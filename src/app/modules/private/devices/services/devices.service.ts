@@ -2,7 +2,6 @@ import { Injectable, inject } from '@angular/core';
 import {Observable, finalize} from 'rxjs';
 import { ApiService } from '../../../../core/services/api.service';
 import { CreateDeviceRq, Device, DeviceAssignment, DeviceStatus, DeviceUpdateBatchRq, RestoreDevicesRq, UpdateDevicesStateRq } from '../models/device.model';
-import { LoadingService } from '../../../../core/services/loading.service';
 
 
 /**
@@ -15,9 +14,6 @@ import { LoadingService } from '../../../../core/services/loading.service';
   providedIn: 'root'
 })
 export class DevicesService {
-
-  private loading = inject(LoadingService);
-
   // Injected services
   private apiService = inject(ApiService);
 
@@ -49,11 +45,8 @@ export class DevicesService {
    * Obtiene todos los dispositivos
    */
   getAllDevices(): Observable<Device[]> {
-  this.loading.show();
-  return this.apiService.get<Device[]>('/devices').pipe(
-    finalize(() => this.loading.hide())
-  );
-}
+    return this.apiService.get<Device[]>('/devices');
+  }
 
   /**
    * Obtiene dispositivos por su estado

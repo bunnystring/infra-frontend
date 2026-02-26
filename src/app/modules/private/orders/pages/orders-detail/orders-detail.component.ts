@@ -1,25 +1,22 @@
+import { DevicesBatchRq } from './../../../devices/models/device.model';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Location } from '@angular/common';
 import { OrdersService } from '../../services/orders.service';
 import { CommonModule } from '@angular/common';
 import { LoadingService } from '../../../../../core/services/loading.service';
 import {
-  Observable,
   tap,
-  exhaustMap,
   catchError,
   takeUntil,
   switchMap,
   of,
   concatMap,
-  forkJoin,
 } from 'rxjs';
 import { Subject } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { toast } from 'ngx-sonner';
 import {
   Order,
-  OrderItem,
   OrderState,
   orderStateColors,
   orderStates,
@@ -52,12 +49,14 @@ export class OrdersDetailComponent implements OnInit, OnDestroy {
     return this.loadingService.loading$;
   }
 
+  // Obtener la etiqueta legible para el estado del dispositivo
   getDeviceStatusLabel(status: string | undefined | null): string {
     return status && DeviceStatusLabels[status as DeviceStatus]
       ? DeviceStatusLabels[status as DeviceStatus]
       : '-';
   }
 
+  // Obtener la clase CSS para el color del estado del dispositivo
   getDeviceStatusColor(status: string | undefined | null): string {
     return (
       'badge-' +
@@ -67,6 +66,7 @@ export class OrdersDetailComponent implements OnInit, OnDestroy {
     );
   }
 
+  // Obtener la clase CSS para el color del estado de la orden
   getOrderStateBadge(state?: OrderState | null): string {
     return (
       'badge badge-' +
@@ -75,12 +75,29 @@ export class OrdersDetailComponent implements OnInit, OnDestroy {
     );
   }
 
+  // Obtener la etiqueta legible para el estado de la orden
   getOrderStateLabel(state?: OrderState | null): string {
     return (state ? orderStates[state] : '-') ?? '-';
   }
 
+  // Obtener el estado del dispositivo para mostrar en la plantilla, para mostar el nombre del estado en vez del código
   DeviceStatusLabels = DeviceStatusLabels;
+
+  // Obtener el color del estado del dispositivo para usar en la plantilla
   DeviceStatusColors = DeviceStatusColors;
+
+  // Variable para almacenar el nombre del grupo, se muestra en el tooltip del badge de grupo
+  groupName: string = '';
+
+  // Variable para almacenar el nombre del empleado, se muestra en el tooltip del badge de empleado
+  get groupNameTooltip() {
+    return this.groupName ? 'Grupo: ' + this.groupName : '';
+  }
+
+  // Variable para almacenar el nombre del empleado, se muestra en el tooltip del badge de empleado
+  get employeeNameTooltip() {
+    return this.order?.assigneeId ? 'Empleado: ' + this.order?.assigneeId : '';
+  }
 
   // Subject para manejar la destrucción del componente y evitar fugas de memoria
   private readonly destroy$ = new Subject<void>();
@@ -93,6 +110,7 @@ export class OrdersDetailComponent implements OnInit, OnDestroy {
     private devicesService: DevicesService,
     private employeeService: EmployeesService,
     private groupsService: GroupsService,
+    private router: Router,
   ) {}
 
   /**
@@ -145,67 +163,71 @@ export class OrdersDetailComponent implements OnInit, OnDestroy {
         ),
         concatMap((order) => {
           if (order && Array.isArray(order.items) && order.items.length > 0) {
-            const requests = order.items.map((item) =>
-              this.devicesService.getDeviceById(item.deviceId).pipe(
-                catchError((err) => {
-                  console.error(
-                    `Error al cargar dispositivo con ID ${item.deviceId}:`,
-                    err,
-                  );
-                  return of(null);
-                }),
-              ),
-            );
-            return forkJoin(requests).pipe(
+            const rq = {} as DevicesBatchRq;
+            rq.ids = order.items.map((item) => item.deviceId);
+            return this.devicesService.getDevicesBatch(rq).pipe(
               tap((devices) => {
-                this.order!.items = this.order!.items.map((item, idx) => ({
-                  ...item,
-                  device: devices[idx],
-                }));
+                if (devices && Array.isArray(devices)) {
+                  order.items.forEach((item) => {
+                    item.device = devices.find(
+                      (device) => device.id === item.deviceId,
+                    )!;
+                  });
+                }
+              }),
+              catchError((err) => {
+                console.error(
+                  `Error al cargar dispositivos con IDs ${rq.ids.join(', ')}:`,
+                  err,
+                );
+                return of(null);
               }),
             );
           } else {
             return of(null);
           }
         }),
-         concatMap(() => {
-        if (!this.order) return of(null);
+        concatMap(() => {
+          if (!this.order) return of(null);
 
-        if (this.order.assigneeType !== 'GROUP') {
-          return this.employeeService.getEmployeeById(this.order.assigneeId).pipe(
-            tap((employee) => {
-              if (this.order) {
-                this.order.assigneeId = employee.fullName;
-              }
-            }),
-            catchError((err) => {
-              console.error(
-                `Error al cargar empleado con ID ${this.order!.assigneeId}:`,
-                err
+          if (this.order.assigneeType !== 'GROUP') {
+            return this.employeeService
+              .getEmployeeById(this.order.assigneeId)
+              .pipe(
+                tap((employee) => {
+                  if (this.order) {
+                    this.order.assigneeId = employee.fullName;
+                  }
+                }),
+                catchError((err) => {
+                  console.error(
+                    `Error al cargar empleado con ID ${this.order!.assigneeId}:`,
+                    err,
+                  );
+                  return of(null);
+                }),
               );
-              return of(null);
-            }),
-          );
-        } else {
-          return this.groupsService.getGroupById(this.order.assigneeId).pipe(
-            tap((group) => {
-              if (this.order) {
-                this.order.assigneeId = group.employees?.length
-                  ? `(${group.employees.length} empleados)`
-                  : group.name;
-              }
-            }),
-            catchError((err) => {
-              console.error(
-                `Error al cargar grupo con ID ${this.order!.assigneeId}:`,
-                err
-              );
-              return of(null);
-            }),
-          );
-        }
-      }),
-    )
+          } else {
+            return this.groupsService.getGroupById(this.order.assigneeId).pipe(
+              tap((group) => {
+                if (this.order) {
+                  this.order.assigneeId = group.employees?.length
+                    ? `(${group.employees.length} empleados)`
+                    : group.name;
+                  this.groupName = group.name;
+                }
+              }),
+              catchError((err) => {
+                console.error(
+                  `Error al cargar grupo con ID ${this.order!.assigneeId}:`,
+                  err,
+                );
+                return of(null);
+              }),
+            );
+          }
+        }),
+      )
       .subscribe(() => {});
   }
 
@@ -237,8 +259,15 @@ export class OrdersDetailComponent implements OnInit, OnDestroy {
   }
 
   goAsignedDetail(): void {
-    toast.error('Funcionalidad no implementada', {
-      description: `${this.order?.assigneeType === 'GROUP' ? 'Detalle de grupo no implementado' : 'Detalle de empleado no implementado'}`,
-    });
+    switch (this.order?.assigneeType) {
+      case 'EMPLOYEE':
+        this.router.navigate(['/app/employees/', this.order.assigneeId]);
+        break;
+      case 'GROUP':
+        this.router.navigate(['/app/groups/', this.order.assigneeId]);
+        break;
+      default:
+        break;
+    }
   }
 }

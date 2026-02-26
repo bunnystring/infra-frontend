@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import {Observable, finalize} from 'rxjs';
 import { ApiService } from '../../../../core/services/api.service';
-import { CreateDeviceRq, Device, DeviceAssignment, DeviceStatus, DeviceUpdateBatchRq, RestoreDevicesRq, UpdateDevicesStateRq } from '../models/device.model';
+import { CreateDeviceRq, Device, DeviceAssignment, DevicesBatchAssignmentRs, DevicesBatchRq, DeviceStatus, DeviceUpdateBatchRq, RestoreDevicesRq, UpdateDevicesStateRq } from '../models/device.model';
 
 
 /**
@@ -85,10 +85,10 @@ export class DevicesService {
 
   /**
    * Obtiene un lote de dispositivos por sus IDs
-   * @param ids Array de IDs de dispositivos
+   * @param ids Objeto que contiene los IDs de los dispositivos
    */
-  getDevicesBatch(ids: string[]): Observable<Device[]> {
-    return this.apiService.post<Device[]>('/devices/batch', { ids });
+  getDevicesBatch(ids: DevicesBatchRq): Observable<Device[]> {
+    return this.apiService.post<Device[]>('/devices/batch', ids);
   }
 
   /**
@@ -125,7 +125,7 @@ export class DevicesService {
 
   /**
    * Obtiene el historial de asignaciones de un dispositivo por su ID
-   * @param deviceId
+   * @param deviceId ID del dispositivo
    * @returns Observable con el historial de asignaciones del dispositivo
    */
   getDeviceAssignmentHistory(deviceId: string): Observable<any[]> {
@@ -144,12 +144,12 @@ export class DevicesService {
   }
 
   /**
-   * Obtiene el estado de asignación activa de un dispositivo por su ID
-   * @param deviceId ID del dispositivo a verificar
-   * @returns Observable con un booleano que indica si el dispositivo tiene una asignación activa
+   * Obtiene el estado de asignación activa de múltiples dispositivos por sus IDs
+   * @param devices Objeto que contiene los IDs de los dispositivos a verificar
+   * @returns Observable con un booleano que indica si los dispositivos tienen una asignación activa
     */
-  hasActiveAssignment(deviceId: string): Observable<boolean> {
-    return this.apiService.get<boolean>(`/devices-assignments/${deviceId}/active`);
+  hasActiveAssignmentBatch(devices: DevicesBatchRq): Observable<DevicesBatchAssignmentRs[]> {
+    return this.apiService.post<DevicesBatchAssignmentRs[]>(`/devices-assignments/devices/active`, devices);
   }
 
   /**

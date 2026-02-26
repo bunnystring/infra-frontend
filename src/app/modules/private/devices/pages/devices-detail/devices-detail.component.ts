@@ -146,7 +146,6 @@ export class DevicesDetailComponent implements OnInit, OnDestroy {
     }
     return forkJoin(
       assignments.map((a) => {
-        // No busques la orden si no hay orderId
         if (!a.orderId) {
           return of({
             ...a,

@@ -367,3 +367,18 @@ export interface DeviceUpdateBatchRq {
   deviceIds: string[];
   state: DeviceStatus;
 }
+
+/**
+ * Request para obtener un lote de dispositivos por sus IDs
+ */
+export interface DevicesBatchRq {
+  "ids": string[];
+}
+
+/**
+ * Response de la verificación de asignación activa para múltiples dispositivos
+ */
+export interface DevicesBatchAssignmentRs {
+  deviceId: string;
+  active: boolean;
+}

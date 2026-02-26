@@ -14,7 +14,6 @@ import {
   catchError,
   concatMap,
   of,
-  forkJoin,
   take,
   exhaustMap,
 } from 'rxjs';
@@ -25,6 +24,7 @@ import {
   DeviceStatusColors,
   DeviceFormResult,
   DeviceUpdateBatchRq,
+  DevicesBatchRq,
 } from '../../models/device.model';
 import { toast } from 'ngx-sonner';
 import { DeviceCreateEditModalComponent } from '../../modals/device-create-edit-modal/device-create-edit-modal.component';
@@ -32,6 +32,7 @@ import { LoadingService } from '../../../../../core/services/loading.service';
 import { DevicesService } from '../../services/devices.service';
 import { DeviceDeleteModalComponent } from '../../modals/device-delete-modal/device-delete-modal.component';
 import { DeviceBulkUploadModalComponent } from '../../modals/device-bulk-upload-modal/device-bulk-upload-modal.component';
+import { find } from 'rxjs';
 
 @Component({
   selector: 'app-devices',
@@ -182,12 +183,20 @@ export class DevicesComponent implements OnInit, OnDestroy {
           if (!devices || devices.length === 0) {
             return of([]);
           }
-          const assignmentsChecks = devices.map((device) =>
-            this.devicesService
-              .hasActiveAssignment(device.id)
-              .pipe(map((active) => ({ ...device, assignmentActive: active }))),
+          const rq: DevicesBatchRq = {
+            ids: devices.map((device) => device.id),
+          };
+          return this.devicesService.hasActiveAssignmentBatch(rq).pipe(
+            map((assignments) => {
+              return devices.map((device) => {
+                const found = assignments.find((a) => a.deviceId === device.id);
+                return {
+                  ...device,
+                  assignmentActive: found ? found.active : false, // por defecto, si no existe es false
+                };
+              });
+            }),
           );
-          return forkJoin(assignmentsChecks);
         }),
         catchError((error) => {
           toast.error('Error al obtener dispositivos o asignaciones', {
@@ -411,7 +420,7 @@ export class DevicesComponent implements OnInit, OnDestroy {
       if (!device.assignmentActive) device.selected = checked;
     });
   }
-  
+
   /**
    * Cuenta el número de dispositivos seleccionados en la lista de dispositivos filtrados
    * @returns number Número de dispositivos seleccionados en la lista de dispositivos filtrados

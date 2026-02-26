@@ -62,8 +62,7 @@ export const routes: Routes = [
         path: 'orders',
         loadChildren: () => import('./modules/private/orders/orders.routes').then(m => m.ORDERS_ROUTES),
         data: { breadcrumb: 'Orders' }
-      }
-      /*
+      },
       {
         path: 'employees',
         loadChildren: () => import('./modules/private/employees/employees.routes').then(m => m.EMPLOYEES_ROUTES),
@@ -73,7 +72,7 @@ export const routes: Routes = [
         path: 'groups',
         loadChildren: () => import('./modules/private/groups/groups.routes').then(m => m.GROUPS_ROUTES),
         data: { breadcrumb: 'Groups' }
-      }*/
+      }
     ]
   },
 

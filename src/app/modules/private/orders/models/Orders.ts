@@ -1,3 +1,5 @@
+import { Device, DeviceStatus } from "../../devices/models/device.model";
+
 /**
  * Estados posibles de una orden y su traducción al español.
  * @returns Objeto con los estados de orden y sus traducciones
@@ -18,7 +20,8 @@ export type OrderState = keyof typeof orderStates;
  */
 export interface OrderItem {
   deviceId: string;
-  originalDeviceState: string;
+  originalDeviceState: DeviceStatus;
+  device?: Device | null;
 }
 
 /**
@@ -85,3 +88,9 @@ export interface OrderWithDevice extends Order {
   firstDeviceName?: string;
   firstDeviceBrand?: string;
 }
+
+export const orderStateColors: Record<string, string> = {
+  'FINISHED': 'success',
+  'IN_PROGRESS': 'info',
+  'CANCELLED': 'error',
+};

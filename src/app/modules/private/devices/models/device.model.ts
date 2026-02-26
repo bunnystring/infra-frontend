@@ -48,7 +48,7 @@ export const DeviceStatusLabels: { [key in DeviceStatus]: string } = {
 export const DeviceStatusColors: { [key in DeviceStatus]: string } = {
   [DeviceStatus.GOOD_CONDITION]: 'success',
   [DeviceStatus.FAIR]: 'warning',
-  [DeviceStatus.OCCUPIED]: 'info',
+  [DeviceStatus.OCCUPIED]: 'primary',
   [DeviceStatus.NEEDS_REPAIR]: 'danger'
 };
 

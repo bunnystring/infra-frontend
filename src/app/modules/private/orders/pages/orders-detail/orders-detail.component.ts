@@ -139,11 +139,6 @@ export class OrdersDetailComponent implements OnInit, OnDestroy {
             }),
           ),
         ),
-       /* concatMap((order) => {
-          if (order?.assigneeType === 'GROUP') {
-
-          }
-        }),*/
         concatMap((order) => {
           if (order && Array.isArray(order.items) && order.items.length > 0) {
             const requests = order.items.map((item) =>

@@ -30,6 +30,8 @@ import {
   DeviceStatusLabels,
   DeviceStatusColors,
 } from '../../../devices/models/device.model';
+import { GroupsService } from '../../../groups/services/groups.service';
+import { EmployeesService } from '../../../employees/services/employees.service';
 
 @Component({
   selector: 'app-orders-detail',
@@ -89,6 +91,8 @@ export class OrdersDetailComponent implements OnInit, OnDestroy {
     private loadingService: LoadingService,
     private route: ActivatedRoute,
     private devicesService: DevicesService,
+    private employeeService: EmployeesService,
+    private groupsService: GroupsService,
   ) {}
 
   /**
@@ -164,7 +168,44 @@ export class OrdersDetailComponent implements OnInit, OnDestroy {
             return of(null);
           }
         }),
-      )
+         concatMap(() => {
+        if (!this.order) return of(null);
+
+        if (this.order.assigneeType !== 'GROUP') {
+          return this.employeeService.getEmployeeById(this.order.assigneeId).pipe(
+            tap((employee) => {
+              if (this.order) {
+                this.order.assigneeId = employee.fullName;
+              }
+            }),
+            catchError((err) => {
+              console.error(
+                `Error al cargar empleado con ID ${this.order!.assigneeId}:`,
+                err
+              );
+              return of(null);
+            }),
+          );
+        } else {
+          return this.groupsService.getGroupById(this.order.assigneeId).pipe(
+            tap((group) => {
+              if (this.order) {
+                this.order.assigneeId = group.employees?.length
+                  ? `(${group.employees.length} empleados)`
+                  : group.name;
+              }
+            }),
+            catchError((err) => {
+              console.error(
+                `Error al cargar grupo con ID ${this.order!.assigneeId}:`,
+                err
+              );
+              return of(null);
+            }),
+          );
+        }
+      }),
+    )
       .subscribe(() => {});
   }
 
@@ -193,5 +234,11 @@ export class OrdersDetailComponent implements OnInit, OnDestroy {
    */
   refreshData(): void {
     this.getOrderDetail();
+  }
+
+  goAsignedDetail(): void {
+    toast.error('Funcionalidad no implementada', {
+      description: `${this.order?.assigneeType === 'GROUP' ? 'Detalle de grupo no implementado' : 'Detalle de empleado no implementado'}`,
+    });
   }
 }

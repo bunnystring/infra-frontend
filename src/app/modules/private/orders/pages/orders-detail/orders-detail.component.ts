@@ -17,9 +17,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { toast } from 'ngx-sonner';
 import {
   Order,
-  OrderState,
-  orderStateColors,
-  orderStates,
+  OrderStates,
+  OrderStatusColors,
 } from '../../models/Orders';
 import { DevicesService } from '../../../devices/services/devices.service';
 import {
@@ -67,17 +66,18 @@ export class OrdersDetailComponent implements OnInit, OnDestroy {
   }
 
   // Obtener la clase CSS para el color del estado de la orden
-  getOrderStateBadge(state?: OrderState | null): string {
+  getOrderStateBadge(state?: OrderStates| null): string {
+    console.log('Estado de la orden:', state, 'Clase CSS:', 'badge badge-' + (state && OrderStatusColors[state] ? OrderStatusColors[state] : 'neutral') + ' text-xl p-4');
     return (
       'badge badge-' +
-      (state && orderStateColors[state] ? orderStateColors[state] : 'neutral') +
+      (state && OrderStatusColors[state] ? OrderStatusColors[state] : 'neutral') +
       ' text-xl p-4'
     );
   }
 
   // Obtener la etiqueta legible para el estado de la orden
-  getOrderStateLabel(state?: OrderState | null): string {
-    return (state ? orderStates[state] : '-') ?? '-';
+  getOrderStateLabel(state?: OrderStates | null): string {
+    return (state ? OrderStates[state] : '-') ?? '-';
   }
 
   // Obtener el estado del dispositivo para mostrar en la plantilla, para mostar el nombre del estado en vez del código
@@ -258,6 +258,11 @@ export class OrdersDetailComponent implements OnInit, OnDestroy {
     this.getOrderDetail();
   }
 
+  /**
+   * Ir al detalle de la asignación segun el tipo de asignación (empleado o grupo)
+   * Navega al detalle del empleado o grupo asignado a la orden, dependiendo del tipo de asignación. Si la orden está asignada a un empleado, navega al detalle del empleado; si está asignada a un grupo, navega al detalle del grupo.
+   * @returns void
+   */
   goAsignedDetail(): void {
     switch (this.order?.assigneeType) {
       case 'EMPLOYEE':

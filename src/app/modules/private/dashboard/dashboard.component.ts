@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Order, orderStates } from '../orders/models/Orders';
+import { Order, OrderStates } from '../orders/models/Orders';
 import { DevicesService } from '../devices/services/devices.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { User } from '../../public/auth/models/user.model';
@@ -61,7 +61,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   devicesByBrand: { brand: string; count: number }[] = [];
 
   // Referencia a orderStates para usar en el template
-  orderStates = orderStates;
+  orderStates = OrderStates;
 
   // Alertas dinámicas
   alerts: Array<{
@@ -544,7 +544,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
    * @returns Texto legible del estado
    */
   getOrderStateText(state: string): string {
-    return orderStates[state as keyof typeof orderStates] || state;
+    return OrderStates[state as keyof typeof OrderStates] || state;
   }
 
   /**

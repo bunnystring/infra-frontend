@@ -6,387 +6,355 @@
 </div>
 
 <div class="container mx-auto px-4 py-6">
-  <!-- HEADER y STATS -->
-  <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-8">
-    <div>
-      <h1 class="text-4xl font-extrabold mb-2 flex items-center gap-3">
-        <svg class="h-8 w-8 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round"
-            d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-        </svg>
-        Dispositivos
-      </h1>
-      <div class="text-base-content/60 text-lg flex items-center gap-2">
-        <svg class="h-5 w-5 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>
-        Gestión y estado de todos los dispositivos del sistema
-      </div>
-    </div>
-    <button class="btn btn-success btn-lg gap-3 shadow-lg" (click)="openBulkUploadModal()">
-      <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v6a8 8 0 008 8 8 8 0 008-8V4" />
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 12v8m0 0l-4-4m4 4l4-4" />
-      </svg>
-      Carga masiva
-    </button>
-    <button class="btn btn-primary btn-lg gap-3 shadow-lg" (click)="openCreateModal()">
-      <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-      </svg>
-      Nuevo dispositivo
-    </button>
-  </div>
-
-  <!-- Stats resumen con iconos SVG -->
-  <ng-container *ngIf="filteredStats$ | async as stats">
-    <div *ngIf="!deviceError" class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-      <div class="stat shadow-md rounded-lg">
-        <div class="stat-figure text-primary">
-          <svg class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+  <!-- SOLO MUESTRA TODO SI NO HAY ERROR -->
+  <ng-container *ngIf="!deviceError; else errorBlock">
+    <!-- HEADER y BOTONES -->
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-8">
+      <div>
+        <h1 class="text-4xl font-extrabold mb-2 flex items-center gap-3">
+          <svg class="h-8 w-8 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round"
               d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
           </svg>
-        </div>
-        <div class="stat-title text-base font-semibold">Total</div>
-        <div class="stat-value text-primary text-2xl">{{ stats.totalDevices }}</div>
-        <div class="stat-desc">dispositivos</div>
-      </div>
-      <div class="stat shadow-md rounded-lg">
-        <div class="stat-figure text-success">
-          <svg class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" />
+          Dispositivos
+        </h1>
+        <div class="text-base-content/60 text-lg flex items-center gap-2">
+          <svg class="h-5 w-5 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
-        </div>
-        <div class="stat-title text-base font-semibold">Buenas condiciones</div>
-        <div class="stat-value text-success text-2xl">{{ stats.goodCondition }}</div>
-        <div class="stat-desc">
-          {{ (stats.totalDevices ? (stats.goodCondition / stats.totalDevices * 100) : 0) | number:'1.0-0' }}%
+          Gestión y estado de todos los dispositivos del sistema
         </div>
       </div>
-      <div class="stat shadow-md rounded-lg">
-        <div class="stat-figure text-info">
-          <svg class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </div>
-        <div class="stat-title text-base font-semibold">Ocupados</div>
-        <div class="stat-value text-info text-2xl">{{ stats.occupied }}</div>
-        <div class="stat-desc">
-          {{ (stats.totalDevices ? (stats.occupied / stats.totalDevices * 100) : 0) | number:'1.0-0' }}%
-        </div>
-      </div>
-      <div class="stat shadow-md rounded-lg">
-        <div class="stat-figure text-error">
-          <svg class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
-        </div>
-        <div class="stat-title text-base font-semibold">Necesitan reparación</div>
-        <div class="stat-value text-error text-2xl">{{ stats.needsRepair }}</div>
-        <div class="stat-desc">
-          {{ (stats.totalDevices ? (stats.needsRepair / stats.totalDevices * 100) : 0) | number:'1.0-0' }}%
-        </div>
-      </div>
+      <button class="btn btn-success btn-lg gap-3 shadow-lg" (click)="openBulkUploadModal()"
+        [disabled]="!buttonsIsAvailable">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v6a8 8 0 008 8 8 8 0 008-8V4" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 12v8m0 0l-4-4m4 4l4-4" />
+        </svg>
+        Carga masiva
+      </button>
+      <button class="btn btn-primary btn-lg gap-3 shadow-lg" (click)="openCreateModal()"
+        [disabled]="!buttonsIsAvailable">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
+        Nuevo dispositivo
+      </button>
     </div>
 
-    <div *ngIf="deviceErrorMessage && stats.totalDevices === 0"
-      class="flex flex-col items-center justify-center py-16 px-4 text-center">
+    <!-- Stats resumen con iconos SVG y tabla -->
+    <ng-container *ngIf="filteredStats$ | async as stats">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+        <!-- ...stats... -->
+        <div class="stat shadow-md rounded-lg">
+          <div class="stat-figure text-primary">
+            <svg class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <div class="stat-title text-base font-semibold">Total</div>
+          <div class="stat-value text-primary text-2xl">{{ stats.totalDevices }}</div>
+          <div class="stat-desc">dispositivos</div>
+        </div>
+        <div class="stat shadow-md rounded-lg">
+          <div class="stat-figure text-success">
+            <svg class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" />
+            </svg>
+          </div>
+          <div class="stat-title text-base font-semibold">Buenas condiciones</div>
+          <div class="stat-value text-success text-2xl">{{ stats.goodCondition }}</div>
+          <div class="stat-desc">
+            {{ (stats.totalDevices ? (stats.goodCondition / stats.totalDevices * 100) : 0) | number:'1.0-0' }}%
+          </div>
+        </div>
+        <div class="stat shadow-md rounded-lg">
+          <div class="stat-figure text-info">
+            <svg class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div class="stat-title text-base font-semibold">Ocupados</div>
+          <div class="stat-value text-info text-2xl">{{ stats.occupied }}</div>
+          <div class="stat-desc">
+            {{ (stats.totalDevices ? (stats.occupied / stats.totalDevices * 100) : 0) | number:'1.0-0' }}%
+          </div>
+        </div>
+        <div class="stat shadow-md rounded-lg">
+          <div class="stat-figure text-error">
+            <svg class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <div class="stat-title text-base font-semibold">Necesitan reparación</div>
+          <div class="stat-value text-error text-2xl">{{ stats.needsRepair }}</div>
+          <div class="stat-desc">
+            {{ (stats.totalDevices ? (stats.needsRepair / stats.totalDevices * 100) : 0) | number:'1.0-0' }}%
+          </div>
+        </div>
+      </div>
+
+      <!-- FILTROS -->
+      <div class="flex flex-row flex-wrap items-center gap-4 mb-4">
+        <!-- Buscador -->
+        <div class="relative w-full sm:w-60">
+          <input class="input input-bordered w-full pl-12 bg-white/90 shadow focus:ring-2 focus:ring-blue-400"
+            placeholder="Buscar por nombre, marca o código..." [value]="search"
+            (input)="onSearchChange($any($event.target).value)">
+          <svg class="h-5 w-5 text-blue-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" fill="none"
+            stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+        <!-- Selector estado -->
+        <div class="relative w-40">
+          <select class="select select-bordered w-full bg-white/90 shadow focus:ring-2 focus:ring-blue-400"
+            [ngModel]="statusFilter" (ngModelChange)="filterByStatus($event)">
+            <option [ngValue]="'ALL'">Todos los estados</option>
+            <option
+              *ngFor="let s of [DeviceStatus.GOOD_CONDITION, DeviceStatus.FAIR, DeviceStatus.OCCUPIED, DeviceStatus.NEEDS_REPAIR]"
+              [ngValue]="s">{{ DeviceStatusLabels[s] }}</option>
+          </select>
+          <svg class="h-5 w-5 text-blue-400 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" fill="none"
+            stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6" />
+          </svg>
+        </div>
+        <!-- Limpiar filtros -->
+        <button class="btn btn-ghost flex items-center gap-2" (click)="resetFilters()">
+          <svg class="h-5 w-5 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+          Limpiar
+        </button>
+        <!-- Botón masivo OR bloque masivo (solo uno visible según modo) -->
+        <ng-container *ngIf="!bulkMode; else bulkActions">
+          <button class="btn btn-warning" (click)="activateBulkMode()">
+            <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" stroke-width="2"
+              viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            Actualizar estados masivamente
+          </button>
+        </ng-container>
+        <ng-template #bulkActions>
+          <select [(ngModel)]="bulkStatus" class="select select-bordered w-48">
+            <option [ngValue]="null">Selecciona nuevo estado…</option>
+            <option
+              *ngFor="let s of [DeviceStatus.GOOD_CONDITION, DeviceStatus.FAIR, DeviceStatus.OCCUPIED, DeviceStatus.NEEDS_REPAIR]"
+              [ngValue]="s">
+              {{ DeviceStatusLabels[s] }}
+            </option>
+          </select>
+          <button class="btn btn-success flex items-center gap-2"
+            [disabled]="countSelectedDevices() === 0 || !bulkStatus" (click)="updateDevicesStatus()">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" />
+            </svg>
+            Guardar
+            <span *ngIf="countSelectedDevices() > 0" class="badge badge-success badge-xs ml-2">
+              {{ countSelectedDevices() }}
+            </span>
+          </button>
+          <button class="btn btn-ghost border-2 border-red-400 flex items-center gap-2 text-red-600"
+            (click)="cancelBulkMode()">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            Cancelar
+          </button>
+        </ng-template>
+        <!-- Botón actualizar -->
+        <button *ngIf="!bulkMode" class="btn btn-ghost gap-2 ml-auto" (click)="refreshData()"
+          [disabled]="loading$ | async">
+          <span *ngIf="loading$ | async" class="loading loading-spinner loading-xs"></span>
+          <svg *ngIf="!(loading$ | async)" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          <span class="hidden sm:inline">
+            {{ (loading$ | async) ? 'Actualizando...' : 'Actualizar' }}
+          </span>
+        </button>
+      </div>
+
+      <!-- MODALES -->
+      <app-device-create-edit-modal *ngIf="showCreateModal || showEditModal" [device]="deviceToEdit"
+        (save)="handleModalSave($event)" (close)="closeModals()">
+      </app-device-create-edit-modal>
+      <app-device-delete-modal *ngIf="showDeleteModal" [device]="deviceToDelete" (deleted)="onDeviceDeleted()"
+        (cancel)="cancelDelete()">
+      </app-device-delete-modal>
+      <app-device-bulk-upload-modal *ngIf="showBulkUploadModal" (uploaded)="onBulkUploadSuccess($event)"
+        (close)="closeBulkUploadModal()">
+      </app-device-bulk-upload-modal>
+
+      <!-- TABLA principal de dispositivos -->
+      <div *ngIf="stats.totalDevices > 0" class="relative">
+        <ng-container *ngIf="pagedDevices$ | async as pagedDevices">
+          <table class="table w-full table-zebra rounded-xl shadow-lg overflow-hidden" *ngIf="pagedDevices.length > 0">
+            <thead class="bg-blue-100">
+              <tr>
+                <th *ngIf="bulkMode">
+                  <input type="checkbox" [checked]="allSelectedFiltered()" (change)="toggleSelectAllFiltered($event)">
+                </th>
+                <th>
+                  <svg class="h-5 w-5 text-blue-400 inline mr-2" fill="none" stroke="currentColor" stroke-width="2"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01" />
+                  </svg>
+                  Nombre
+                </th>
+                <th>
+                  <svg class="h-5 w-5 text-blue-400 inline mr-2" fill="none" stroke="currentColor" stroke-width="2"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  Marca
+                </th>
+                <th>
+                  <svg class="h-5 w-5 text-blue-400 inline mr-2" fill="none" stroke="currentColor" stroke-width="2"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                  </svg>
+                  Código de barras
+                </th>
+                <th>
+                  <svg class="h-5 w-5 text-blue-400 inline mr-2" fill="none" stroke="currentColor" stroke-width="2"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" />
+                  </svg>
+                  Estado de dispositivo
+                </th>
+                <th>
+                  <svg class="h-5 w-5 text-blue-400 inline mr-2" fill="none" stroke="currentColor" stroke-width="2"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  Estado de asignación
+                </th>
+                <th class="text-center">
+                  <svg class="h-5 w-5 text-blue-400 inline mr-2" fill="none" stroke="currentColor" stroke-width="2"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Acciones
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let device of pagedDevices" class="hover:bg-blue-50 transition">
+                <td *ngIf="bulkMode">
+                  <input type="checkbox" [(ngModel)]="device.selected" [disabled]="device.assignmentActive ?? false" />
+                </td>
+                <td (click)="goToDetail(device)"
+                  class="cursor-pointer hover:underline text-lg font-semibold text-blue-900">
+                  <svg class="h-5 w-5 text-blue-500 inline mr-2" fill="none" stroke="currentColor" stroke-width="2"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01" />
+                  </svg>
+                  <div class="tooltip" [attr.data-tip]="device.name">
+                    {{ getTextoShort(device.name) }}
+                  </div>
+                </td>
+                <td class="text-lg text-blue-700">{{ device.brand }}</td>
+                <td class="text-center">
+                  <span class="badge badge-ghost badge-lg text-blue-700 bg-blue-50">{{ device.barcode }}</span>
+                </td>
+                <td>
+                  <span [class]="getStatusBadge(device.status)">
+                    {{ DeviceStatusLabels[device.status] }}
+                  </span>
+                </td>
+                <td class="text-center">
+                  <span *ngIf="device.assignmentActive" class="badge badge-success badge-lg">Asignado</span>
+                  <span *ngIf="!device.assignmentActive" class="badge badge-outline badge-lg text-blue-700 bg-blue-50">
+                    Sin asignar
+                  </span>
+                </td>
+                <td class="flex gap-2 justify-center text-center">
+                  <button
+                    class="btn btn-sm min-w-10 min-h-10 border-2 border-yellow-400 bg-white text-yellow-600 flex items-center justify-center hover:bg-yellow-100 hover:border-yellow-500 hover:text-yellow-700 transition-all duration-150"
+                    (click)="openEditModal(device)" [attr.aria-label]="'Editar dispositivo'"
+                    [attr.title]="'Editar dispositivo'" type="button">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                      stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M16.862 4.487l1.651 1.651a2.131 2.131 0 010 3.016l-9.193 9.193a1.5 1.5 0 01-.61.378l-3.12.937a.376.376 0 01-.47-.47l.938-3.12a1.5 1.5 0 01.378-.61l9.193-9.193a2.132 2.132 0 013.017 0z" />
+                    </svg>
+                  </button>
+                  <span *ngIf="device.assignmentActive; else deleteButtonEnabled" class="tooltip tooltip-left"
+                    data-tip="No puedes eliminar este dispositivo porque se encuentra asignado a una orden">
+                    <button [disabled]="true"
+                      class="btn btn-sm min-w-10 min-h-10 border-2 border-red-400 bg-white text-red-600 flex items-center justify-center hover:cursor-not-allowed transition-all duration-150"
+                      type="button">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7M9 10v6m6-6v6m2-10V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2M4 7h16" />
+                      </svg>
+                    </button>
+                  </span>
+                  <ng-template #deleteButtonEnabled>
+                    <button [disabled]="false"
+                      class="btn btn-sm min-w-10 min-h-10 border-2 border-red-400 bg-white text-red-600 flex items-center justify-center hover:bg-red-100 hover:border-red-500 hover:text-red-700 transition-all duration-150"
+                      (click)="openDeleteModal(device)" [attr.aria-label]="'Eliminar dispositivo'"
+                      [attr.title]="'Eliminar dispositivo'" type="button">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7M9 10v6m6-6v6m2-10V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2M4 7h16" />
+                      </svg>
+                    </button>
+                  </ng-template>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Estado vacío -->
+          <div *ngIf="pagedDevices.length === 0" class="py-12 text-center opacity-80">
+            <svg class="mx-auto h-20 w-20 text-blue-300" fill="none" stroke="currentColor" stroke-width="2"
+              viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div class="text-2xl font-semibold mt-6 text-blue-900">No hay dispositivos</div>
+            <div class="text-base-content/60 text-lg">Agrega uno nuevo para comenzar.</div>
+          </div>
+        </ng-container>
+      </div>
+    </ng-container>
+  </ng-container>
+
+  <!-- BLOQUE DE ERROR - SOLO si hay error -->
+  <ng-template #errorBlock>
+    <div class="flex flex-col items-center justify-center py-16 px-4 text-center">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-32 w-32 text-error opacity-20 mb-6" fill="none"
         viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
           d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
-
       <h2 class="text-2xl font-bold mb-2 text-base-content">
         No se pudieron cargar los datos
       </h2>
-
       <p class="text-base-content/60 mb-6 max-w-md">
         Hubo un problema al conectar con el servidor.
         Por favor verifica tu conexión e intenta nuevamente.
       </p>
-
       <button class="btn btn-primary gap-2" (click)="retryLoadData()" [disabled]="isRetrying">
         <span *ngIf="isRetrying" class="loading loading-spinner loading-sm"></span>
-        <svg *ngIf="!isRetrying" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-          stroke="currentColor">
+        <svg *ngIf="!isRetrying" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
         </svg>
         {{ isRetrying ? 'Reintentando...' : 'Volver a intentar' }}
       </button>
     </div>
-
-
-    <!-- FILTROS -->
-    <div *ngIf="!deviceError" class="flex flex-row flex-wrap items-center gap-4 mb-4">
-      <!-- Buscador -->
-      <div class="relative w-full sm:w-60">
-        <input class="input input-bordered w-full pl-12 bg-white/90 shadow focus:ring-2 focus:ring-blue-400"
-          placeholder="Buscar por nombre, marca o código..." [value]="search"
-          (input)="onSearchChange($any($event.target).value)">
-        <svg class="h-5 w-5 text-blue-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" fill="none"
-          stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-      </div>
-      <!-- Selector estado -->
-      <div class="relative w-40">
-        <select class="select select-bordered w-full bg-white/90 shadow focus:ring-2 focus:ring-blue-400"
-          [ngModel]="statusFilter" (ngModelChange)="filterByStatus($event)">
-          <option [ngValue]="'ALL'">Todos los estados</option>
-          <option
-            *ngFor="let s of [DeviceStatus.GOOD_CONDITION, DeviceStatus.FAIR, DeviceStatus.OCCUPIED, DeviceStatus.NEEDS_REPAIR]"
-            [ngValue]="s">{{ DeviceStatusLabels[s] }}</option>
-        </select>
-        <svg class="h-5 w-5 text-blue-400 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" fill="none"
-          stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6" />
-        </svg>
-      </div>
-      <!-- Limpiar filtros -->
-      <button class="btn btn-ghost flex items-center gap-2" (click)="resetFilters()">
-        <svg class="h-5 w-5 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-        Limpiar
-      </button>
-      <!-- Botón masivo OR bloque masivo (solo uno visible según modo) -->
-      <ng-container *ngIf="!bulkMode; else bulkActions">
-        <button class="btn btn-warning" (click)="activateBulkMode()">
-          <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-          </svg>
-          Actualizar estados masivamente
-        </button>
-      </ng-container>
-      <ng-template #bulkActions>
-        <select [(ngModel)]="bulkStatus" class="select select-bordered w-48">
-          <option [ngValue]="null">Selecciona nuevo estado…</option>
-          <option
-            *ngFor="let s of [DeviceStatus.GOOD_CONDITION, DeviceStatus.FAIR, DeviceStatus.OCCUPIED, DeviceStatus.NEEDS_REPAIR]"
-            [ngValue]="s">
-            {{ DeviceStatusLabels[s] }}
-          </option>
-        </select>
-        <button class="btn btn-success flex items-center gap-2" [disabled]="countSelectedDevices() === 0 || !bulkStatus"
-          (click)="updateDevicesStatus()">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" />
-          </svg>
-          Guardar
-          <span *ngIf="countSelectedDevices() > 0" class="badge badge-success badge-xs ml-2">
-            {{ countSelectedDevices() }}
-          </span>
-        </button>
-        <button class="btn btn-ghost border-2 border-red-400 flex items-center gap-2 text-red-600"
-          (click)="cancelBulkMode()">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-          Cancelar
-        </button>
-      </ng-template>
-      <!-- Botón actualizar -->
-      <button *ngIf="!bulkMode" class="btn btn-ghost gap-2 ml-auto" (click)="refreshData()"
-        [disabled]="loading$ | async">
-        <span *ngIf="loading$ | async" class="loading loading-spinner loading-xs"></span>
-        <svg *ngIf="!(loading$ | async)" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
-          viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-        </svg>
-        <span class="hidden sm:inline">
-          {{ (loading$ | async) ? 'Actualizando...' : 'Actualizar' }}
-        </span>
-      </button>
-    </div>
-
-    <!-- MODAL CREAR/EDITAR -->
-    <app-device-create-edit-modal *ngIf="showCreateModal || showEditModal" [device]="deviceToEdit"
-      (save)="handleModalSave($event)" (close)="closeModals()">
-    </app-device-create-edit-modal>
-
-    <!-- MODAL ELIMINAR -->
-    <app-device-delete-modal *ngIf="showDeleteModal" [device]="deviceToDelete" (deleted)="onDeviceDeleted()"
-      (cancel)="cancelDelete()">
-    </app-device-delete-modal>
-
-    <!-- MODAL CARGA MASIVA -->
-    <app-device-bulk-upload-modal *ngIf="showBulkUploadModal" (uploaded)="onBulkUploadSuccess($event)"
-      (close)="closeBulkUploadModal()">
-    </app-device-bulk-upload-modal>
-
-    <!-- TABLA principal de dispositivos -->
-    <div *ngIf="!deviceError && stats.totalDevices > 0" class="relative">
-      <ng-container *ngIf="pagedDevices$ | async as pagedDevices">
-        <table class="table w-full table-zebra rounded-xl shadow-lg overflow-hidden" *ngIf="pagedDevices.length > 0">
-          <thead class="bg-blue-100">
-            <tr>
-              <th *ngIf="bulkMode">
-                <input type="checkbox" [checked]="allSelectedFiltered()" (change)="toggleSelectAllFiltered($event)">
-              </th>
-              <th>
-                <svg class="h-5 w-5 text-blue-400 inline mr-2" fill="none" stroke="currentColor" stroke-width="2"
-                  viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01" />
-                </svg>
-                Nombre
-              </th>
-              <th>
-                <svg class="h-5 w-5 text-blue-400 inline mr-2" fill="none" stroke="currentColor" stroke-width="2"
-                  viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                Marca
-              </th>
-              <th>
-                <svg class="h-5 w-5 text-blue-400 inline mr-2" fill="none" stroke="currentColor" stroke-width="2"
-                  viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                </svg>
-                Código de barras
-              </th>
-              <th>
-                <svg class="h-5 w-5 text-blue-400 inline mr-2" fill="none" stroke="currentColor" stroke-width="2"
-                  viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" />
-                </svg>
-                Estado de dispositivo
-              </th>
-              <th>
-                <svg class="h-5 w-5 text-blue-400 inline mr-2" fill="none" stroke="currentColor" stroke-width="2"
-                  viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-                Estado de asignación
-              </th>
-              <th class="text-center">
-                <svg class="h-5 w-5 text-blue-400 inline mr-2" fill="none" stroke="currentColor" stroke-width="2"
-                  viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Acciones
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let device of pagedDevices" class="hover:bg-blue-50 transition">
-              <td *ngIf="bulkMode">
-                <input type="checkbox" [(ngModel)]="device.selected" [disabled]="device.assignmentActive ?? false" />
-              </td>
-              <td (click)="goToDetail(device)"
-                class="cursor-pointer hover:underline text-lg font-semibold text-blue-900">
-                <svg class="h-5 w-5 text-blue-500 inline mr-2" fill="none" stroke="currentColor" stroke-width="2"
-                  viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01" />
-                </svg>
-                <div class="tooltip" [attr.data-tip]="device.name">
-                  {{ getTextoShort(device.name) }}
-                </div>
-              </td>
-              <td class="text-lg text-blue-700">{{ device.brand }}</td>
-              <td class="text-center">
-                <span class="badge badge-ghost badge-lg text-blue-700 bg-blue-50">{{ device.barcode }}</span>
-              </td>
-              <td>
-                <span [class]="getStatusBadge(device.status)">
-                  {{ DeviceStatusLabels[device.status] }}
-                </span>
-              </td>
-              <td class="text-center">
-                <span *ngIf="device.assignmentActive" class="badge badge-success badge-lg">Asignado</span>
-                <span *ngIf="!device.assignmentActive" class="badge badge-outline badge-lg text-blue-700 bg-blue-50">
-                  Sin asignar
-                </span>
-              </td>
-              <td class="flex gap-2 justify-center text-center">
-                <button
-                  class="btn btn-sm min-w-10 min-h-10 border-2 border-yellow-400 bg-white text-yellow-600 flex items-center justify-center hover:bg-yellow-100 hover:border-yellow-500 hover:text-yellow-700 transition-all duration-150"
-                  (click)="openEditModal(device)" [attr.aria-label]="'Editar dispositivo'"
-                  [attr.title]="'Editar dispositivo'" type="button">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M16.862 4.487l1.651 1.651a2.131 2.131 0 010 3.016l-9.193 9.193a1.5 1.5 0 01-.61.378l-3.12.937a.376.376 0 01-.47-.47l.938-3.12a1.5 1.5 0 01.378-.61l9.193-9.193a2.132 2.132 0 013.017 0z" />
-                  </svg>
-                </button>
-                <span *ngIf="device.assignmentActive; else deleteButtonEnabled" class="tooltip tooltip-left"
-                  data-tip="No puedes eliminar este dispositivo porque se encuentra asignado a una orden">
-                  <button [disabled]="true"
-                    class="btn btn-sm min-w-10 min-h-10 border-2 border-red-400 bg-white text-red-600 flex items-center justify-center hover:cursor-not-allowed transition-all duration-150"
-                    type="button">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                      stroke="currentColor" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7M9 10v6m6-6v6m2-10V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2M4 7h16" />
-                    </svg>
-                  </button>
-                </span>
-                <ng-template #deleteButtonEnabled>
-                  <button [disabled]="false"
-                    class="btn btn-sm min-w-10 min-h-10 border-2 border-red-400 bg-white text-red-600 flex items-center justify-center hover:bg-red-100 hover:border-red-500 hover:text-red-700 transition-all duration-150"
-                    (click)="openDeleteModal(device)" [attr.aria-label]="'Eliminar dispositivo'"
-                    [attr.title]="'Eliminar dispositivo'" type="button">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                      stroke="currentColor" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7M9 10v6m6-6v6m2-10V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2M4 7h16" />
-                    </svg>
-                  </button>
-                </ng-template>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <!-- Estado vacío -->
-        <div *ngIf="pagedDevices.length === 0" class="py-12 text-center opacity-80">
-          <svg class="mx-auto h-20 w-20 text-blue-300" fill="none" stroke="currentColor" stroke-width="2"
-            viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <div class="text-2xl font-semibold mt-6 text-blue-900">No hay dispositivos</div>
-          <div class="text-base-content/60 text-lg">Agrega uno nuevo para comenzar.</div>
-        </div>
-
-        <!-- PAGINADOR -->
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-2">
-          <!-- Cantidad de registros -->
-          <div class="flex items-center gap-3 text-blue-900 font-semibold text-base">
-            <svg class="h-6 w-6 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            <span class="badge badge-primary badge-lg bg-blue-100 text-blue-900 shadow">
-              {{ totalItems }} {{ totalItems === 1 ? 'registro' : 'registros' }}
-            </span>
-            <span class="opacity-60">encontrados</span>
-          </div>
-          <!-- Paginador -->
-          <div class="flex items-center gap-3 mt-2 md:mt-0" *ngIf="totalItems > pageSize">
-            <button class="btn btn-sm btn-outline btn-primary" [disabled]="page === 1" (click)="page = page - 1">
-              <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-              </svg>
-              Anterior
-            </button>
-            <span class="badge badge-secondary badge-lg bg-blue-200 text-blue-700 shadow px-4">
-              Página {{ page }} de {{ getTotalPages() }}
-            </span>
-            <button class="btn btn-sm btn-outline btn-primary" [disabled]="page === getTotalPages()"
-              (click)="page = page + 1">
-              Siguiente
-              <svg class="h-4 w-4 ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      </ng-container>
-    </div>
-  </ng-container>
+  </ng-template>
 </div>
+

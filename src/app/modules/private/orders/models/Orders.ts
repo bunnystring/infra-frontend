@@ -4,14 +4,32 @@ import { Device, DeviceStatus } from "../../devices/models/device.model";
  * Estados posibles de una orden y su traducción al español.
  * @returns Objeto con los estados de orden y sus traducciones
  */
-export const orderStates = {
-  CREATED: 'Creada',
-  IN_PROGRESS: 'En Progreso',
-  DISPATCHED: 'Despachada',
-  FINISHED: 'Finalizada',
-} as const;
+export enum OrderStates {
+  CREATED = 'CREATED',
+  IN_PROGRESS = 'IN_PROGRESS',
+  DISPATCHED = 'DISPATCHED',
+  FINISHED = 'FINISHED',
+}
 
-export type OrderState = keyof typeof orderStates;
+/**
+ * Labels para mostrar en UI
+ */
+export const OrderStateLabels: { [key in OrderStates]: string } = {
+  [OrderStates.CREATED]: 'Creada',
+  [OrderStates.IN_PROGRESS]: 'En Progreso',
+  [OrderStates.DISPATCHED]: 'Despachada',
+  [OrderStates.FINISHED]: 'Finalizada',
+};
+
+/**
+ * Colores para badges en UI
+ */
+export const OrderStatusColors: { [key in OrderStates]: string } = {
+  [OrderStates.CREATED]: 'success',
+  [OrderStates.IN_PROGRESS]: 'warning',
+  [OrderStates.DISPATCHED]: 'primary',
+  [OrderStates.FINISHED]: 'success'
+};
 
 /**
  * Interfaz que representa los items de una orden y su estado original del dispositivo
@@ -32,12 +50,13 @@ export interface OrderItem {
 export interface Order {
   id: string;
   description: string;
-  state: OrderState;
+  state: OrderStates;
   assigneeType: string;
   assigneeId: string;
   createdAt: string;
   updatedAt: string;
   items: OrderItem[];
+  assignee: any;
 }
 
 /**
@@ -58,7 +77,7 @@ export interface CreateOrderRequest {
  */
 export interface UpdateOrderRequest {
   description?: string;
-  state?: OrderState;
+  state?: OrderStates;
   assigneeType?: string;
   assigneeId?: string;
   devicesIds?: string[];
@@ -89,8 +108,11 @@ export interface OrderWithDevice extends Order {
   firstDeviceBrand?: string;
 }
 
-export const orderStateColors: Record<string, string> = {
-  'FINISHED': 'success',
-  'IN_PROGRESS': 'info',
-  'CANCELLED': 'error',
-};
+// Resultado del formulario de creación/edición de orden
+export interface OrderFormResult {
+  order: Order;
+  mode: 'create' | 'edit';
+}
+
+
+

@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import {
   Subject,
   takeUntil,
@@ -32,7 +32,6 @@ import { LoadingService } from '../../../../../core/services/loading.service';
 import { DevicesService } from '../../services/devices.service';
 import { DeviceDeleteModalComponent } from '../../modals/device-delete-modal/device-delete-modal.component';
 import { DeviceBulkUploadModalComponent } from '../../modals/device-bulk-upload-modal/device-bulk-upload-modal.component';
-import { find } from 'rxjs';
 
 @Component({
   selector: 'app-devices',
@@ -142,10 +141,13 @@ export class DevicesComponent implements OnInit, OnDestroy {
   bulkStatus: DeviceStatus | null = null;
   bulkMode = false;
 
+  buttonsIsAvailable = true;
+
   constructor(
     private devicesService: DevicesService,
     private loadingService: LoadingService,
     private router: Router,
+    private route: ActivatedRoute,
   ) {}
 
   /**
@@ -154,7 +156,38 @@ export class DevicesComponent implements OnInit, OnDestroy {
    * @returns void
    */
   ngOnInit(): void {
-    this.loadDevices();
+    this.initDevicesData();
+  }
+
+  /**
+   * Inicializa los datos de dispositivos a partir del resolver
+   * @returns void
+   */
+  initDevicesData(): void {
+    const resolved = this.route.snapshot.data['devices'];
+
+    if (resolved === 'ERROR') {
+      toast.error('No se pudo conectar al microservicio de dispositivos.');
+      this.deviceError = true;
+      this.deviceErrorMessage = 'Error de conexión al backend.';
+      this.devices$.next([]);
+      this.buttonsIsAvailable = false;
+      return;
+    }
+
+    if (!resolved || resolved.length === 0) {
+      toast.info('No hay dispositivos para mostrar actualmente.');
+      this.deviceError = false;
+      this.deviceErrorMessage = '';
+      this.devices$.next([]);
+      this.buttonsIsAvailable = true;
+      return;
+    }
+
+    this.buttonsIsAvailable = true; 
+    this.deviceError = false;
+    this.deviceErrorMessage = '';
+    this.devices$.next(resolved);
   }
 
   /**

@@ -134,6 +134,23 @@ export class OrdersComponent implements OnInit, OnDestroy {
   // Flag para controlar la disponibilidad de los botones de acción (crear, editar, eliminar)
   buttonsIsAvailable = true;
 
+  public getStates(orders: Order[]) {
+    const totalOrders = orders.length;
+    const created = orders.filter(
+      (o) => o.state === OrderStates.CREATED,
+    ).length;
+    const inProgress = orders.filter(
+      (o) => o.state === OrderStates.IN_PROGRESS,
+    ).length;
+    const dispatched = orders.filter(
+      (o) => o.state === OrderStates.DISPATCHED,
+    ).length;
+    const finished = orders.filter(
+      (o) => o.state === OrderStates.FINISHED,
+    ).length;
+    return { totalOrders, created, inProgress, dispatched, finished };
+  }
+
   constructor(
     private ordersService: OrdersService,
     private loadingService: LoadingService,
@@ -271,8 +288,6 @@ export class OrdersComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (orders) => {
           this.orders$.next(orders);
-          console.log('Órdenes cargadas:', orders);
-          this.updateStates(orders);
         },
         error: (err) => {
           console.error('Error al cargar órdenes:', err);
@@ -287,21 +302,6 @@ export class OrdersComponent implements OnInit, OnDestroy {
    * Actualiza las estadísticas de órdenes según su estado.
    * @param orders Lista de órdenes a procesar
    */
-  updateStates(orders: Order[]) {
-    this.stats.totalOrders = orders.length;
-    this.stats.created = orders.filter(
-      (o) => o.state === OrderStates.CREATED,
-    ).length;
-    this.stats.inProgress = orders.filter(
-      (o) => o.state === OrderStates.IN_PROGRESS,
-    ).length;
-    this.stats.dispatched = orders.filter(
-      (o) => o.state === OrderStates.DISPATCHED,
-    ).length;
-    this.stats.finished = orders.filter(
-      (o) => o.state === OrderStates.FINISHED,
-    ).length;
-  }
 
   /**
    * Calcula el número total de páginas para la paginación según el total de órdenes filtradas y el tamaño de página

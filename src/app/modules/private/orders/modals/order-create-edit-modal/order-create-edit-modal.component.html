@@ -1,0 +1,154 @@
+<div class="modal modal-open bg-transparent">
+  <div class="modal-box bg-white/90 backdrop-blur-sm border border-blue-200 shadow-2xl rounded-xl relative max-w-2xl">
+    <!-- Icono decorativo arriba derecha -->
+    <div class="absolute top-0 right-0 m-6 z-10 text-blue-200 pointer-events-none opacity-70">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    </div>
+    <div class="px-8 py-10">
+      <h3 class="font-bold text-3xl mb-7 text-blue-700 tracking-tight flex items-center gap-3">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-blue-400" fill="none" viewBox="0 0 24 24"
+          stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+        </svg>
+        {{ order ? 'Editar Orden' : 'Nueva Orden' }}
+      </h3>
+
+      <form [formGroup]="orderForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        <!-- Descripción -->
+        <div>
+          <label class="label text-base font-semibold text-blue-700 mb-2">Descripción</label>
+          <div class="relative">
+            <input formControlName="description" type="text"
+              class="input input-bordered w-full pr-12 text-lg bg-white/70 focus:ring-2 focus:ring-blue-400 transition-all"
+              placeholder="Breve descripción" [class.input-error]="submitted && orderForm.get('description')?.invalid"
+              autocomplete="off" />
+            <svg *ngIf="orderForm.get('description')?.valid && orderForm.get('description')?.touched"
+              class="h-5 w-5 text-success absolute right-5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor"
+              stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+            <svg *ngIf="submitted && orderForm.get('description')?.invalid"
+              class="h-5 w-5 text-error absolute right-5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor"
+              stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </div>
+          <div class="text-xs text-error mt-2 transition-all"
+            *ngIf="submitted && orderForm.get('description')?.hasError('whitespace')">No debe contener solo espacios
+            en blanco.</div>
+          <div class="text-xs text-error mt-2 transition-all"
+            *ngIf="submitted && orderForm.get('description')?.hasError('required')">Campo obligatorio.</div>
+        </div>
+        <!-- Tipo de asignación -->
+        <div>
+          <label class="label text-base font-semibold text-blue-700 mb-2">Tipo de asignación</label>
+          <select formControlName="assignedType" class="select select-bordered w-full text-lg bg-white/70">
+            <option value="" disabled selected>Selecciona tipo de asignación</option>
+            <option *ngFor="let tipo of assignedType" [value]="tipo.value">
+              {{ tipo.label }}
+            </option>
+          </select>
+          <div class="text-xs text-error mt-2" *ngIf="orderForm.get('assignedType')?.invalid && submitted">Selecciona
+            el tipo de asignación.</div>
+        </div>
+        <!-- Selector de grupos -->
+        <div *ngIf="orderForm.get('assignedType')?.value === 'GROUP'">
+          <label class="label text-base font-semibold text-blue-700 mb-2">Grupo responsable</label>
+          <select formControlName="assigneeId" class="select select-bordered w-full text-lg bg-white/70">
+            <option value="" disabled selected>Selecciona grupo</option>
+            <option *ngFor="let group of groups" [value]="group.id">{{ group.name }}</option>
+          </select>
+          <div class="text-xs text-error mt-2" *ngIf="orderForm.get('assigneeId')?.invalid && submitted">Selecciona un
+            grupo.</div>
+        </div>
+        <!-- Selector de empleados -->
+        <div *ngIf="orderForm.get('assignedType')?.value === 'EMPLOYEE'">
+          <label class="label text-base font-semibold text-blue-700 mb-2">Empleado responsable</label>
+          <select formControlName="assigneeId" class="select select-bordered w-full text-lg bg-white/70">
+            <option value="" disabled selected>Selecciona empleado</option>
+            <option *ngFor="let emp of employees" [value]="emp.id">{{ emp.fullName }}</option>
+          </select>
+          <div class="text-xs text-error mt-2" *ngIf="orderForm.get('assigneeId')?.invalid && submitted">Selecciona un
+            empleado.</div>
+        </div>
+        <!-- Multiselect dispositivos: custom dropdown -->
+        <div>
+          <label class="label text-base font-semibold text-blue-700 mb-2">Dispositivos a incluir</label>
+          <div class="flex flex-wrap gap-2 mb-2">
+            <ng-container *ngFor="let selectedId of orderForm.get('devicesIds')?.value">
+              <span
+                class="badge badge-lg px-3 py-1 bg-blue-100 text-blue-700 border border-blue-300 font-medium flex items-center cursor-pointer shadow">
+                {{ getDeviceName(selectedId) }}
+                <button type="button" class="ml-2 btn btn-xs btn-circle btn-outline btn-error border-none text-xs"
+                  (click)="removeDevice(selectedId)" aria-label="Quitar dispositivo">
+                  ✕
+                </button>
+              </span>
+            </ng-container>
+            <span *ngIf="!orderForm.get('devicesIds')?.value.length"
+              class="text-neutral-content opacity-50 text-sm">Nada seleccionado</span>
+          </div>
+          <!-- Custom dropdown (sin DaisyUI dropdown, solo Angular control) -->
+          <div class="relative w-full">
+            <button type="button"
+              class="select select-bordered w-full text-lg bg-white/70 flex justify-between items-center cursor-pointer px-4 py-2 transition-all border-blue-300"
+              (click)="showDeviceDropdown = !showDeviceDropdown">
+              <span class="text-blue-700 font-medium">Añadir dispositivo...</span>
+              <svg width="16" height="16" fill="none" class="text-blue-500">
+                <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2" />
+              </svg>
+            </button>
+            <div *ngIf="showDeviceDropdown"
+              class="absolute left-0 top-full mt-2 p-2 shadow bg-white/90 border border-blue-200 rounded-xl w-full z-50"
+              style="max-height:15rem;overflow-y:auto;">
+              <input [(ngModel)]="deviceSearch" [ngModelOptions]="{standalone: true}" (input)="filterDevices()"
+                type="text"
+                class="input input-sm input-bordered w-full mb-2 bg-white/90 focus:ring-2 focus:ring-blue-400"
+                placeholder="Buscar dispositivo..." />
+              <ul>
+                <li *ngFor="let dev of filteredDevices">
+                  <a (click)="addDevice(dev.id)"
+                    class="select select-bordered w-full text-lg bg-white/70 flex items-center justify-between px-4 py-2 cursor-pointer transition-all border-none hover:bg-blue-50 hover:text-blue-700 focus:bg-blue-100 rounded-lg">
+                    <span class="font-medium">{{ dev.name }}</span>
+                    <span class="text-xs text-blue-500">{{ dev.brand }}</span>
+                  </a>
+                </li>
+                <li *ngIf="filteredDevices.length === 0" class="text-center text-neutral-content opacity-60 py-2">Sin
+                  coincidencias</li>
+              </ul>
+              <!-- Cierra el menú -->
+              <button type="button" class="btn btn-sm btn-ghost w-full mt-2" (click)="showDeviceDropdown = false">
+                Cerrar
+              </button>
+            </div>
+          </div>
+          <div class="text-xs text-error mt-2" *ngIf="orderForm.get('devicesIds')?.invalid && submitted">
+            Selecciona al menos un dispositivo.
+          </div>
+        </div>
+        <!-- Botones -->
+        <div class="modal-action flex justify-center gap-4 mt-8">
+          <button type="button" class="btn btn-ghost btn-lg text-red-600 border-red-400" (click)="close.emit()">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary btn-lg shadow-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+            {{ order ? 'Guardar cambios' : 'Crear orden' }}
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>

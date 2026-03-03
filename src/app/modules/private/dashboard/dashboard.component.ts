@@ -7,7 +7,6 @@ import { User } from '../../public/auth/models/user.model';
 import { forkJoin } from 'rxjs/internal/observable/forkJoin';
 import { catchError, Observable, of, map } from 'rxjs';
 import { Device, DeviceStatus } from '../devices/models/device.model';
-import { takeUntil } from 'rxjs/internal/operators/takeUntil';
 import { Subject } from 'rxjs/internal/Subject';
 import { OrdersService } from '../orders/services/orders.service';
 import { LoadingService } from '../../../core/services/loading.service';
@@ -45,7 +44,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     totalOrders: number;
     activeOrders: number;
     createdOrders: number;
-    inProgressOrders: number;
+    inProcessOrders: number;
     despatchedOrders: number;
     finishedOrders: number;
     totalDevicesInOrders: number;
@@ -59,7 +58,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     totalOrders: 0,
     activeOrders: 0,
     createdOrders: 0,
-    inProgressOrders: 0,
+    inProcessOrders: 0,
     despatchedOrders: 0,
     finishedOrders: 0,
     totalDevicesInOrders: 0,
@@ -80,6 +79,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   orderError = false;
   orderErrorMessage = '';
   isRetrying = false;
+
 
   // Computed property para saber si hay algún error
   get hasAnyError(): boolean {
@@ -174,8 +174,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
         const createdOrders = orders.filter(
           (o) => o.state === 'CREATED',
         ).length;
-        const inProgressOrders = orders.filter(
-          (o) => o.state === 'IN_PROGRESS',
+        const inProcessOrders = orders.filter(
+          (o) => o.state === 'IN_PROCESS',
         ).length;
         const despatchedOrders = orders.filter(
           (o) => o.state === 'DISPATCHED',
@@ -184,7 +184,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           (o) => o.state === 'FINISHED',
         ).length;
         const activeOrders =
-          createdOrders + inProgressOrders + despatchedOrders;
+          createdOrders + inProcessOrders + despatchedOrders;
 
         const totalDevicesInOrders = orders.reduce(
           (sum, order) => sum + (order.items?.length || 0),
@@ -204,7 +204,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           totalOrders,
           activeOrders,
           createdOrders,
-          inProgressOrders,
+          inProcessOrders,
           despatchedOrders,
           finishedOrders,
           totalDevicesInOrders,
@@ -447,8 +447,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
         type: 'primary',
         icon: '🔄',
         title: 'Órdenes en progreso',
-        message: `${stats.inProgressOrders} orden${stats.inProgressOrders !== 1 ? 'es' : ''} en proceso`,
-        count: stats.inProgressOrders,
+        message: `${stats.inProcessOrders} orden${stats.inProcessOrders !== 1 ? 'es' : ''} en proceso`,
+        count: stats.inProcessOrders,
       },
       {
         type: 'success',
@@ -468,7 +468,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   getOrderStateClass(state: string): string {
     const stateMap: Record<string, string> = {
       CREATED: 'badge-info',
-      IN_PROGRESS: 'badge-warning',
+      IN_PROCESS: 'badge-warning',
       DESPATCHED: 'badge-primary',
       FINISHED: 'badge-success',
     };

@@ -66,10 +66,10 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
-            <div class="stat-title text-base font-semibold">En progreso</div>
-            <div class="stat-value text-warning text-2xl">{{ stats.inProgress }}</div>
+            <div class="stat-title text-base font-semibold">En proceso</div>
+            <div class="stat-value text-warning text-2xl">{{ stats.inProcess }}</div>
             <div class="stat-desc">
-              {{ (stats.totalOrders ? (stats.inProgress / stats.totalOrders * 100) : 0) | number:'1.0-0' }}%
+              {{ (stats.totalOrders ? (stats.inProcess / stats.totalOrders * 100) : 0) | number:'1.0-0' }}%
             </div>
           </div>
           <div class="stat shadow-md rounded-lg">
@@ -104,7 +104,7 @@
           [ngModel]="statusFilter" (ngModelChange)="statusFilter = $event">
           <option [ngValue]="'ALL'">Todos los estados</option>
           <option
-            *ngFor="let s of [OrderStates.CREATED, OrderStates.IN_PROGRESS, OrderStates.DISPATCHED, OrderStates.FINISHED]"
+            *ngFor="let s of [OrderStates.CREATED, OrderStates.IN_PROCESS, OrderStates.DISPATCHED, OrderStates.FINISHED]"
             [ngValue]="s">
             {{ OrderStateLabels[s] }}
           </option>

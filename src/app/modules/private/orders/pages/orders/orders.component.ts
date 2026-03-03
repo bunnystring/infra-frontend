@@ -139,8 +139,8 @@ export class OrdersComponent implements OnInit, OnDestroy {
     const created = orders.filter(
       (o) => o.state === OrderStates.CREATED,
     ).length;
-    const inProgress = orders.filter(
-      (o) => o.state === OrderStates.IN_PROGRESS,
+    const inProcess = orders.filter(
+      (o) => o.state === OrderStates.IN_PROCESS,
     ).length;
     const dispatched = orders.filter(
       (o) => o.state === OrderStates.DISPATCHED,
@@ -148,7 +148,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
     const finished = orders.filter(
       (o) => o.state === OrderStates.FINISHED,
     ).length;
-    return { totalOrders, created, inProgress, dispatched, finished };
+    return { totalOrders, created, inProcess, dispatched, finished };
   }
 
   constructor(

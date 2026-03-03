@@ -1,6 +1,5 @@
 <div class="modal modal-open bg-transparent">
   <div class="modal-box bg-white/90 backdrop-blur-sm border border-blue-200 shadow-2xl rounded-xl relative max-w-2xl">
-    <!-- Icono decorativo arriba derecha -->
     <div class="absolute top-0 right-0 m-6 z-10 text-blue-200 pointer-events-none opacity-70">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -92,7 +91,6 @@
             <span *ngIf="!orderForm.get('devicesIds')?.value.length"
               class="text-neutral-content opacity-50 text-sm">Nada seleccionado</span>
           </div>
-          <!-- Custom dropdown (sin DaisyUI dropdown, solo Angular control) -->
           <div class="relative w-full">
             <button type="button"
               class="select select-bordered w-full text-lg bg-white/70 flex justify-between items-center cursor-pointer px-4 py-2 transition-all border-blue-300"

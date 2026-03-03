@@ -5,12 +5,13 @@ import { DevicesService } from '../devices/services/devices.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { User } from '../../public/auth/models/user.model';
 import { forkJoin } from 'rxjs/internal/observable/forkJoin';
-import { catchError, Observable, of } from 'rxjs';
+import { catchError, Observable, of, map } from 'rxjs';
 import { Device, DeviceStatus } from '../devices/models/device.model';
 import { takeUntil } from 'rxjs/internal/operators/takeUntil';
 import { Subject } from 'rxjs/internal/Subject';
 import { OrdersService } from '../orders/services/orders.service';
 import { LoadingService } from '../../../core/services/loading.service';
+import { Alerta, DashboardStatsType } from './models/DashboardStats';
 
 /**
  * Componente de Dashboard
@@ -34,43 +35,44 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return this.loadingService.loading$;
   }
 
-  // Estado de carga
-  stats = {
-    // Dispositivos
+  // Observables para estadísticas y datos del dashboard
+  dashboardStats$: Observable<{
+    totalDevices: number;
+    goodCondition: number;
+    occupied: number;
+    needsRepair: number;
+    fair: number;
+    totalOrders: number;
+    activeOrders: number;
+    createdOrders: number;
+    inProgressOrders: number;
+    despatchedOrders: number;
+    finishedOrders: number;
+    totalDevicesInOrders: number;
+    averageItemsPerOrder: number;
+  }> = of({
     totalDevices: 0,
     goodCondition: 0,
     occupied: 0,
     needsRepair: 0,
     fair: 0,
-
-    // Ordenes
     totalOrders: 0,
     activeOrders: 0,
     createdOrders: 0,
     inProgressOrders: 0,
     despatchedOrders: 0,
     finishedOrders: 0,
-
-    // Otros
     totalDevicesInOrders: 0,
     averageItemsPerOrder: 0,
-  };
+  });
 
+  // Datos para mostrar en el dashboard
   recentDevices: Device[] = [];
   recentOrders: Order[] = [];
   devicesByBrand: { brand: string; count: number }[] = [];
 
   // Referencia a orderStates para usar en el template
   orderStates = OrderStates;
-
-  // Alertas dinámicas
-  alerts: Array<{
-    type: string;
-    icon: string;
-    title: string;
-    message: string;
-    count: number;
-  }> = [];
 
   // Manejo de errores
   deviceError = false;
@@ -84,10 +86,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return this.deviceError || this.orderError;
   }
 
+  // Subject para manejar desuscripciones y evitar fugas de memoria
   destroy$: Subject<void> = new Subject<void>();
-
-  // Bandera para evitar recargas múltiples al inicializar el componente
-  private hasLoadedOnce = false;
 
   constructor(
     private devicesService: DevicesService,
@@ -123,7 +123,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.loadDashboardData();
   }
 
-
   /**
    * Carga los datos del dashboard, incluyendo dispositivos y órdenes,
    * y maneja los errores de forma individual para cada recurso, permitiendo mostrar
@@ -135,53 +134,84 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.deviceErrorMessage = '';
     this.orderError = false;
     this.orderErrorMessage = '';
-    forkJoin({
+    this.dashboardStats$ = forkJoin({
       devices: this.devicesService.getAllDevices().pipe(
         catchError((error) => {
-          console.error(' Error al cargar dispositivos:', error);
+          console.error('Error al cargar dispositivos:', error);
           this.deviceError = true;
           this.deviceErrorMessage =
             error.message || 'Error al cargar dispositivos';
-          return of([]);
+          return of([] as Device[]);
         }),
       ),
       orders: this.ordersService.getAllOrders().pipe(
         catchError((error) => {
-          console.error(' Error al cargar órdenes:', error);
+          console.error('Error al cargar órdenes:', error);
           this.orderError = true;
           this.orderErrorMessage = error.message || 'Error al cargar órdenes';
-          return of([]);
+          return of([] as Order[]);
         }),
       ),
-    })
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: ({ devices, orders }) => {
-          // Procesar dispositivos (puede ser [])
-          if (devices.length > 0) {
-            this.calculateDeviceStats(devices);
-            this.recentDevices = this.getRecentDevices(devices, 5);
-            this.devicesByBrand = this.getDevicesByBrand(devices);
-          } else if (!this.deviceError) {
-            this.resetDeviceStats();
-          }
+    }).pipe(
+      map(({ devices, orders }) => {
+        this.recentOrders = this.getRecentOrders(orders, 5);
+        this.devicesByBrand = this.getDevicesByBrand(devices);
+        const totalDevices = devices.length;
+        const goodCondition = devices.filter(
+          (d) => d.status === DeviceStatus.GOOD_CONDITION,
+        ).length;
+        const occupied = devices.filter(
+          (d) => d.status === DeviceStatus.OCCUPIED,
+        ).length;
+        const needsRepair = devices.filter(
+          (d) => d.status === DeviceStatus.NEEDS_REPAIR,
+        ).length;
+        const fair = devices.filter(
+          (d) => d.status === DeviceStatus.FAIR,
+        ).length;
 
-          // Procesar órdenes (puede ser [])
-          if (orders.length > 0) {
-            this.calculateOrderStats(orders);
-            this.recentOrders = this.getRecentOrders(orders, 5);
-            this.updateAlerts();
-          } else if (!this.orderError) {
-            this.resetOrderStats();
-          }
+        const totalOrders = orders.length;
+        const createdOrders = orders.filter(
+          (o) => o.state === 'CREATED',
+        ).length;
+        const inProgressOrders = orders.filter(
+          (o) => o.state === 'IN_PROGRESS',
+        ).length;
+        const despatchedOrders = orders.filter(
+          (o) => o.state === 'DISPATCHED',
+        ).length;
+        const finishedOrders = orders.filter(
+          (o) => o.state === 'FINISHED',
+        ).length;
+        const activeOrders =
+          createdOrders + inProgressOrders + despatchedOrders;
 
-          this.hasLoadedOnce = true;
-          this.isRetrying = false;
-        },
-        error: (error) => {
-          console.error(' Error inesperado:', error);
-        },
-      });
+        const totalDevicesInOrders = orders.reduce(
+          (sum, order) => sum + (order.items?.length || 0),
+          0,
+        );
+        const averageItemsPerOrder =
+          orders.length > 0
+            ? Math.round((totalDevicesInOrders / orders.length) * 10) / 10
+            : 0;
+
+        return {
+          totalDevices,
+          goodCondition,
+          occupied,
+          needsRepair,
+          fair,
+          totalOrders,
+          activeOrders,
+          createdOrders,
+          inProgressOrders,
+          despatchedOrders,
+          finishedOrders,
+          totalDevicesInOrders,
+          averageItemsPerOrder,
+        };
+      }),
+    );
   }
 
   /**
@@ -250,13 +280,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
       )
       .subscribe((devices) => {
         if (devices.length > 0) {
-          this.calculateDeviceStats(devices);
           this.recentDevices = this.getRecentDevices(devices, 5);
           this.devicesByBrand = this.getDevicesByBrand(devices);
         } else {
           // Si no hay datos y no hay error, resetear
           if (!this.deviceError) {
-            this.resetDeviceStats();
             this.recentDevices = [];
             this.devicesByBrand = [];
           }
@@ -289,45 +317,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
       )
       .subscribe((orders) => {
         if (orders.length > 0) {
-          this.calculateOrderStats(orders);
           this.recentOrders = this.getRecentOrders(orders, 5);
-          this.updateAlerts();
         } else {
           if (!this.orderError) {
-            this.resetOrderStats();
             this.recentOrders = [];
-            this.alerts = [];
           }
         }
         this.isRetrying = false;
       });
-  }
-
-  /**
-   * Resetear solo estadísticas de dispositivos
-   * @returns void
-   */
-  private resetDeviceStats(): void {
-    this.stats.totalDevices = 0;
-    this.stats.goodCondition = 0;
-    this.stats.occupied = 0;
-    this.stats.needsRepair = 0;
-    this.stats.fair = 0;
-  }
-
-  /**
-   * Resetear solo estadísticas de órdenes
-   * @returns void
-   */
-  private resetOrderStats(): void {
-    this.stats.totalOrders = 0;
-    this.stats.activeOrders = 0;
-    this.stats.createdOrders = 0;
-    this.stats.inProgressOrders = 0;
-    this.stats.despatchedOrders = 0;
-    this.stats.finishedOrders = 0;
-    this.stats.totalDevicesInOrders = 0;
-    this.stats.averageItemsPerOrder = 0;
   }
 
   /**
@@ -370,7 +367,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
    */
   private loadUser(): void {
     this.user = this.authService.getCurrentUser();
-    // console.log('👤 Usuario en Dashboard:', this.user);
   }
 
   /**
@@ -413,65 +409,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Calcular estadísticas de dispositivos en base a su estado
-   * @param devices Lista de dispositivos
-   * @return void
-   */
-  private calculateDeviceStats(devices: Device[]): void {
-    this.stats.totalDevices = devices.length;
-    this.stats.goodCondition = devices.filter(
-      (d) => d.status === DeviceStatus.GOOD_CONDITION,
-    ).length;
-    this.stats.occupied = devices.filter(
-      (d) => d.status === DeviceStatus.OCCUPIED,
-    ).length;
-    this.stats.needsRepair = devices.filter(
-      (d) => d.status === DeviceStatus.NEEDS_REPAIR,
-    ).length;
-    this.stats.fair = devices.filter(
-      (d) => d.status === DeviceStatus.FAIR,
-    ).length;
-  }
-
-  /**
-   * Calcular estadísticas de órdenes
-   * @param orders Lista de órdenes
-   * @return void
-   */
-  private calculateOrderStats(orders: Order[]): void {
-    this.stats.totalOrders = orders.length;
-    this.stats.createdOrders = orders.filter(
-      (o) => o.state === 'CREATED',
-    ).length;
-    this.stats.inProgressOrders = orders.filter(
-      (o) => o.state === 'IN_PROGRESS',
-    ).length;
-    this.stats.despatchedOrders = orders.filter(
-      (o) => o.state === 'DISPATCHED',
-    ).length;
-    this.stats.finishedOrders = orders.filter(
-      (o) => o.state === 'FINISHED',
-    ).length;
-    this.stats.activeOrders =
-      this.stats.createdOrders +
-      this.stats.inProgressOrders +
-      this.stats.despatchedOrders;
-
-    // Calcular total de dispositivos en órdenes
-    this.stats.totalDevicesInOrders = orders.reduce(
-      (sum, order) => sum + order.items.length,
-      0,
-    );
-
-    // Calcular promedio de items por orden
-    this.stats.averageItemsPerOrder =
-      orders.length > 0
-        ? Math.round((this.stats.totalDevicesInOrders / orders.length) * 10) /
-          10
-        : 0;
-  }
-
-  /**
    * Obtener órdenes recientes basadas en la fecha de creación
    * @param orders Lista completa de órdenes
    * @param limit Cantidad de órdenes a retornar
@@ -490,35 +427,36 @@ export class DashboardComponent implements OnInit, OnDestroy {
    * Actualizar mensajes y conteos de alertas basados en las estadísticas actuales
    * @returns void
    */
-  private updateAlerts(): void {
-    this.alerts = [
+  getAlerts(stats: DashboardStatsType): Alerta[] {
+    console.log('Calculando alertas con stats:', stats);
+    return [
       {
         type: 'warning',
         icon: '⚠️',
         title: 'Dispositivos que necesitan reparación',
-        message: `${this.stats.needsRepair} dispositivo${this.stats.needsRepair !== 1 ? 's' : ''} requiere${this.stats.needsRepair === 1 ? '' : 'n'} atención`,
-        count: this.stats.needsRepair,
+        message: `${stats.needsRepair} dispositivo${stats.needsRepair !== 1 ? 's' : ''} requiere${stats.needsRepair === 1 ? '' : 'n'} atención`,
+        count: stats.needsRepair,
       },
       {
         type: 'info',
         icon: '📋',
         title: 'Órdenes creadas',
-        message: `${this.stats.createdOrders} orden${this.stats.createdOrders !== 1 ? 'es' : ''} esperando inicio`,
-        count: this.stats.createdOrders,
+        message: `${stats.createdOrders} orden${stats.createdOrders !== 1 ? 'es' : ''} esperando inicio`,
+        count: stats.createdOrders,
       },
       {
         type: 'primary',
         icon: '🔄',
         title: 'Órdenes en progreso',
-        message: `${this.stats.inProgressOrders} orden${this.stats.inProgressOrders !== 1 ? 'es' : ''} en proceso`,
-        count: this.stats.inProgressOrders,
+        message: `${stats.inProgressOrders} orden${stats.inProgressOrders !== 1 ? 'es' : ''} en proceso`,
+        count: stats.inProgressOrders,
       },
       {
         type: 'success',
         icon: '✅',
         title: 'Órdenes finalizadas',
-        message: `${this.stats.finishedOrders} orden${this.stats.finishedOrders !== 1 ? 'es' : ''} completadas`,
-        count: this.stats.finishedOrders,
+        message: `${stats.finishedOrders} orden${stats.finishedOrders !== 1 ? 'es' : ''} completadas`,
+        count: stats.finishedOrders,
       },
     ];
   }
@@ -641,9 +579,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   getAssigneeIcon(type: string): string {
     const iconMap: Record<string, string> = {
       GROUP: '👥',
-      INDIVIDUAL: '👤',
-      TECHNICIAN: '🔧',
-      TEAM: '🏢',
+      INDIVIDUAL: '👤'
     };
     return iconMap[type] || '📋';
   }

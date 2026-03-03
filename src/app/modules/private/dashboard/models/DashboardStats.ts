@@ -38,3 +38,37 @@ export interface DashboardStatsGroups {
   totalGroups: number;
   activeGroups: number;
 }
+
+/**
+ * Interface que representa las estadísticas generales del dashboard, combinando dispositivos, órdenes, empleados y grupos.
+ * @since 2026-02-05
+ * @author Bunnystring
+ */
+export interface Alerta {
+  type: string;
+  icon: string;
+  title: string;
+  message: string;
+  count: number;
+}
+
+/**
+ * Interface que representa las estadísticas generales del dashboard, combinando dispositivos, órdenes, empleados y grupos.
+ * @since 2026-02-05
+ * @author Bunnystring
+ */
+export type DashboardStatsType = {
+  totalDevices: number;
+  goodCondition: number;
+  occupied: number;
+  needsRepair: number;
+  fair: number;
+  totalOrders: number;
+  activeOrders: number;
+  createdOrders: number;
+  inProgressOrders: number;
+  despatchedOrders: number;
+  finishedOrders: number;
+  totalDevicesInOrders: number;
+  averageItemsPerOrder: number;
+};

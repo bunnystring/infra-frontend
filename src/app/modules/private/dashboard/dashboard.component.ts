@@ -428,7 +428,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
    * @returns void
    */
   getAlerts(stats: DashboardStatsType): Alerta[] {
-    console.log('Calculando alertas con stats:', stats);
     return [
       {
         type: 'warning',

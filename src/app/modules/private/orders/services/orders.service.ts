@@ -49,4 +49,14 @@ export class OrdersService {
       return this.apiService.putFormData<Order>(`/orders/${id}/state`, formData );
     }
 
+    /**
+     * Actualiza una orden existente
+     * @param id
+     * @param order
+     * @returns
+     */
+    updateOrder(id: string, order: Partial<CreateOrderRequest>): Observable<Order> {
+      return this.apiService.put<Order>(`/orders/${id}`, order);
+    }
+
 }

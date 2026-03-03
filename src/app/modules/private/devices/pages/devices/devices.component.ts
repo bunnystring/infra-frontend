@@ -105,15 +105,6 @@ export class DevicesComponent implements OnInit, OnDestroy {
   // Subject para manejar la destrucción del componente y evitar fugas de memoria
   private readonly destroy$ = new Subject<void>();
 
-  // Stats locales
-  stats = {
-    totalDevices: 0,
-    goodCondition: 0,
-    occupied: 0,
-    needsRepair: 0,
-    fair: 0,
-  };
-
   // Paginación
   page = 1;
   pageSize = 10;
@@ -184,7 +175,7 @@ export class DevicesComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.buttonsIsAvailable = true; 
+    this.buttonsIsAvailable = true;
     this.deviceError = false;
     this.deviceErrorMessage = '';
     this.devices$.next(resolved);

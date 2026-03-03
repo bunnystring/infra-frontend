@@ -123,11 +123,11 @@ export class OrderCreateEditModalComponent
   }
 
   addDevice(deviceId: string) {
-  const selected = this.orderForm.get('devicesIds')?.value || [];
-  this.orderForm.get('devicesIds')?.setValue([...selected, deviceId]);
-  this.deviceSearch = '';
-  this.filterDevices();
-}
+    const selected = this.orderForm.get('devicesIds')?.value || [];
+    this.orderForm.get('devicesIds')?.setValue([...selected, deviceId]);
+    this.deviceSearch = '';
+    this.filterDevices();
+  }
 
   removeDevice(deviceId: string) {
     const selected = this.orderForm.controls['devicesIds'].value || [];
@@ -169,25 +169,47 @@ export class OrderCreateEditModalComponent
       this.filterDevices();
     });
   }
-
+  /**
+   * Maneja el evento de envío del formulario, validando los datos y emitiendo el resultado a través del Output 'save'.
+   * Si el formulario es inválido, se establece un mensaje de error y no se emite ningún evento.
+   * Si el formulario es válido, se construye un objeto OrderFormResult con los datos del formulario y se emite a través del Output 'save'.
+   * @returns void
+   */
   onSubmit(): void {
     this.submitted = true;
   }
 
+  /**
+   * Maneja el cambio en el tipo de asignación (empleado o grupo), limpiando el campo de selección correspondiente para evitar inconsistencias en el formulario.
+   * Se llama cada vez que el usuario cambia el valor del campo 'assignedType' en el formulario.
+   * @returns void
+   * @param event
+   */
   onAssignedTypeChange(event: any) {
     this.orderForm.patchValue({ assigneeId: '' });
   }
 
+  /**
+   * Obtiene el nombre del dispositivo a partir de su ID, buscando en la lista de dispositivos cargada en el componente. Si no se encuentra el dispositivo, devuelve 'Sin nombre'.
+   * Se utiliza para mostrar el nombre del dispositivo en la interfaz de usuario a partir de su ID almacenada en la orden.
+   * @param deviceId El ID del dispositivo.
+   * @returns El nombre del dispositivo o 'Sin nombre' si no se encuentra.
+   */
   getDeviceName(deviceId: string): string {
     const device = this.devices.find((d) => d.id === deviceId);
     return device ? device.name : 'Sin nombre';
   }
 
+  /**
+   * Maneja la selección de un dispositivo desde el dropdown personalizado, agregando el ID del dispositivo seleccionado al formulario y actualizando la lista de dispositivos filtrados.
+   * Se llama cada vez que el usuario selecciona un dispositivo del dropdown, y se encarga de mantener actualizado el estado del formulario y la lista de dispositivos disponibles para selección.
+   * @returns void
+   * @param deviceId El ID del dispositivo seleccionado.
+   */
   onSeleccionarDispositivo(deviceId: string) {
-  const seleccionados = this.orderForm.get('devicesIds')?.value || [];
-  this.orderForm.get('devicesIds')?.setValue([...seleccionados, deviceId]);
-  this.deviceSearch = '';
-  this.filterDevices(); // Este método sólo actualiza filteredDevices, que también puede estar en el template
-  // NO necesitas cd.detectChanges() si lo haces en este handler, Angular está listo para el cambio
-}
+    const seleccionados = this.orderForm.get('devicesIds')?.value || [];
+    this.orderForm.get('devicesIds')?.setValue([...seleccionados, deviceId]);
+    this.deviceSearch = '';
+    this.filterDevices();
+  }
 }

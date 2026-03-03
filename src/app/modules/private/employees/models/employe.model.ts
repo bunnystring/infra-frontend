@@ -22,9 +22,9 @@ export interface CreateEmployeeRq {
 /**
  * Modelo que representa los estados posibles de un empleado
  */
-export interface EmployeeStatus {
-  ACTIVE: 'ACTIVE';
-  INACTIVE: 'INACTIVE';
+export enum EmployeeStatus {
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
 }
 
 /**

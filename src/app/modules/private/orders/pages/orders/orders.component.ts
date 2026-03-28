@@ -139,8 +139,8 @@ export class OrdersComponent implements OnInit, OnDestroy {
     const created = orders.filter(
       (o) => o.state === OrderStates.CREATED,
     ).length;
-    const inProgress = orders.filter(
-      (o) => o.state === OrderStates.IN_PROGRESS,
+    const inProcess = orders.filter(
+      (o) => o.state === OrderStates.IN_PROCESS,
     ).length;
     const dispatched = orders.filter(
       (o) => o.state === OrderStates.DISPATCHED,
@@ -148,7 +148,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
     const finished = orders.filter(
       (o) => o.state === OrderStates.FINISHED,
     ).length;
-    return { totalOrders, created, inProgress, dispatched, finished };
+    return { totalOrders, created, inProcess, dispatched, finished };
   }
 
   constructor(
@@ -381,5 +381,52 @@ export class OrdersComponent implements OnInit, OnDestroy {
       default:
         break;
     }
+  }
+  
+  /**
+   * Navega al detalle de la orden relacionada a una asignación de dispositivo
+   * @param orderId ID de la orden a la que se desea navegar
+   * @returns void
+   */
+  goDetailOrder(orderId: string): void {
+    if (!orderId) return;
+    this.router.navigate(['/app/orders/', orderId]);
+  }
+
+  /**
+   * Navega a una página específica
+   * @param pageNumber Número de página a la que se quiere navegar
+   * @returns void
+   */
+  goToPage(pageNumber: number): void {
+    const totalPages = this.getTotalPages();
+    if (pageNumber >= 1 && pageNumber <= totalPages) {
+      this.page = pageNumber;
+    }
+  }
+
+  /**
+   * Navega a la página siguiente
+   * @returns void
+   */
+  nextPage(): void {
+    this.goToPage(this.page + 1);
+  }
+
+  /**
+   * Navega a la página anterior
+   * @returns void
+   */
+  previousPage(): void {
+    this.goToPage(this.page - 1);
+  }
+
+  /**
+   * Genera un array con los números de página para mostrar en el paginador
+   * @returns number[] Array con los números de página
+   */
+  get pages(): number[] {
+    const totalPages = this.getTotalPages();
+    return Array.from({ length: totalPages }, (_, i) => i + 1);
   }
 }

@@ -6,7 +6,7 @@ import { Device, DeviceStatus } from "../../devices/models/device.model";
  */
 export enum OrderStates {
   CREATED = 'CREATED',
-  IN_PROGRESS = 'IN_PROGRESS',
+  IN_PROCESS = 'IN_PROCESS',
   DISPATCHED = 'DISPATCHED',
   FINISHED = 'FINISHED',
 }
@@ -16,7 +16,7 @@ export enum OrderStates {
  */
 export const OrderStateLabels: { [key in OrderStates]: string } = {
   [OrderStates.CREATED]: 'Creada',
-  [OrderStates.IN_PROGRESS]: 'En Progreso',
+  [OrderStates.IN_PROCESS]: 'En Proceso',
   [OrderStates.DISPATCHED]: 'Despachada',
   [OrderStates.FINISHED]: 'Finalizada',
 };
@@ -26,7 +26,7 @@ export const OrderStateLabels: { [key in OrderStates]: string } = {
  */
 export const OrderStatusColors: { [key in OrderStates]: string } = {
   [OrderStates.CREATED]: 'success',
-  [OrderStates.IN_PROGRESS]: 'warning',
+  [OrderStates.IN_PROCESS]: 'warning',
   [OrderStates.DISPATCHED]: 'primary',
   [OrderStates.FINISHED]: 'success'
 };

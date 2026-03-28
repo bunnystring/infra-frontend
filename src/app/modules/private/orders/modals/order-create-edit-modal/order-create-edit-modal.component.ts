@@ -78,6 +78,17 @@ export class OrderCreateEditModalComponent
   deviceSearch = '';
   filteredDevices: Device[] = [];
 
+  // Mapa para almacenar el nombre de los dispositivos por su ID, evitando llamadas repetidas a getDeviceName
+  deviceNameMap: { [id: string]: string } = {};
+
+  // Contador para verificar cuántas veces se llama a getDeviceName
+  private updateDeviceNameMap() {
+    this.deviceNameMap = {};
+    for (const device of this.devices) {
+      this.deviceNameMap[device.id] = device.name;
+    }
+  }
+
   constructor(
     private devicesService: DevicesService,
     private groupsService: GroupsService,
@@ -112,6 +123,7 @@ export class OrderCreateEditModalComponent
    * @returns void
    */
   private initParameters(): void {
+    console.log('Inicializando parámetros para orden:', this.order);
     forkJoin([
       this.devicesService.getAllDevices(),
       this.groupsService.getAllGroups(),
@@ -119,7 +131,6 @@ export class OrderCreateEditModalComponent
     ])
       .pipe(
         tap(([devices, groups, employees]) => {
-          // Guarda los resultados de los servicios
           this.devices = devices;
           this.groups = groups;
           this.employees = employees;
@@ -144,6 +155,10 @@ export class OrderCreateEditModalComponent
                   } as Device;
                 });
                 const filteredDevices = this.validateDevices(newDevices);
+                console.log(
+                  'Dispositivos después de validar asignaciones activas:',
+                  filteredDevices,
+                );
                 return [filteredDevices, groups, employees] as [
                   Device[],
                   any,
@@ -167,6 +182,7 @@ export class OrderCreateEditModalComponent
         this.groups = this.validateGroups(groups);
         this.employees = employees;
         this.filterDevices();
+        this.updateDeviceNameMap();
         this.cd.detectChanges();
       });
   }
@@ -257,8 +273,8 @@ export class OrderCreateEditModalComponent
     this.submitted = true;
     this.formError = '';
 
-    // Validación: si es edición, verifica que haya cambios
-    if (this.order && !this.hasChanges()) {
+    // Validación: si es edición, verifica que haya cambios antes de enviar
+    if (this.order?.id && !this.hasChanges()) {
       toast.warning('No se detectaron cambios en la orden');
       this.formLoading = false;
       this.cd.markForCheck();
@@ -313,17 +329,6 @@ export class OrderCreateEditModalComponent
   }
 
   /**
-   * Obtiene el nombre del dispositivo a partir de su ID, buscando en la lista de dispositivos cargada en el componente. Si no se encuentra el dispositivo, devuelve 'Sin nombre'.
-   * Se utiliza para mostrar el nombre del dispositivo en la interfaz de usuario a partir de su ID almacenada en la orden.
-   * @param deviceId El ID del dispositivo.
-   * @returns El nombre del dispositivo o 'Sin nombre' si no se encuentra.
-   */
-  getDeviceName(deviceId: string): string {
-    const device = this.devices.find((d) => d.id === deviceId);
-    return device ? device.name : 'Sin nombre';
-  }
-
-  /**
    * Maneja la selección de un dispositivo desde el dropdown personalizado, agregando el ID del dispositivo seleccionado al formulario y actualizando la lista de dispositivos filtrados.
    * Se llama cada vez que el usuario selecciona un dispositivo del dropdown, y se encarga de mantener actualizado el estado del formulario y la lista de dispositivos disponibles para selección.
    * @returns void
@@ -342,9 +347,13 @@ export class OrderCreateEditModalComponent
    * @returns Device[] - Lista de dispositivos válidos para asignar a una orden.
    */
   validateDevices(devices: Device[]): Device[] {
-    return devices
-      .filter((d) => !d.assignmentActive)
-      .filter((d) => d.status === DeviceStatus.GOOD_CONDITION);
+    const orderDeviceIds =
+      this.order?.items.map((i) => String(i.deviceId)) || [];
+    return devices.filter((d) => {
+      const isInOrder = orderDeviceIds.includes(String(d.id));
+      if (isInOrder) return true;
+      return d.status === DeviceStatus.GOOD_CONDITION && !d.assignmentActive;
+    });
   }
 
   /**
@@ -355,12 +364,32 @@ export class OrderCreateEditModalComponent
    */
   private hasChanges(): boolean {
     if (!this.order) return true;
+
     const current = this.orderForm.value;
+    const originalDevicesIds = this.order.items.map((d) => d.deviceId).sort();
+    const currentDevicesIds = (current.devicesIds || []).sort();
+
+    // Comparar descripción
+    const descriptionChanged =
+      current.description?.trim() !== this.order.description;
+
+    // Comparar tipo de asignación
+    const assignedTypeChanged =
+      current.assignedType !== this.order.assigneeType;
+
+    // Comparar ID del asignado
+    const assigneeIdChanged = current.assigneeId !== this.order.assigneeId;
+
+    // Comparar dispositivos (arrays)
+    const devicesChanged =
+      originalDevicesIds.length !== currentDevicesIds.length ||
+      !originalDevicesIds.every((id, index) => id === currentDevicesIds[index]);
+
     return (
-      current.description !== this.order.description ||
-      current.devicesIds !== this.order.items ||
-      current.assigneesIds !== this.order.assigneeId ||
-      current.assigneeType !== this.order.assigneeType
+      descriptionChanged ||
+      assignedTypeChanged ||
+      assigneeIdChanged ||
+      devicesChanged
     );
   }
 
@@ -374,7 +403,9 @@ export class OrderCreateEditModalComponent
     return groups.filter(
       (group) =>
         Array.isArray(group.employees) &&
-        group.employees.some((employee) => employee.status === EmployeeStatus.ACTIVE),
+        group.employees.some(
+          (employee) => employee.status === EmployeeStatus.ACTIVE,
+        ),
     );
   }
 }

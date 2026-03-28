@@ -66,7 +66,7 @@ export type DashboardStatsType = {
   totalOrders: number;
   activeOrders: number;
   createdOrders: number;
-  inProgressOrders: number;
+  inProcessOrders: number;
   despatchedOrders: number;
   finishedOrders: number;
   totalDevicesInOrders: number;

@@ -56,7 +56,7 @@ export class OrdersService {
      * @returns
      */
     updateOrder(id: string, order: Partial<CreateOrderRequest>): Observable<Order> {
-      return this.apiService.put<Order>(`/orders/${id}`, order);
+      return this.apiService.put<Order>(`/orders/update/${id}`, order);
     }
 
 }

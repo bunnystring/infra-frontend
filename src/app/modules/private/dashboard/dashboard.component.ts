@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Order, OrderStates } from '../orders/models/Orders';
+import { Order, OrderStateLabels, OrderStates } from '../orders/models/Orders';
 import { DevicesService } from '../devices/services/devices.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { User } from '../../public/auth/models/user.model';
@@ -79,7 +79,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   orderError = false;
   orderErrorMessage = '';
   isRetrying = false;
-
 
   // Computed property para saber si hay algún error
   get hasAnyError(): boolean {
@@ -183,8 +182,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         const finishedOrders = orders.filter(
           (o) => o.state === 'FINISHED',
         ).length;
-        const activeOrders =
-          createdOrders + inProcessOrders + despatchedOrders;
+        const activeOrders = createdOrders + inProcessOrders + despatchedOrders;
 
         const totalDevicesInOrders = orders.reduce(
           (sum, order) => sum + (order.items?.length || 0),
@@ -471,6 +469,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       IN_PROCESS: 'badge-warning',
       DESPATCHED: 'badge-primary',
       FINISHED: 'badge-success',
+      CREATED_WITH_ERRORS: 'badge-error',
     };
     return stateMap[state] || 'badge-ghost';
   }
@@ -481,7 +480,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
    * @returns Texto legible del estado
    */
   getOrderStateText(state: string): string {
-    return OrderStates[state as keyof typeof OrderStates] || state;
+    const orderState =
+      OrderStateLabels[state as keyof typeof OrderStateLabels] || state;
+    return orderState;
   }
 
   /**
@@ -578,7 +579,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   getAssigneeIcon(type: string): string {
     const iconMap: Record<string, string> = {
       GROUP: '👥',
-      INDIVIDUAL: '👤'
+      INDIVIDUAL: '👤',
     };
     return iconMap[type] || '📋';
   }

@@ -222,6 +222,12 @@
                     <path d="M12 8v4l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                       stroke-linejoin="round" />
                   </svg>
+                  <svg *ngIf="order.state === OrderStates.CREATED_WITH_ERRORS" class="h-5 w-5 text-error" fill="none"
+                    stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none" />
+                    <path d="M12 8v4l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round" />
+                  </svg>
                   {{ OrderStateLabels[order.state] }}
                 </span>
               </td>

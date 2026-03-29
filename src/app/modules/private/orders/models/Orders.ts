@@ -9,6 +9,7 @@ export enum OrderStates {
   IN_PROCESS = 'IN_PROCESS',
   DISPATCHED = 'DISPATCHED',
   FINISHED = 'FINISHED',
+  CREATED_WITH_ERRORS = 'CREATED_WITH_ERRORS'
 }
 
 /**
@@ -19,6 +20,7 @@ export const OrderStateLabels: { [key in OrderStates]: string } = {
   [OrderStates.IN_PROCESS]: 'En Proceso',
   [OrderStates.DISPATCHED]: 'Despachada',
   [OrderStates.FINISHED]: 'Finalizada',
+  [OrderStates.CREATED_WITH_ERRORS]: 'Creada con errores',
 };
 
 /**
@@ -28,7 +30,8 @@ export const OrderStatusColors: { [key in OrderStates]: string } = {
   [OrderStates.CREATED]: 'success',
   [OrderStates.IN_PROCESS]: 'warning',
   [OrderStates.DISPATCHED]: 'primary',
-  [OrderStates.FINISHED]: 'success'
+  [OrderStates.FINISHED]: 'success',
+  [OrderStates.CREATED_WITH_ERRORS]: 'error'
 };
 
 /**

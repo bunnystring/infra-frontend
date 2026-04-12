@@ -45,7 +45,7 @@ import { EmployeeStatus } from '../../../employees/models/employe.model';
   templateUrl: './order-create-edit-modal.component.html',
   styleUrls: ['./order-create-edit-modal.component.css'],
   imports: [CommonModule, ReactiveFormsModule, FormsModule],
-  standalone: true,
+  standalone: true
 })
 export class OrderCreateEditModalComponent
   implements OnInit, OnDestroy, OnChanges
@@ -99,8 +99,10 @@ export class OrderCreateEditModalComponent
   ) {}
 
   ngOnInit() {
-    this.initParameters();
     this.initForm();
+    this.loadDevices();
+    this.loadGroups();
+    this.loadEmployees();
   }
 
   ngOnDestroy() {
@@ -110,80 +112,120 @@ export class OrderCreateEditModalComponent
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['order'] && !changes['order'].firstChange) {
-      this.initParameters();
       this.initForm();
+      this.loadDevices();
+      this.loadGroups();
+      this.loadEmployees();
       this.filterDevices();
     }
   }
 
+
   /**
-   * Inicializa los parámetros necesarios para el formulario, cargando dispositivos, grupos y empleados desde sus respectivos servicios.
-   * Luego, si hay dispositivos cargados, realiza una consulta adicional para obtener el estado de asignación activa de cada dispositivo y actualizar la lista de dispositivos con esta información.
-   * Finalmente, actualiza el estado del componente con los datos cargados y filtrados, y fuerza la detección de cambios para reflejar los cambios en la interfaz de usuario.
+   * Carga todos los dispositivos y verifica sus asignaciones activas
+   * Primero, obtiene la lista completa de dispositivos desde el servicio de dispositivos.
+   * Luego, si hay dispositivos, construye una consulta para verificar qué dispositivos tienen asignaciones activas.
+   * Después, actualiza cada dispositivo con la información de si tiene una asignación activa o no.
+   * Finalmente, valida la lista de dispositivos para asegurarse de que solo se muestren aquellos que están en buen estado y no tienen asignaciones activas (a menos que ya estén en la orden), y actualiza el estado del componente con esta lista filtrada.
    * @returns void
    */
-  private initParameters(): void {
-    console.log('Inicializando parámetros para orden:', this.order);
-    forkJoin([
-      this.devicesService.getAllDevices(),
-      this.groupsService.getAllGroups(),
-      this.employeesService.getAllEmployees(),
-    ])
+  private loadDevices(): void {
+    this.devicesService
+      .getAllDevices()
       .pipe(
-        tap(([devices, groups, employees]) => {
-          this.devices = devices;
-          this.groups = groups;
-          this.employees = employees;
-          this.filterDevices();
-          this.cd.detectChanges();
-        }),
-        switchMap(([devices, groups, employees]) => {
-          if (devices.length > 0) {
-            const rq: DevicesBatchRq = {
-              ids: devices.map((device) => device.id),
-            };
-            return this.devicesService.hasActiveAssignmentBatch(rq).pipe(
-              map((assignments) => {
-                const newDevices = devices.map((device): Device => {
-                  const found = assignments.find(
-                    (a) => a.deviceId === device.id,
-                  );
-                  return {
-                    ...device,
-                    assignmentActive: found ? found.active : false,
-                    selected: false,
-                  } as Device;
-                });
-                const filteredDevices = this.validateDevices(newDevices);
-                console.log(
-                  'Dispositivos después de validar asignaciones activas:',
-                  filteredDevices,
-                );
-                return [filteredDevices, groups, employees] as [
-                  Device[],
-                  any,
-                  any,
-                ];
-              }),
-            );
-          } else {
-            return of([[], groups, employees] as [Device[], any, any]);
+        takeUntil(this.destroy$),
+        switchMap((devices) => {
+          if (!devices || devices.length === 0) {
+            return of([]);
           }
-        }),
-        tap(([devices, groups, employees]) => {
-          this.groups = this.validateGroups(groups);
-          this.employees = employees;
-          this.filterDevices();
-          this.cd.detectChanges();
+
+          // Construir request para verificar asignaciones activas
+          const rq: DevicesBatchRq = {
+            ids: devices.map((device) => device.id),
+          };
+
+          return this.devicesService.hasActiveAssignmentBatch(rq).pipe(
+            map((assignments) => {
+              const devicesWithAssignments = devices.map((device): Device => {
+                const found = assignments.find((a) => a.deviceId === device.id);
+                return {
+                  ...device,
+                  assignmentActive: found ? found.active : false,
+                  selected: false,
+                } as Device;
+              });
+
+              return this.validateDevices(devicesWithAssignments);
+            }),
+          );
         }),
       )
-      .subscribe(([devices, groups, employees]) => {
-        this.devices = devices;
-        this.groups = this.validateGroups(groups);
-        this.employees = employees;
-        this.filterDevices();
-        this.updateDeviceNameMap();
-        this.cd.detectChanges();
+      .subscribe({
+        next: (devices) => {
+          this.devices = devices;
+          this.filterDevices();
+          this.updateDeviceNameMap();
+          this.cd.detectChanges();
+          console.log('Dispositivos cargados:', devices.length);
+        },
+        error: (error) => {
+          console.error('Error al cargar dispositivos:', error);
+          this.devices = [];
+          this.cd.detectChanges();
+        },
+      });
+  }
+
+  /**
+   * Carga todos los grupos y los valida para asegurarse de que solo se muestren aquellos que tienen empleados activos asignados
+   * Primero, obtiene la lista completa de grupos desde el servicio de grupos.
+   * Luego, filtra esta lista para asegurarse de que solo se incluyan los grupos que tienen al menos un empleado activo asignado, utilizando la función validateGroups.
+   * Finalmente, actualiza el estado del componente con la lista de grupos filtrada y fuerza la detección de cambios para reflejar los cambios en la interfaz de usuario.
+   * @returns void
+   */
+  private loadGroups(): void {
+    this.groupsService
+      .getAllGroups()
+      .pipe(
+        takeUntil(this.destroy$),
+        map((groups) => this.validateGroups(groups)),
+      )
+      .subscribe({
+        next: (groups) => {
+          this.groups = groups;
+          this.cd.detectChanges();
+          console.log('Grupos cargados:', groups.length);
+        },
+        error: (error) => {
+          console.error('Error al cargar grupos:', error);
+          this.groups = [];
+          this.cd.detectChanges();
+        },
+      });
+  }
+
+  /**
+   * Carga todos los empleados desde el servicio de empleados y actualiza el estado del componente con esta lista, manejando errores en caso de que la carga falle.
+   * Primero, obtiene la lista completa de empleados desde el servicio de empleados.
+   * Luego, actualiza el estado del componente con esta lista de empleados y fuerza la detección de cambios para reflejar los cambios en la interfaz de usuario.
+   * Si ocurre un error durante la carga, se maneja el error registrándolo en la consola, estableciendo la lista de empleados como vacía y forzando la detección de cambios para actualizar la interfaz de usuario.
+   * @returns void
+   */
+  private loadEmployees(): void {
+    this.employeesService
+      .getAllEmployees()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (employees) => {
+          this.employees = employees;
+          this.cd.detectChanges();
+          console.log('Empleados cargados:', employees.length);
+        },
+        error: (error) => {
+          console.error('Error al cargar empleados:', error);
+          this.employees = [];
+          this.cd.detectChanges();
+        },
       });
   }
 

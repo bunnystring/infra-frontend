@@ -1,10 +1,14 @@
 import { Routes } from "@angular/router";
-import { DashboardComponent } from "./dashboard.component";
 
+/**
+ * Rutas del módulo de dashboard con lazy loading
+ * @author Bunnystring
+ * @since 2026-04-11
+ */
 export const DASHBOARD_ROUTES: Routes = [
   {
     path: '',
-    component: DashboardComponent,
+    loadComponent: () => import('./dashboard.component').then(m => m.DashboardComponent),
     data: { breadcrumb: 'Inicio' }
   }
 ];

@@ -5,17 +5,15 @@ import { OrdersResolver } from "./resolvers/orders-resolver";
 
 /**
  * Rutas del módulo de órdenes con lazy loading
- * Estructura:
- * - /orders -> Lista principal de órdenes
- * - /orders/:id -> Detalle de una orden específica
  *
  * @author Bunnystring
  * @since 2026-02-19
+ * @version 2.0
  */
 export const ORDERS_ROUTES: Routes = [
   {
     path: '',
-    component: OrdersComponent,
+    loadComponent: () => import('./pages/orders/orders.component').then(m => m.OrdersComponent),
     resolve: { orders: OrdersResolver },
     data: {
       breadcrumb: 'Órdenes',
@@ -24,7 +22,7 @@ export const ORDERS_ROUTES: Routes = [
   },
   {
     path: ':id',
-    component: OrdersDetailComponent,
+    loadComponent: () => import('./pages/orders-detail/orders-detail.component').then(m => m.OrdersDetailComponent),
     data: {
       breadcrumb: 'Detalle',
       title: 'Detalle de la Orden',

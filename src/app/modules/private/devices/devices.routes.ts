@@ -1,22 +1,17 @@
 import { Routes } from '@angular/router';
-import { DevicesComponent } from './pages/devices/devices.component';
-import { DevicesDetailComponent } from './pages/devices-detail/devices-detail.component';
 import { DevicesResolver } from './resolvers/devices-resolver';
 
 /**
  * Rutas del módulo de dispositivos con lazy loading
  *
- * Estructura:
- * - /devices -> Lista principal de dispositivos
- * - /devices/:id -> Detalle de un dispositivo específico
- *
  * @author Bunnystring
  * @since 2026-02-19
+ * @version 2.0
  */
 export const DEVICES_ROUTES: Routes = [
   {
     path: '',
-    component: DevicesComponent,
+    loadComponent: () => import('./pages/devices/devices.component').then(m => m.DevicesComponent),
     resolve:{ devices: DevicesResolver },
     data: {
       breadcrumb: 'Dispositivos',
@@ -25,7 +20,7 @@ export const DEVICES_ROUTES: Routes = [
   },
   {
     path: ':id',
-    component: DevicesDetailComponent,
+    loadComponent: () => import('./pages/devices-detail/devices-detail.component').then(m => m.DevicesDetailComponent),
     data: {
       breadcrumb: 'Detalle',
       title: 'Detalle del Dispositivo',

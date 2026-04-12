@@ -1,20 +1,16 @@
 import { Routes } from '@angular/router';
-import { EmployeesComponent } from './pages/employees/employees.component';
-import { EmployeesDetailComponent } from './pages/employees-detail/employees-detail.component';
 
 /**
  * Rutas del módulo de empleados con lazy loading
- * Estructura:
- * - /employees -> Lista principal de empleados
- * - /employees/:id -> Detalle de un empleado específico
  *
  * @since 2026-02-19
  * @author Bunnystring
+ * @version 2.0
  */
 export const EMPLOYEES_ROUTES: Routes = [
   {
     path: '',
-    component: EmployeesComponent,
+    loadComponent: () => import('./pages/employees/employees.component').then(m => m.EmployeesComponent),
     data: {
       breadcrumb: 'Empleados',
       title: 'Gestión de Empleados',
@@ -22,7 +18,7 @@ export const EMPLOYEES_ROUTES: Routes = [
   },
   {
     path: ':id',
-    component: EmployeesDetailComponent,
+    loadComponent: () => import('./pages/employees-detail/employees-detail.component').then(m => m.EmployeesDetailComponent),
     data: {
       breadcrumb: 'Detalle',
       title: 'Detalle del Empleado',

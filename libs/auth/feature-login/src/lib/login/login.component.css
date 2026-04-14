@@ -1,0 +1,239 @@
+/* ========================================
+   ANIMACIONES DE ENTRADA
+   ======================================== */
+
+/* Animación de entrada del card completo */
+:host {
+  display: block;
+  animation: slideInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========================================
+   EFECTOS DE INPUTS
+   ======================================== */
+
+/* Efecto sutil al enfocar inputs */
+.input:focus {
+  transform: scale(1.01);
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Animación suave para errores en inputs */
+.input-error {
+  animation: shake 0.3s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+/* Efecto hover en el botón de mostrar/ocultar contraseña */
+.input .btn-ghost:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* ========================================
+   BOTONES
+   ======================================== */
+
+/* Deshabilitar pointer events cuando está loading */
+.btn.loading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+/* Efecto ripple en el botón principal */
+.btn-primary {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn-primary:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* Transición suave para estado disabled */
+.btn:disabled {
+  cursor: not-allowed;
+  transition: opacity 0.3s ease;
+}
+
+/* ========================================
+   ALERTAS
+   ======================================== */
+
+/* Animación de entrada para alertas de error */
+.alert-error {
+  animation: slideInDown 0.4s ease-out;
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========================================
+   FORM CONTROLS
+   ======================================== */
+
+/* Espaciado consistente para form-control */
+.form-control + .form-control {
+  margin-top: 1rem;
+}
+
+/* Efecto focus en checkbox */
+.checkbox:focus {
+  outline: 2px solid hsl(var(--p));
+  outline-offset: 2px;
+}
+
+/* ========================================
+   LABELS
+   ======================================== */
+
+/* Transición suave para mensajes de error */
+.label-text-alt {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ========================================
+   LINKS
+   ======================================== */
+
+/* Efecto hover en links */
+.link {
+  transition: all 0.2s ease;
+}
+
+.link:hover {
+  transform: translateX(2px);
+}
+
+/* ========================================
+   DIVIDER
+   ======================================== */
+
+/* Estilo personalizado para el divider */
+.divider {
+  opacity: 0.5;
+}
+
+/* ========================================
+   CARD
+   ======================================== */
+
+/* Sombra dinámica para el card */
+.card {
+  transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+/* Ajustes para móviles */
+@media (max-width: 640px) {
+  .card-body {
+    padding: 1.5rem;
+  }
+
+  :host {
+    animation: slideInUp 0.3s ease-out;
+  }
+
+  .btn-primary::before {
+    display: none; /* Desactivar ripple en móviles */
+  }
+}
+
+/* ========================================
+   ACCESIBILIDAD
+   ======================================== */
+
+/* Mejorar contraste para modo de alto contraste */
+@media (prefers-contrast: high) {
+  .input-error {
+    border-width: 3px;
+  }
+
+  .label-text-alt {
+    font-weight: 600;
+  }
+}
+
+/* Respetar preferencia de movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ========================================
+   UTILIDADES
+   ======================================== */
+
+/* Prevenir selección de texto en botones */
+.btn {
+  user-select: none;
+}
+
+/* Smooth scroll para navegación */
+:host {
+  scroll-behavior: smooth;
+}

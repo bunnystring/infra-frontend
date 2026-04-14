@@ -40,3 +40,9 @@ Thumbs.db
 
 # Build artifacts
 /build
+
+
+
+.nx/cache
+.nx/workspace-data
+.angular

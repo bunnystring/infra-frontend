@@ -17,7 +17,7 @@ import {
   DeviceStatusLabels,
   DeviceFormResult,
 } from '../../models/device.model';
-import { CommonModule } from '@angular/common';
+
 import { ReactiveFormsModule } from '@angular/forms';
 import { Subject, takeUntil, finalize } from 'rxjs';
 import { DevicesService } from '../../services/devices.service';
@@ -29,7 +29,7 @@ import { toast } from 'ngx-sonner';
   templateUrl: './device-create-edit-modal.component.html',
   standalone: true,
   styleUrls: ['./device-create-edit-modal.component.css'],
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [ReactiveFormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DeviceCreateEditModalComponent

@@ -2,10 +2,10 @@
   <div class="card-body">
     <!-- Mascota animada -->
     <app-animated-pet
-     [isPasswordFocused]="isPasswordFocused"
-     [isTextFieldFocused]="isEmailFocused"
-     [textFieldValue]="f['email'].value"
-     [focusedFieldType]="'email'">
+      [isPasswordFocused]="isPasswordFocused"
+      [isTextFieldFocused]="isEmailFocused"
+      [textFieldValue]="f['email'].value"
+      [focusedFieldType]="'email'">
     </app-animated-pet>
 
     <!-- Header -->
@@ -43,12 +43,18 @@
             (focus)="onEmailFocus()"
             (blur)="onEmailBlur()" />
         </label>
-        <label class="label" *ngIf="submitted && f['email'].errors">
-          <span class="label-text-alt text-error">
-            <span *ngIf="f['email'].errors['required']">El correo es requerido</span>
-            <span *ngIf="f['email'].errors['email']">Ingresa un correo válido</span>
-          </span>
-        </label>
+        @if (submitted && f['email'].errors) {
+          <label class="label">
+            <span class="label-text-alt text-error">
+              @if (f['email'].errors['required']) {
+                <span>El correo es requerido</span>
+              }
+              @if (f['email'].errors['email']) {
+                <span>Ingresa un correo válido</span>
+              }
+            </span>
+          </label>
+        }
       </div>
 
       <!-- Password Field -->
@@ -80,26 +86,36 @@
             (click)="togglePasswordVisibility()"
             class="btn btn-ghost btn-xs"
             [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'">
-            <svg *ngIf="!showPassword" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
-              viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-            </svg>
-            <svg *ngIf="showPassword" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-            </svg>
+            @if (!showPassword) {
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+            }
+            @if (showPassword) {
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+              </svg>
+            }
           </button>
         </label>
-        <label class="label" *ngIf="submitted && f['password'].errors">
-          <span class="label-text-alt text-error">
-            <span *ngIf="f['password'].errors['required']">La contraseña es requerida</span>
-            <span *ngIf="f['password'].errors['minlength']">Mínimo 6 caracteres</span>
-          </span>
-        </label>
+        @if (submitted && f['password'].errors) {
+          <label class="label">
+            <span class="label-text-alt text-error">
+              @if (f['password'].errors['required']) {
+                <span>La contraseña es requerida</span>
+              }
+              @if (f['password'].errors['minlength']) {
+                <span>Mínimo 6 caracteres</span>
+              }
+            </span>
+          </label>
+        }
       </div>
 
       <!-- Remember Me -->
@@ -114,24 +130,30 @@
       <!-- Submit Button -->
       <div class="form-control mt-6">
         <button type="submit" class="btn btn-primary" [disabled]="loading" [class.loading]="loading">
-          <span *ngIf="!loading" class="flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-            </svg>
-            Iniciar Sesión
-          </span>
-          <span *ngIf="loading" class="loading loading-spinner loading-md"></span>
+          @if (!loading) {
+            <span class="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+              </svg>
+              Iniciar Sesión
+            </span>
+          }
+          @if (loading) {
+            <span class="loading loading-spinner loading-md"></span>
+          }
         </button>
       </div>
 
       <!-- Reset Button -->
-      <div class="form-control mt-2" *ngIf="submitted && loginForm.dirty">
-        <button type="button" (click)="resetForm()" class="btn btn-ghost btn-sm">
-          Limpiar formulario
-        </button>
-      </div>
+      @if (submitted && loginForm.dirty) {
+        <div class="form-control mt-2">
+          <button type="button" (click)="resetForm()" class="btn btn-ghost btn-sm">
+            Limpiar formulario
+          </button>
+        </div>
+      }
     </form>
 
     <!-- Divider -->

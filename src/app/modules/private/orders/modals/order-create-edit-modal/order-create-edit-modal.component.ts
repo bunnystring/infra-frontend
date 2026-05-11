@@ -16,7 +16,7 @@ import {
   OrderStateLabels,
   OrderStates,
 } from '../../models/Orders';
-import { CommonModule } from '@angular/common';
+
 import { FormGroup, FormsModule, Validators } from '@angular/forms';
 import {
   forkJoin,
@@ -44,7 +44,7 @@ import { EmployeeStatus } from '../../../employees/models/employe.model';
   selector: 'app-order-create-edit-modal',
   templateUrl: './order-create-edit-modal.component.html',
   styleUrls: ['./order-create-edit-modal.component.css'],
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [ReactiveFormsModule, FormsModule],
   standalone: true
 })
 export class OrderCreateEditModalComponent

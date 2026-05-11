@@ -1,6 +1,6 @@
 <div class="modal modal-open z-50 bg-transparent">
   <div class="modal-box bg-white/90 backdrop-blur-sm border border-error shadow-2xl rounded-xl relative">
-    <div class="absolute top-0 right-0 m-4 text-error">
+    <div class="absolute top-0 right-0 m-4 text-error pointer-events-none">
       <svg class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
       </svg>
@@ -15,38 +15,38 @@
       <svg class="h-5 w-5 text-blue-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
       </svg>
-      ¿Estás seguro de que deseas eliminar <b class="text-error">{{ group?.name }}</b>?
+      ¿Estás seguro de que deseas eliminar <b class="text-error">{{ group()?.name }}</b>?
     </p>
-    @if (group?.employees?.length) {
+    @if (group()?.employees?.length) {
       <div class="alert alert-warning mb-4 text-sm flex gap-2 items-center">
         <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        Este grupo tiene <b>{{ group?.employees?.length }}</b> empleado(s) asignado(s). Se perderán las asignaciones.
+        Este grupo tiene <b>{{ group()?.employees?.length }}</b> empleado(s) asignado(s). Se perderán las asignaciones.
       </div>
     }
-    @if (error) {
+    @if (error()) {
       <div class="alert alert-warning font-semibold mb-4 flex gap-2 items-center">
         <svg class="h-5 w-5 text-warning" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        {{ error }}
+        {{ error() }}
       </div>
     }
-    @if (loading) {
+    @if (loading()) {
       <div class="flex justify-center mb-4">
         <span class="loading loading-spinner loading-lg text-error"></span>
       </div>
     }
     <div class="modal-action flex justify-end gap-4">
-      <button class="btn btn-ghost btn-lg" (click)="cancelDelete()" [disabled]="loading">
+      <button class="btn btn-ghost btn-lg" (click)="cancelDelete()" [disabled]="loading()">
         <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
         </svg>
         Cancelar
       </button>
-      <button class="btn btn-error btn-lg" (click)="confirmDelete()" [disabled]="loading">
-        @if (loading) {
+      <button class="btn btn-error btn-lg" (click)="confirmDelete()" [disabled]="loading()">
+        @if (loading()) {
           <span class="loading loading-spinner loading-xs mr-2"></span>
         }
         <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">

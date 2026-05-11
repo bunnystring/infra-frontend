@@ -1,19 +1,16 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
 import {
-  Subject,
-  takeUntil,
-  BehaviorSubject,
-  Observable,
-  combineLatest,
-  startWith,
-  map,
-  tap,
-  catchError,
-  of,
-} from 'rxjs';
+  Component,
+  ChangeDetectionStrategy,
+  computed,
+  effect,
+  inject,
+  resource,
+  signal,
+} from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { Group, GroupFormResult } from '../../models/groups.model';
 import { toast } from 'ngx-sonner';
 import { GroupCreateEditModalComponent } from '../../modals/group-create-edit-modal/group-create-edit-modal.component';
@@ -21,190 +18,140 @@ import { GroupDeleteModalComponent } from '../../modals/group-delete-modal/group
 import { LoadingService } from '../../../../../core/services/loading.service';
 import { GroupsService } from '../../services/groups.service';
 
+/**
+ * Componente principal del módulo de grupos
+ *
+ * @since 2026-05-11
+ * @author Bunnystring
+ */
 @Component({
   selector: 'app-groups',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    GroupCreateEditModalComponent,
-    GroupDeleteModalComponent,
-  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [GroupCreateEditModalComponent, GroupDeleteModalComponent, DatePipe],
   templateUrl: './groups.component.html',
   styleUrl: './groups.component.css',
 })
-export class GroupsComponent implements OnInit, OnDestroy {
-  // Modales
-  showCreateModal = false;
-  showEditModal = false;
-  showDeleteModal = false;
+export class GroupsComponent {
+  private readonly groupsService = inject(GroupsService);
+  private readonly loadingService = inject(LoadingService);
+  private readonly router = inject(Router);
 
-  // Grupo seleccionado
-  groupToEdit: Group | null = null;
-  groupToDelete: Group | null = null;
+  readonly loading = toSignal(this.loadingService.loading$, { initialValue: false });
 
-  // Estado de error
-  groupError = false;
-  groupErrorMessage = '';
-  isRetrying = false;
+  readonly groupsResource = resource({
+    loader: () => firstValueFrom(this.groupsService.getAllGroups()),
+  });
 
-  // Filtro de búsqueda reactivo
-  search$ = new BehaviorSubject<string>('');
+  readonly search = signal('');
+  readonly page = signal(1);
+  readonly pageSize = signal(10);
 
-  get search(): string { return this.search$.value; }
-  set search(val: string) { this.search$.next(val); }
+  readonly showCreateModal = signal(false);
+  readonly showEditModal = signal(false);
+  readonly showDeleteModal = signal(false);
+  readonly groupToEdit = signal<Group | null>(null);
+  readonly groupToDelete = signal<Group | null>(null);
 
-  get loading$() { return this.loadingService.loading$; }
+  readonly filteredGroups = computed(() => {
+    const groups = this.groupsResource.value() ?? [];
+    const search = this.search().toLowerCase();
+    if (!search) return groups;
+    return groups.filter(
+      (g) =>
+        g.name.toLowerCase().includes(search) ||
+        g.address.toLowerCase().includes(search),
+    );
+  });
 
-  // Fuente de datos principal
-  groups$ = new BehaviorSubject<Group[]>([]);
-  filteredGroups: Group[] = [];
+  readonly filteredStats = computed(() => {
+    const groups = this.filteredGroups();
+    return {
+      total: groups.length,
+      withEmployees: groups.filter((g) => g.employees?.length > 0).length,
+      empty: groups.filter((g) => !g.employees?.length).length,
+    };
+  });
 
-  // Paginación
-  page = 1;
-  pageSize = 10;
-  totalItems = 0;
+  readonly totalItems = computed(() => this.filteredGroups().length);
 
-  private readonly destroy$ = new Subject<void>();
-
-  // Observable de grupos filtrados por búsqueda
-  filteredGroups$: Observable<Group[]> = combineLatest([
-    this.groups$,
-    this.search$.pipe(startWith('')),
-  ]).pipe(
-    map(([groups, search]) =>
-      groups.filter((g) => this.matchSearch(g, search)),
-    ),
-    tap((groups) => {
-      this.totalItems = groups.length;
-      this.filteredGroups = groups;
-    }),
+  readonly totalPages = computed(() =>
+    Math.ceil(this.totalItems() / this.pageSize()) || 1,
   );
 
-  // Stats calculadas sobre la lista filtrada
-  filteredStats$: Observable<{ total: number; withEmployees: number; empty: number }> =
-    this.filteredGroups$.pipe(
-      map((groups) => ({
-        total: groups.length,
-        withEmployees: groups.filter((g) => g.employees?.length > 0).length,
-        empty: groups.filter((g) => !g.employees?.length).length,
-      })),
-    );
+  readonly pagedGroups = computed(() => {
+    const start = (this.page() - 1) * this.pageSize();
+    return this.filteredGroups().slice(start, start + this.pageSize());
+  });
 
-  get pagedGroups$(): Observable<Group[]> {
-    return this.filteredGroups$.pipe(
-      map((groups) =>
-        groups.slice((this.page - 1) * this.pageSize, this.page * this.pageSize),
-      ),
-    );
-  }
-
-  constructor(
-    private groupsService: GroupsService,
-    private loadingService: LoadingService,
-    private router: Router,
-  ) {}
-
-  ngOnInit(): void {
-    this.loadGroups();
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  loadGroups(): void {
-    this.groupError = false;
-    this.groupErrorMessage = '';
-
-    this.groupsService
-      .getAllGroups()
-      .pipe(
-        takeUntil(this.destroy$),
-        catchError((err) => {
-          toast.error('Error al obtener grupos', { description: err?.message || '' });
-          this.groupError = true;
-          this.groupErrorMessage = err?.message || 'Error al cargar grupos';
-          this.groups$.next([]);
-          this.isRetrying = false;
-          return of([]);
-        }),
-      )
-      .subscribe({
-        next: (groups) => {
-          if (!groups || groups.length === 0) {
-            toast.info('No hay grupos para mostrar actualmente.');
-          }
-          this.groups$.next(groups);
-          this.isRetrying = false;
-        },
-      });
-  }
-
-  retryLoadData(): void {
-    this.isRetrying = true;
-    this.loadGroups();
+  constructor() {
+    effect(() => {
+      if (this.groupsResource.error()) {
+        toast.error('Error al obtener grupos');
+      }
+    });
+    effect(() => {
+      const groups = this.groupsResource.value();
+      if (groups !== undefined && groups.length === 0) {
+        toast.info('No hay grupos para mostrar actualmente.');
+      }
+    });
   }
 
   onSearchChange(value: string): void {
-    this.page = 1;
-    this.search = value || '';
+    this.search.set(value);
+    this.page.set(1);
   }
 
   resetFilters(): void {
-    this.page = 1;
-    this.search = '';
+    this.search.set('');
+    this.page.set(1);
   }
 
-  private matchSearch(group: Group, search: string): boolean {
-    if (!search) return true;
-    const lower = search.toLowerCase();
-    return (
-      group.name.toLowerCase().includes(lower) ||
-      group.address.toLowerCase().includes(lower)
-    );
+  setPageSize(value: string): void {
+    this.pageSize.set(+value);
+    this.page.set(1);
   }
 
   openCreateModal(): void {
-    this.groupToEdit = null;
-    this.showCreateModal = true;
-    this.showEditModal = false;
+    this.groupToEdit.set(null);
+    this.showCreateModal.set(true);
+    this.showEditModal.set(false);
   }
 
   openEditModal(group: Group): void {
-    this.groupToEdit = group;
-    this.showEditModal = true;
-    this.showCreateModal = false;
+    this.groupToEdit.set(group);
+    this.showEditModal.set(true);
+    this.showCreateModal.set(false);
   }
 
   openDeleteModal(group: Group): void {
-    this.groupToDelete = group;
-    this.showDeleteModal = true;
+    this.groupToDelete.set(group);
+    this.showDeleteModal.set(true);
   }
 
   onGroupDeleted(): void {
-    this.showDeleteModal = false;
-    this.groupToDelete = null;
-    this.loadGroups();
+    this.showDeleteModal.set(false);
+    this.groupToDelete.set(null);
+    this.groupsResource.reload();
   }
 
   cancelDelete(): void {
-    this.showDeleteModal = false;
-    this.groupToDelete = null;
+    this.showDeleteModal.set(false);
+    this.groupToDelete.set(null);
   }
 
   closeModals(): void {
-    this.showCreateModal = false;
-    this.showEditModal = false;
-    this.showDeleteModal = false;
-    this.groupToEdit = null;
-    this.groupToDelete = null;
+    this.showCreateModal.set(false);
+    this.showEditModal.set(false);
+    this.showDeleteModal.set(false);
+    this.groupToEdit.set(null);
+    this.groupToDelete.set(null);
   }
 
   handleModalSave({ mode }: GroupFormResult): void {
     toast.success(mode === 'create' ? 'Grupo creado' : 'Grupo actualizado');
-    this.loadGroups();
+    this.groupsResource.reload();
     this.closeModals();
   }
 
@@ -212,27 +159,14 @@ export class GroupsComponent implements OnInit, OnDestroy {
     this.router.navigate(['/app/groups', group.id]);
   }
 
-  refreshData(): void {
-    this.loadGroups();
-  }
-
-  getTotalPages(): number {
-    return Math.ceil(this.totalItems / this.pageSize) || 1;
-  }
-
-  get pages(): number[] {
-    return Array.from({ length: this.getTotalPages() }, (_, i) => i + 1);
-  }
-
   goToPage(pageNumber: number): void {
-    const total = this.getTotalPages();
-    if (pageNumber >= 1 && pageNumber <= total) {
-      this.page = pageNumber;
+    if (pageNumber >= 1 && pageNumber <= this.totalPages()) {
+      this.page.set(pageNumber);
     }
   }
 
-  nextPage(): void { this.goToPage(this.page + 1); }
-  previousPage(): void { this.goToPage(this.page - 1); }
+  nextPage(): void { this.goToPage(this.page() + 1); }
+  previousPage(): void { this.goToPage(this.page() - 1); }
 
   getShortText(text: string): string {
     return text.length > 30 ? text.substring(0, 30) + '…' : text;

@@ -12,36 +12,34 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
-        {{ group ? 'Editar grupo' : 'Nuevo grupo' }}
+        {{ group() ? 'Editar grupo' : 'Nuevo grupo' }}
       </h3>
 
-      <form [formGroup]="groupForm" (ngSubmit)="submit()" class="space-y-6">
+      <form (submit)="onSubmit(); $event.preventDefault()" class="space-y-6">
+
         <!-- Nombre -->
         <div>
           <label class="label text-base font-semibold text-blue-700 mb-2">Nombre</label>
           <div class="relative">
             <input
               class="input input-bordered w-full pr-12 text-lg transition-all focus:ring-2 focus:ring-blue-400 bg-white/70"
-              formControlName="name"
+              [formField]="groupForm.name"
               placeholder="Nombre del grupo"
-              [class.input-error]="submitted && groupForm.get('name')?.invalid"
+              [class.input-error]="groupForm.name().touched() && groupForm.name().errors().length"
               autocomplete="off" />
-            @if (groupForm.get('name')?.valid && groupForm.get('name')?.touched) {
-              <svg class="h-5 w-5 text-success absolute right-5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            @if (groupForm.name().touched() && !groupForm.name().errors().length) {
+              <svg class="h-5 w-5 text-success absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             }
-            @if (submitted && groupForm.get('name')?.invalid) {
-              <svg class="h-5 w-5 text-error absolute right-5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            @if (groupForm.name().touched() && groupForm.name().errors().length) {
+              <svg class="h-5 w-5 text-error absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             }
           </div>
-          @if (submitted && groupForm.get('name')?.hasError('required')) {
-            <div class="text-xs text-error mt-2 transition-all">Campo obligatorio.</div>
-          }
-          @if (submitted && groupForm.get('name')?.hasError('whitespace')) {
-            <div class="text-xs text-error mt-2 transition-all">No debe contener solo espacios en blanco.</div>
+          @if (groupForm.name().touched() && groupForm.name().errors().length) {
+            <div class="text-xs text-error mt-2 transition-all">{{ groupForm.name().errors()[0].message }}</div>
           }
         </div>
 
@@ -51,53 +49,50 @@
           <div class="relative">
             <input
               class="input input-bordered w-full pr-12 text-lg transition-all focus:ring-2 focus:ring-blue-400 bg-white/70"
-              formControlName="address"
+              [formField]="groupForm.address"
               placeholder="Dirección del grupo"
-              [class.input-error]="submitted && groupForm.get('address')?.invalid"
+              [class.input-error]="groupForm.address().touched() && groupForm.address().errors().length"
               autocomplete="off" />
-            @if (groupForm.get('address')?.valid && groupForm.get('address')?.touched) {
-              <svg class="h-5 w-5 text-success absolute right-5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            @if (groupForm.address().touched() && !groupForm.address().errors().length) {
+              <svg class="h-5 w-5 text-success absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             }
-            @if (submitted && groupForm.get('address')?.invalid) {
-              <svg class="h-5 w-5 text-error absolute right-5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            @if (groupForm.address().touched() && groupForm.address().errors().length) {
+              <svg class="h-5 w-5 text-error absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             }
           </div>
-          @if (submitted && groupForm.get('address')?.hasError('required')) {
-            <div class="text-xs text-error mt-2 transition-all">Campo obligatorio.</div>
-          }
-          @if (submitted && groupForm.get('address')?.hasError('whitespace')) {
-            <div class="text-xs text-error mt-2 transition-all">No debe contener solo espacios en blanco.</div>
+          @if (groupForm.address().touched() && groupForm.address().errors().length) {
+            <div class="text-xs text-error mt-2 transition-all">{{ groupForm.address().errors()[0].message }}</div>
           }
         </div>
 
-        @if (formLoading) {
+        @if (formLoading()) {
           <div class="flex justify-center mt-6">
-            <span class="loading loading-spinner loading-lg"></span>
+            <span class="loading loading-spinner loading-lg text-blue-400"></span>
           </div>
         }
-        @if (formError) {
-          <div class="text-error text-center mb-4 text-base font-semibold">{{ formError }}</div>
+        @if (formError()) {
+          <div class="alert alert-error text-center font-semibold text-sm">{{ formError() }}</div>
         }
 
         <div class="modal-action flex justify-center gap-4 mt-8">
-          <button type="button" class="btn btn-ghost btn-lg text-red-600 border-red-400" (click)="closeModal()">
+          <button type="button" class="btn btn-ghost btn-lg text-red-600 border-red-400" (click)="closeModal()" [disabled]="formLoading()">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
             Cancelar
           </button>
-          <button type="submit" class="btn btn-primary btn-lg shadow-lg" [disabled]="formLoading">
-            @if (formLoading) {
+          <button type="submit" class="btn btn-primary btn-lg shadow-lg" [disabled]="formLoading()">
+            @if (formLoading()) {
               <span class="loading loading-spinner loading-xs mr-2"></span>
             }
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
             </svg>
-            {{ group ? 'Actualizar' : 'Guardar' }}
+            {{ group() ? 'Actualizar' : 'Guardar' }}
           </button>
         </div>
       </form>

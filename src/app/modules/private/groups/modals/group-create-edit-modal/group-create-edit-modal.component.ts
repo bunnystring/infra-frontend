@@ -1,130 +1,88 @@
 import {
   Component,
-  Input,
-  Output,
-  EventEmitter,
-  OnInit,
-  OnChanges,
-  SimpleChanges,
-  OnDestroy,
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
+  inject,
+  signal,
+  linkedSignal,
+  input,
+  output,
 } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ReactiveFormsModule } from '@angular/forms';
-import { Subject, takeUntil, finalize } from 'rxjs';
+import {
+  form,
+  FormField,
+  submit,
+  required,
+  minLength,
+} from '@angular/forms/signals';
+import { firstValueFrom } from 'rxjs';
 import { Group, GroupFormResult } from '../../models/groups.model';
 import { GroupsService } from '../../services/groups.service';
-import { noWhitespaceValidator } from '../../../../../core/utils/form-validators.utils';
 import { toast } from 'ngx-sonner';
 
+/**
+ * Modal para crear o editar un grupo usando Signal Forms (Angular 21)
+ *
+ * @since 2026-05-11
+ * @author Bunnystring
+ */
 @Component({
   selector: 'app-group-create-edit-modal',
   templateUrl: './group-create-edit-modal.component.html',
   standalone: true,
   styleUrls: ['./group-create-edit-modal.component.css'],
-  imports: [ReactiveFormsModule],
+  imports: [FormField],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class GroupCreateEditModalComponent implements OnInit, OnChanges, OnDestroy {
-  @Input() group: Group | null = null;
-  @Output() close = new EventEmitter<void>();
-  @Output() save = new EventEmitter<GroupFormResult>();
+export class GroupCreateEditModalComponent {
+  readonly group = input<Group | null>(null);
+  readonly close = output<void>();
+  readonly save = output<GroupFormResult>();
 
-  groupForm!: FormGroup;
-  submitted = false;
-  formError = '';
-  formLoading = false;
+  private readonly groupsService = inject(GroupsService);
 
-  private destroy$ = new Subject<void>();
+  readonly formError = signal('');
+  readonly formLoading = signal(false);
 
-  constructor(
-    private fb: FormBuilder,
-    private groupsService: GroupsService,
-    private cd: ChangeDetectorRef,
-  ) {}
+  readonly model = linkedSignal(() => {
+    const g = this.group();
+    return {
+      name: g?.name ?? '',
+      address: g?.address ?? '',
+    };
+  });
 
-  ngOnInit(): void {
-    this.initForm();
-  }
+  readonly groupForm = form(this.model, (s) => {
+    required(s.name, { message: 'Nombre es obligatorio' });
+    minLength(s.name, 3, { message: 'Debe tener al menos 3 caracteres' });
+    required(s.address, { message: 'Dirección es obligatoria' });
+    minLength(s.address, 3, { message: 'Debe tener al menos 3 caracteres' });
+  });
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
+  onSubmit(): void {
+    this.formError.set('');
+    const isEdit = !!this.group();
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['group'] && !changes['group'].firstChange) {
-      this.initForm();
-    }
-  }
-
-  private initForm(): void {
-    this.groupForm = this.fb.group({
-      name: [
-        this.group?.name || '',
-        [Validators.required, noWhitespaceValidator()],
-      ],
-      address: [
-        this.group?.address || '',
-        [Validators.required, noWhitespaceValidator()],
-      ],
+    submit(this.groupForm, async () => {
+      this.formLoading.set(true);
+      try {
+        const { name, address } = this.model();
+        const result = await firstValueFrom(
+          isEdit
+            ? this.groupsService.updateGroup(this.group()!.id, { name, address })
+            : this.groupsService.createGroup({ name, address }),
+        );
+        this.save.emit({ group: result, mode: isEdit ? 'edit' : 'create' });
+      } catch (err: any) {
+        const msg = err?.error?.message || err?.message || 'Error al guardar el grupo';
+        this.formError.set(msg);
+        toast.error('Error al guardar el grupo', { description: msg });
+      } finally {
+        this.formLoading.set(false);
+      }
     });
-    this.submitted = false;
-    this.formError = '';
-    this.formLoading = false;
-  }
-
-  submit(): void {
-    this.submitted = true;
-    this.formError = '';
-
-    if (this.group && !this.hasChanges()) {
-      toast.warning('No se detectaron cambios en el grupo');
-      return;
-    }
-
-    if (this.groupForm.invalid) return;
-
-    this.formLoading = true;
-    this.cd.markForCheck();
-
-    const value = this.groupForm.value;
-    const isEdit = !!this.group;
-    const op$ = this.group
-      ? this.groupsService.updateGroup(this.group.id, value)
-      : this.groupsService.createGroup(value);
-
-    op$
-      .pipe(
-        takeUntil(this.destroy$),
-        finalize(() => {
-          this.formLoading = false;
-          this.cd.markForCheck();
-        }),
-      )
-      .subscribe({
-        next: (group: Group) => {
-          this.save.emit({ group, mode: isEdit ? 'edit' : 'create' });
-        },
-        error: (err) => {
-          const msg = err?.error?.message || err?.message || 'Error al guardar el grupo';
-          this.formError = msg;
-          toast.error('Error al guardar el grupo', { description: msg });
-        },
-      });
   }
 
   closeModal(): void {
     this.close.emit();
-  }
-
-  private hasChanges(): boolean {
-    if (!this.group) return true;
-    const current = this.groupForm.value;
-    return (
-      current.name !== this.group.name ||
-      current.address !== this.group.address
-    );
   }
 }

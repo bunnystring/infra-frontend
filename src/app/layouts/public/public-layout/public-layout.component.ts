@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
-import { CommonModule } from '@angular/common';
+
 import { ThemeService } from '../../../core/services/theme.service';
 
 /**
@@ -13,7 +13,7 @@ import { ThemeService } from '../../../core/services/theme.service';
 @Component({
   selector: 'app-public-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './public-layout.component.html',
   styleUrl: './public-layout.component.css'
 })

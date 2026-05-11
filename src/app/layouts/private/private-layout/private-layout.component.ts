@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
@@ -16,7 +16,7 @@ import { ThemeService, Theme } from '../../../core/services/theme.service';
  */
 @Component({
   selector: 'app-private-layout',
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './private-layout.component.html',
   styleUrl: './private-layout.component.css',
 })

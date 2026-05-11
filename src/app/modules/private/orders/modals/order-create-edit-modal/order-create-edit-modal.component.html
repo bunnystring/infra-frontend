@@ -25,60 +25,84 @@
               class="input input-bordered w-full pr-12 text-lg bg-white/70 focus:ring-2 focus:ring-blue-400 transition-all"
               placeholder="Breve descripción" [class.input-error]="submitted && orderForm.get('description')?.invalid"
               autocomplete="off" />
-            <svg *ngIf="orderForm.get('description')?.valid && orderForm.get('description')?.touched"
-              class="h-5 w-5 text-success absolute right-5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor"
-              stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-            <svg *ngIf="submitted && orderForm.get('description')?.invalid"
-              class="h-5 w-5 text-error absolute right-5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor"
-              stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            @if (orderForm.get('description')?.valid && orderForm.get('description')?.touched) {
+              <svg
+                class="h-5 w-5 text-success absolute right-5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor"
+                stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            }
+            @if (submitted && orderForm.get('description')?.invalid) {
+              <svg
+                class="h-5 w-5 text-error absolute right-5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor"
+                stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            }
           </div>
-          <div class="text-xs text-error mt-2 transition-all"
-            *ngIf="submitted && orderForm.get('description')?.hasError('whitespace')">No debe contener solo espacios
+          @if (submitted && orderForm.get('description')?.hasError('whitespace')) {
+            <div class="text-xs text-error mt-2 transition-all"
+              >No debe contener solo espacios
             en blanco.</div>
-          <div class="text-xs text-error mt-2 transition-all"
-            *ngIf="submitted && orderForm.get('description')?.hasError('required')">Campo obligatorio.</div>
+          }
+          @if (submitted && orderForm.get('description')?.hasError('required')) {
+            <div class="text-xs text-error mt-2 transition-all"
+            >Campo obligatorio.</div>
+          }
         </div>
         <!-- Tipo de asignación -->
         <div>
           <label class="label text-base font-semibold text-blue-700 mb-2">Tipo de asignación</label>
           <select formControlName="assignedType" class="select select-bordered w-full text-lg bg-white/70">
             <option value="" disabled selected>Selecciona tipo de asignación</option>
-            <option *ngFor="let tipo of assignedType" [value]="tipo.value">
-              {{ tipo.label }}
-            </option>
+            @for (tipo of assignedType; track tipo) {
+              <option [value]="tipo.value">
+                {{ tipo.label }}
+              </option>
+            }
           </select>
-          <div class="text-xs text-error mt-2" *ngIf="orderForm.get('assignedType')?.invalid && submitted">Selecciona
+          @if (orderForm.get('assignedType')?.invalid && submitted) {
+            <div class="text-xs text-error mt-2">Selecciona
             el tipo de asignación.</div>
+          }
         </div>
         <!-- Selector de grupos -->
-        <div *ngIf="orderForm.get('assignedType')?.value === 'GROUP'">
-          <label class="label text-base font-semibold text-blue-700 mb-2">Grupo responsable</label>
-          <select formControlName="assigneeId" class="select select-bordered w-full text-lg bg-white/70">
-            <option value="" disabled selected>Selecciona grupo</option>
-            <option *ngFor="let group of groups" [value]="group.id">{{ group.name }}</option>
-          </select>
-          <div class="text-xs text-error mt-2" *ngIf="orderForm.get('assigneeId')?.invalid && submitted">Selecciona un
-            grupo.</div>
-        </div>
+        @if (orderForm.get('assignedType')?.value === 'GROUP') {
+          <div>
+            <label class="label text-base font-semibold text-blue-700 mb-2">Grupo responsable</label>
+            <select formControlName="assigneeId" class="select select-bordered w-full text-lg bg-white/70">
+              <option value="" disabled selected>Selecciona grupo</option>
+              @for (group of groups; track group) {
+                <option [value]="group.id">{{ group.name }}</option>
+              }
+            </select>
+            @if (orderForm.get('assigneeId')?.invalid && submitted) {
+              <div class="text-xs text-error mt-2">Selecciona un
+              grupo.</div>
+            }
+          </div>
+        }
         <!-- Selector de empleados -->
-        <div *ngIf="orderForm.get('assignedType')?.value === 'EMPLOYEE'">
-          <label class="label text-base font-semibold text-blue-700 mb-2">Empleado responsable</label>
-          <select formControlName="assigneeId" class="select select-bordered w-full text-lg bg-white/70">
-            <option value="" disabled selected>Selecciona empleado</option>
-            <option *ngFor="let emp of employees" [value]="emp.id">{{ emp.fullName }}</option>
-          </select>
-          <div class="text-xs text-error mt-2" *ngIf="orderForm.get('assigneeId')?.invalid && submitted">Selecciona un
-            empleado.</div>
-        </div>
+        @if (orderForm.get('assignedType')?.value === 'EMPLOYEE') {
+          <div>
+            <label class="label text-base font-semibold text-blue-700 mb-2">Empleado responsable</label>
+            <select formControlName="assigneeId" class="select select-bordered w-full text-lg bg-white/70">
+              <option value="" disabled selected>Selecciona empleado</option>
+              @for (emp of employees; track emp) {
+                <option [value]="emp.id">{{ emp.fullName }}</option>
+              }
+            </select>
+            @if (orderForm.get('assigneeId')?.invalid && submitted) {
+              <div class="text-xs text-error mt-2">Selecciona un
+              empleado.</div>
+            }
+          </div>
+        }
         <!-- Multiselect dispositivos: custom dropdown -->
         <div>
           <label class="label text-base font-semibold text-blue-700 mb-2">Dispositivos a incluir</label>
           <div class="flex flex-wrap gap-2 mb-2">
-            <ng-container *ngFor="let selectedId of orderForm.get('devicesIds')?.value">
+            @for (selectedId of orderForm.get('devicesIds')?.value; track selectedId) {
               <span
                 class="badge badge-lg px-3 py-1 bg-blue-100 text-blue-700 border border-blue-300 font-medium flex items-center cursor-pointer shadow">
                 {{ deviceNameMap[selectedId] || 'Sin nombre' }}
@@ -87,9 +111,11 @@
                   ✕
                 </button>
               </span>
-            </ng-container>
-            <span *ngIf="!orderForm.get('devicesIds')?.value.length"
+            }
+            @if (!orderForm.get('devicesIds')?.value.length) {
+              <span
               class="text-neutral-content opacity-50 text-sm">Nada seleccionado</span>
+            }
           </div>
           <div class="relative w-full">
             <button type="button"
@@ -100,33 +126,41 @@
                 <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2" />
               </svg>
             </button>
-            <div *ngIf="showDeviceDropdown"
-              class="absolute left-0 top-full mt-2 p-2 shadow bg-white/90 border border-blue-200 rounded-xl w-full z-50"
-              style="max-height:15rem;overflow-y:auto;">
-              <input [(ngModel)]="deviceSearch" [ngModelOptions]="{standalone: true}" (input)="filterDevices()"
-                type="text"
-                class="input input-sm input-bordered w-full mb-2 bg-white/90 focus:ring-2 focus:ring-blue-400"
-                placeholder="Buscar dispositivo..." />
-              <ul>
-                <li *ngFor="let dev of filteredDevices">
-                  <a (click)="addDevice(dev.id)"
-                    class="select select-bordered w-full text-lg bg-white/70 flex items-center justify-between px-4 py-2 cursor-pointer transition-all border-none hover:bg-blue-50 hover:text-blue-700 focus:bg-blue-100 rounded-lg">
-                    <span class="font-medium">{{ dev.name }}</span>
-                    <span class="text-xs text-blue-500">{{ dev.brand }}</span>
-                  </a>
-                </li>
-                <li *ngIf="filteredDevices.length === 0" class="text-center text-neutral-content opacity-60 py-2">Sin
-                  coincidencias</li>
-              </ul>
-              <!-- Cierra el menú -->
-              <button type="button" class="btn btn-sm btn-ghost w-full mt-2" (click)="showDeviceDropdown = false">
-                Cerrar
-              </button>
+            @if (showDeviceDropdown) {
+              <div
+                class="absolute left-0 top-full mt-2 p-2 shadow bg-white/90 border border-blue-200 rounded-xl w-full z-50"
+                style="max-height:15rem;overflow-y:auto;">
+                <input [(ngModel)]="deviceSearch" [ngModelOptions]="{standalone: true}" (input)="filterDevices()"
+                  type="text"
+                  class="input input-sm input-bordered w-full mb-2 bg-white/90 focus:ring-2 focus:ring-blue-400"
+                  placeholder="Buscar dispositivo..." />
+                <ul>
+                  @for (dev of filteredDevices; track dev) {
+                    <li>
+                      <a (click)="addDevice(dev.id)"
+                        class="select select-bordered w-full text-lg bg-white/70 flex items-center justify-between px-4 py-2 cursor-pointer transition-all border-none hover:bg-blue-50 hover:text-blue-700 focus:bg-blue-100 rounded-lg">
+                        <span class="font-medium">{{ dev.name }}</span>
+                        <span class="text-xs text-blue-500">{{ dev.brand }}</span>
+                      </a>
+                    </li>
+                  }
+                  @if (filteredDevices.length === 0) {
+                    <li class="text-center text-neutral-content opacity-60 py-2">Sin
+                    coincidencias</li>
+                  }
+                </ul>
+                <!-- Cierra el menú -->
+                <button type="button" class="btn btn-sm btn-ghost w-full mt-2" (click)="showDeviceDropdown = false">
+                  Cerrar
+                </button>
+              </div>
+            }
+          </div>
+          @if (orderForm.get('devicesIds')?.invalid && submitted) {
+            <div class="text-xs text-error mt-2">
+              Selecciona al menos un dispositivo.
             </div>
-          </div>
-          <div class="text-xs text-error mt-2" *ngIf="orderForm.get('devicesIds')?.invalid && submitted">
-            Selecciona al menos un dispositivo.
-          </div>
+          }
         </div>
         <!-- Botones -->
         <div class="modal-action flex justify-center gap-4 mt-8">

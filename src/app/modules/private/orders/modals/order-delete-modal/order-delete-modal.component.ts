@@ -1,12 +1,12 @@
 import { Component, OnInit, EventEmitter, Input, Output } from '@angular/core';
 import { Order } from '../../models/Orders';
-import { CommonModule } from '@angular/common';
+
 
 @Component({
   selector: 'app-order-delete-modal',
   templateUrl: './order-delete-modal.component.html',
   styleUrls: ['./order-delete-modal.component.css'],
-  imports: [CommonModule],
+  imports: [],
   standalone: true,
 })
 export class OrderDeleteModalComponent implements OnInit {

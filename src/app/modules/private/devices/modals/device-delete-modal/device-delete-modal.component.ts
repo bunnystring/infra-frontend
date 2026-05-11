@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { Device } from '../../models/device.model';
 import { DevicesService } from '../../services/devices.service';
-import { CommonModule } from '@angular/common';
+
 import { toast } from 'ngx-sonner';
 import { finalize } from 'rxjs';
 import {} from 'rxjs';
@@ -10,7 +10,7 @@ import {} from 'rxjs';
   selector: 'app-device-delete-modal',
   templateUrl: './device-delete-modal.component.html',
   styleUrls: ['./device-delete-modal.component.css'],
-  imports: [CommonModule],
+  imports: [],
 })
 export class DeviceDeleteModalComponent implements OnInit {
 

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Location } from '@angular/common';
-import { CommonModule } from '@angular/common';
+
 
 @Component({
   selector: 'app-groups-detail',

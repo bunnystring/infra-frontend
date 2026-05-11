@@ -24,50 +24,58 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 12v8m0 0l-4-4m4 4l4-4"/>
         </svg>
         <input type="file"
-               class="file-input file-input-bordered w-full"
-               (change)="onFileSelect($event)"
-               [disabled]="loading"
-               accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"/>
+          class="file-input file-input-bordered w-full"
+          (change)="onFileSelect($event)"
+          [disabled]="loading"
+          accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"/>
       </div>
       <!-- Nombre archivo -->
-      <div *ngIf="form.get('file')?.value" class="text-blue-700 font-mono text-sm">
-        Archivo seleccionado: <b>{{ form.get('file')?.value.name }}</b>
-      </div>
+      @if (form.get('file')?.value) {
+        <div class="text-blue-700 font-mono text-sm">
+          Archivo seleccionado: <b>{{ form.get('file')?.value.name }}</b>
+        </div>
+      }
       <!-- Errores de validación -->
-      <div *ngIf="fileErrorMsg" class="alert alert-error flex gap-2 mt-2">
-        <svg class="h-5 w-5 text-error" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="10" stroke-linecap="round" stroke-linejoin="round"/>
-          <line x1="12" y1="8" x2="12" y2="12" stroke-linecap="round" stroke-linejoin="round"/>
-          <line x1="12" y1="16" x2="12" y2="16" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span>{{ fileErrorMsg }}</span>
-      </div>
+      @if (fileErrorMsg) {
+        <div class="alert alert-error flex gap-2 mt-2">
+          <svg class="h-5 w-5 text-error" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="12" y1="8" x2="12" y2="12" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="12" y1="16" x2="12" y2="16" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>{{ fileErrorMsg }}</span>
+        </div>
+      }
       <!-- Error de backend -->
-      <div *ngIf="formError" class="alert alert-error flex gap-2 mt-2">
-        <svg class="h-5 w-5 text-error" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="10" stroke-linecap="round" stroke-linejoin="round"/>
-          <line x1="12" y1="8" x2="12" y2="12" stroke-linecap="round" stroke-linejoin="round"/>
-          <line x1="12" y1="16" x2="12" y2="16" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span>{{ formError }}</span>
-      </div>
+      @if (formError) {
+        <div class="alert alert-error flex gap-2 mt-2">
+          <svg class="h-5 w-5 text-error" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="12" y1="8" x2="12" y2="12" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="12" y1="16" x2="12" y2="16" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>{{ formError }}</span>
+        </div>
+      }
       <!-- Loader -->
-      <div *ngIf="loading" class="flex justify-center items-center mt-2">
-        <span class="loading loading-spinner loading-lg text-primary"></span>
-      </div>
+      @if (loading) {
+        <div class="flex justify-center items-center mt-2">
+          <span class="loading loading-spinner loading-lg text-primary"></span>
+        </div>
+      }
       <!-- Botones -->
       <div class="modal-action flex gap-3 justify-end mt-6">
         <button class="btn btn-primary btn-lg gap-2"
-                [disabled]="form.invalid || loading">
+          [disabled]="form.invalid || loading">
           <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
           </svg>
           Cargar
         </button>
         <button class="btn btn-ghost btn-lg gap-2"
-                type="button"
-                [disabled]="loading"
-                (click)="closeModal()">
+          type="button"
+          [disabled]="loading"
+          (click)="closeModal()">
           <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
           </svg>

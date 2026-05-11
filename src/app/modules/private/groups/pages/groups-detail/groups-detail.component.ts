@@ -1,107 +1,82 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  computed,
+  inject,
+  resource,
+  signal,
+} from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Location } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
-import {
-  Subject,
-  Observable,
-  of,
-  switchMap,
-  tap,
-  catchError,
-  finalize,
-  takeUntil,
-} from 'rxjs';
-import { Group } from '../../models/groups.model';
+import { map } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { GroupsService } from '../../services/groups.service';
 import { LoadingService } from '../../../../../core/services/loading.service';
 import { toast } from 'ngx-sonner';
 
+/**
+ * Componente de detalle de un grupo
+ *
+ * @since 2026-05-11
+ * @author Bunnystring
+ */
 @Component({
   selector: 'app-groups-detail',
   templateUrl: './groups-detail.component.html',
   styleUrls: ['./groups-detail.component.css'],
   standalone: true,
-  imports: [CommonModule],
+  imports: [DatePipe],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class GroupsDetailComponent implements OnInit, OnDestroy {
-  group$: Observable<Group | null> = of(null);
+export class GroupsDetailComponent {
+  private readonly route = inject(ActivatedRoute);
+  private readonly groupsService = inject(GroupsService);
+  private readonly location = inject(Location);
+  private readonly loadingService = inject(LoadingService);
 
-  loading = false;
-  error = '';
-  removingEmployeeId: string | null = null;
+  readonly loading = toSignal(this.loadingService.loading$, { initialValue: false });
 
-  get loading$() {
-    return this.loadingService.loading$;
-  }
+  private readonly groupId = toSignal(
+    this.route.params.pipe(map((params) => params['id'] as string)),
+    { initialValue: '' },
+  );
 
-  private destroy$ = new Subject<void>();
+  readonly groupResource = resource({
+    params: this.groupId,
+    loader: async ({ params: id }) => {
+      if (!id) return null;
+      return firstValueFrom(this.groupsService.getGroupById(id));
+    },
+  });
 
-  constructor(
-    private route: ActivatedRoute,
-    private groupsService: GroupsService,
-    private location: Location,
-    private loadingService: LoadingService,
-  ) {}
+  readonly errorMessage = computed(() => {
+    const err: any = this.groupResource.error();
+    return err?.error?.message || err?.message || 'Error al cargar el grupo';
+  });
 
-  ngOnInit(): void {
-    this.initParams();
-  }
+  readonly removingEmployeeId = signal<string | null>(null);
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  initParams(): void {
-    this.group$ = this.route.params.pipe(
-      tap(() => {
-        this.loading = true;
-        this.error = '';
-      }),
-      switchMap((params) =>
-        this.groupsService.getGroupById(params['id']).pipe(
-          catchError((err) => {
-            toast.error('Error al cargar el grupo');
-            this.error = err?.error?.message || 'Error al cargar el grupo';
-            return of(null);
-          }),
-          finalize(() => (this.loading = false)),
-        ),
-      ),
-      takeUntil(this.destroy$),
-    );
-  }
-
-  removeEmployee(groupId: string, employeeId: string): void {
-    this.removingEmployeeId = employeeId;
-    this.groupsService
-      .removeEmployeesFromGroup(groupId, employeeId)
-      .pipe(
-        takeUntil(this.destroy$),
-        finalize(() => (this.removingEmployeeId = null)),
-      )
-      .subscribe({
-        next: () => {
-          toast.success('Empleado removido del grupo');
-          this.initParams();
-        },
-        error: (err) => {
-          const msg = err?.error?.message || err?.message || 'Error al remover el empleado';
-          toast.error('Error al remover empleado', { description: msg });
-        },
-      });
+  async removeEmployee(groupId: string, employeeId: string): Promise<void> {
+    this.removingEmployeeId.set(employeeId);
+    try {
+      await firstValueFrom(this.groupsService.removeEmployeesFromGroup(groupId, employeeId));
+      toast.success('Empleado removido del grupo');
+      this.groupResource.reload();
+    } catch (err: any) {
+      const msg = err?.error?.message || err?.message || 'Error al remover el empleado';
+      toast.error('Error al remover empleado', { description: msg });
+    } finally {
+      this.removingEmployeeId.set(null);
+    }
   }
 
   refreshData(): void {
-    this.initParams();
+    this.groupResource.reload();
   }
 
   goBack(): void {
     this.location.back();
-  }
-
-  getShortId(id: string): string {
-    return id.substring(0, 8);
   }
 }

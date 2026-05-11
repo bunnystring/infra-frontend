@@ -1,6 +1,121 @@
-<button class="btn btn-outline btn-primary mb-6 flex items-center gap-2" (click)="goBack()">
-  <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-  </svg>
-  Volver
-</button>
+@if (loading()) {
+  <div class="toast toast-top toast-center z-50">
+    <div class="alert alert-info gap-2">
+      <span class="loading loading-spinner loading-sm"></span>
+      <span>Actualizando datos...</span>
+    </div>
+  </div>
+}
+
+<div class="container mx-auto px-4 py-6 max-w-3xl">
+  <button class="btn btn-outline btn-primary mb-6 flex items-center gap-2" (click)="goBack()">
+    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+    </svg>
+    Volver a empleados
+  </button>
+
+  @if (employeeResource.isLoading()) {
+    <div class="flex justify-center py-16">
+      <span class="loading loading-spinner loading-lg text-blue-400"></span>
+    </div>
+  }
+
+  @if (employeeResource.error()) {
+    <div class="alert alert-error mt-8 mx-auto w-fit text-lg shadow-lg">
+      <svg class="h-6 w-6 text-error" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      {{ errorMessage() }}
+    </div>
+  }
+
+  @if (employeeResource.value(); as employee) {
+    <!-- CARD PRINCIPAL -->
+    <div class="bg-white border border-blue-200 rounded-2xl shadow-xl p-8">
+      <div class="flex items-center justify-between gap-4 mb-8">
+        <div class="flex items-center gap-5">
+          <!-- Avatar con inicial -->
+          <div class="avatar placeholder">
+            <div class="bg-blue-100 text-blue-600 rounded-full w-16 h-16 text-2xl font-bold flex items-center justify-center">
+              {{ employee.fullName.charAt(0).toUpperCase() }}
+            </div>
+          </div>
+          <div>
+            <h2 class="text-3xl font-extrabold text-blue-700">{{ employee.fullName }}</h2>
+            <div class="mt-2">
+              @if (employee.status === EmployeeStatus.ACTIVE) {
+                <span class="badge badge-success badge-lg">Activo</span>
+              } @else {
+                <span class="badge badge-ghost badge-lg">Inactivo</span>
+              }
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-ghost gap-2" (click)="refreshData()" [disabled]="loading()">
+          @if (loading()) {
+            <span class="loading loading-spinner loading-xs"></span>
+          } @else {
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          }
+          <span class="hidden sm:inline">{{ loading() ? 'Actualizando...' : 'Actualizar' }}</span>
+        </button>
+      </div>
+
+      <!-- DATOS DEL EMPLEADO -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-blue-900">
+        <div class="bg-blue-50 rounded-xl p-5">
+          <span class="font-semibold mb-1 block text-sm text-blue-500 uppercase tracking-wide">Email</span>
+          <a [href]="'mailto:' + employee.email" class="link link-primary text-lg flex items-center gap-2">
+            <svg class="h-4 w-4 text-blue-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            {{ employee.email }}
+          </a>
+        </div>
+
+        <div class="bg-blue-50 rounded-xl p-5">
+          <span class="font-semibold mb-1 block text-sm text-blue-500 uppercase tracking-wide">Estado</span>
+          <span class="text-lg flex items-center gap-2">
+            @if (employee.status === EmployeeStatus.ACTIVE) {
+              <svg class="h-5 w-5 text-success" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span class="text-success font-semibold">Activo</span>
+            } @else {
+              <svg class="h-5 w-5 text-warning" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span class="text-warning font-semibold">Inactivo</span>
+            }
+          </span>
+        </div>
+
+        <div class="bg-blue-50 rounded-xl p-5">
+          <span class="font-semibold mb-1 block text-sm text-blue-500 uppercase tracking-wide">Tipo de documento</span>
+          <span class="text-lg text-blue-700 font-medium">{{ employee.documentType || '—' }}</span>
+        </div>
+
+        <div class="bg-blue-50 rounded-xl p-5">
+          <span class="font-semibold mb-1 block text-sm text-blue-500 uppercase tracking-wide">Número de documento</span>
+          <span class="text-lg text-blue-700 font-mono">{{ employee.documentNumber || '—' }}</span>
+        </div>
+
+        <div class="bg-blue-50 rounded-xl p-5 md:col-span-2">
+          <span class="font-semibold mb-1 block text-sm text-blue-500 uppercase tracking-wide">ID del empleado</span>
+          <span class="font-mono text-base text-blue-700 flex items-center gap-2">
+            <svg class="h-4 w-4 text-blue-300 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+            </svg>
+            {{ employee.id }}
+          </span>
+        </div>
+      </div>
+    </div>
+  }
+</div>

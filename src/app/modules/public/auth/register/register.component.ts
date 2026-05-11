@@ -7,7 +7,7 @@ import {
   ElementRef,
 } from '@angular/core';
 import { AnimatedPetComponent } from '../../../../shared/animated-pet/animated-pet.component';
-import { CommonModule } from '@angular/common';
+
 import {
   ReactiveFormsModule,
   FormBuilder,
@@ -47,11 +47,10 @@ import { AuthResponse } from '../models/auth.model';
 @Component({
   selector: 'app-register',
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     RouterLink,
-    AnimatedPetComponent,
-  ],
+    AnimatedPetComponent
+],
   templateUrl: './register.component.html',
   styleUrl: './register.component.css',
 })

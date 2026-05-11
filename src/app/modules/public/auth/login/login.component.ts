@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import {
   Component,
   OnInit,
@@ -42,11 +42,10 @@ import { AnimatedPetComponent } from '../../../../shared/animated-pet/animated-p
   selector: 'app-login',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     RouterLink,
-    AnimatedPetComponent,
-  ],
+    AnimatedPetComponent
+],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
 })

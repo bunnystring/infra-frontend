@@ -1,12 +1,14 @@
-<div *ngIf="loading$ | async" class="toast toast-top toast-center z-50">
-  <div class="alert alert-info gap-2">
-    <span class="loading loading-spinner loading-sm"></span>
-    <span>Actualizando datos...</span>
+@if (loading$ | async) {
+  <div class="toast toast-top toast-center z-50">
+    <div class="alert alert-info gap-2">
+      <span class="loading loading-spinner loading-sm"></span>
+      <span>Actualizando datos...</span>
+    </div>
   </div>
-</div>
+}
 
 <div class="container mx-auto px-4 py-6">
-  <ng-container *ngIf="!orderError; else errorBlock">
+  @if (!orderError) {
     <!-- HEADER y STATS -->
     <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-8">
       <div>
@@ -32,10 +34,9 @@
         Nueva orden
       </button>
     </div>
-
     <!-- Stats resumen con iconos SVG -->
-    <ng-container *ngIf="filteredOrders$ | async as filteredOrders">
-      <ng-container *ngIf="getStates(filteredOrders) as stats">
+    @if (filteredOrders$ | async; as filteredOrders) {
+      @if (getStates(filteredOrders); as stats) {
         <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
           <div class="stat shadow-md rounded-lg">
             <div class="stat-figure text-primary">
@@ -86,9 +87,8 @@
             </div>
           </div>
         </div>
-      </ng-container>
-    </ng-container>
-
+      }
+    }
     <!-- FILTROS -->
     <div class="flex flex-row flex-wrap items-center gap-4 mb-4">
       <div class="relative w-full sm:w-64">
@@ -103,11 +103,12 @@
         <select class="select select-bordered w-full bg-white/90 shadow focus:ring-2 focus:ring-blue-400"
           [ngModel]="statusFilter" (ngModelChange)="statusFilter = $event">
           <option [ngValue]="'ALL'">Todos los estados</option>
-          <option
-            *ngFor="let s of [OrderStates.CREATED, OrderStates.IN_PROCESS, OrderStates.DISPATCHED, OrderStates.FINISHED]"
-            [ngValue]="s">
-            {{ OrderStateLabels[s] }}
-          </option>
+          @for (s of [OrderStates.CREATED, OrderStates.IN_PROCESS, OrderStates.DISPATCHED, OrderStates.FINISHED]; track s) {
+            <option
+              [ngValue]="s">
+              {{ OrderStateLabels[s] }}
+            </option>
+          }
         </select>
         <svg class="h-5 w-5 text-blue-400 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" fill="none"
           stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -121,121 +122,139 @@
         Limpiar
       </button>
       <button class="btn btn-ghost gap-2 ml-auto" (click)="loadOrders()" [disabled]="loading$ | async">
-        <span *ngIf="loading$ | async" class="loading loading-spinner loading-xs"></span>
-        <svg *ngIf="!(loading$ | async)" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
-          viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-        </svg>
+        @if (loading$ | async) {
+          <span class="loading loading-spinner loading-xs"></span>
+        }
+        @if (!(loading$ | async)) {
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+        }
         <span class="hidden sm:inline">
           {{ (loading$ | async) ? 'Actualizando...' : 'Actualizar' }}
         </span>
       </button>
     </div>
-
     <!-- MODALES -->
-    <app-order-create-edit-modal *ngIf="showCreateModal || showEditModal" [order]="orderToEdit"
-      (save)="handleModalSave($event)" (close)="closeModals()">
-    </app-order-create-edit-modal>
-    <app-order-delete-modal *ngIf="showDeleteModal" [order]="orderToDelete" (deleted)="onDeviceDeleted()"
+    @if (showCreateModal || showEditModal) {
+      <app-order-create-edit-modal [order]="orderToEdit"
+        (save)="handleModalSave($event)" (close)="closeModals()">
+      </app-order-create-edit-modal>
+    }
+    @if (showDeleteModal) {
+      <app-order-delete-modal [order]="orderToDelete" (deleted)="onDeviceDeleted()"
       (cancel)="cancelDelete()"></app-order-delete-modal>
-
+    }
     <!-- TABLA principal de órdenes -->
     <div class="relative">
-      <ng-container *ngIf="pagedOrders$ | async as pagedOrders">
-        <table *ngIf="pagedOrders.length > 0" class="table w-full table-zebra rounded-xl shadow-lg overflow-hidden">
-          <thead class="bg-blue-100">
-            <tr>
-              <th>
-                <svg class="h-5 w-5 text-blue-400 inline mr-2" fill="none" stroke="currentColor" stroke-width="2"
-                  viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="10" />
-                </svg>
-                Estado
-              </th>
-              <th>
-                <svg class="h-5 w-5 text-blue-400 inline mr-2" fill="none" stroke="currentColor" stroke-width="2"
-                  viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
-                </svg>
-                Descripción
-              </th>
-              <th>
-                <svg class="h-5 w-5 text-blue-400 inline mr-2" fill="none" stroke="currentColor" stroke-width="2"
-                  viewBox="0 0 24 24">
-                  <rect x="6" y="9" width="12" height="6" rx="3" />
-                  <circle cx="9" cy="12" r="2" />
-                  <circle cx="15" cy="12" r="2" />
-                </svg>
-                Responsable
-              </th>
-              <th>
-                <svg class="h-5 w-5 text-blue-400 inline mr-2" fill="none" stroke="currentColor" stroke-width="2"
-                  viewBox="0 0 24 24">
-                  <rect x="6" y="6" width="12" height="12" rx="3" />
-                </svg>
-                Tipo Asignación
-              </th>
-              <th>
-                <svg class="h-5 w-5 text-blue-400 inline mr-2" fill="none" stroke="currentColor" stroke-width="2"
-                  viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                Creada
-              </th>
-              <th class="text-center">
-                <svg class="h-5 w-5 text-blue-400 inline mr-2" fill="none" stroke="currentColor" stroke-width="2"
-                  viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-                Acciones
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let order of pagedOrders" class="hover:bg-blue-50 transition">
-              <!-- Estado con badge -->
-              <td>
-                <span
-                  class="badge badge-lg px-5 min-w-[120px] text-base font-semibold whitespace-nowrap flex items-center gap-2"
-                  [ngClass]="OrderStatusColors[order.state]">
-                  <svg *ngIf="order.state === OrderStates.FINISHED" class="h-5 w-5 text-success" fill="none"
-                    stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" />
-                  </svg>
-                  <svg *ngIf="order.state === OrderStates.CREATED" class="h-5 w-5 text-blue-400" fill="none"
+      @if (pagedOrders$ | async; as pagedOrders) {
+        @if (pagedOrders.length > 0) {
+          <table class="table w-full table-zebra rounded-xl shadow-lg overflow-hidden">
+            <thead class="bg-blue-100">
+              <tr>
+                <th>
+                  <svg class="h-5 w-5 text-blue-400 inline mr-2" fill="none" stroke="currentColor" stroke-width="2"
                     viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="#3B82F6"
-                      fill-opacity="0.1" />
-                    <circle cx="12" cy="12" r="3" fill="#3B82F6" />
+                    <circle cx="12" cy="12" r="10" />
                   </svg>
-                  <svg *ngIf="order.state === OrderStates.DISPATCHED" class="h-5 w-5 text-primary" fill="none"
-                    stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <polygon points="9,12 17,8 17,16" fill="currentColor" />
-                    <rect x="6" y="6" width="12" height="12" rx="4" stroke="currentColor" stroke-width="2"
-                      fill="none" />
+                  Estado
+                </th>
+                <th>
+                  <svg class="h-5 w-5 text-blue-400 inline mr-2" fill="none" stroke="currentColor" stroke-width="2"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
                   </svg>
-                  <svg *ngIf="order.state === OrderStates.IN_PROCESS" class="h-5 w-5 text-warning" fill="none"
-                    stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none" />
-                    <path d="M12 8v4l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                      stroke-linejoin="round" />
+                  Descripción
+                </th>
+                <th>
+                  <svg class="h-5 w-5 text-blue-400 inline mr-2" fill="none" stroke="currentColor" stroke-width="2"
+                    viewBox="0 0 24 24">
+                    <rect x="6" y="9" width="12" height="6" rx="3" />
+                    <circle cx="9" cy="12" r="2" />
+                    <circle cx="15" cy="12" r="2" />
                   </svg>
-                  <svg *ngIf="order.state === OrderStates.CREATED_WITH_ERRORS" class="h-5 w-5 text-error" fill="none"
-                    stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none" />
-                    <path d="M12 8v4l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                      stroke-linejoin="round" />
+                  Responsable
+                </th>
+                <th>
+                  <svg class="h-5 w-5 text-blue-400 inline mr-2" fill="none" stroke="currentColor" stroke-width="2"
+                    viewBox="0 0 24 24">
+                    <rect x="6" y="6" width="12" height="12" rx="3" />
                   </svg>
-                  {{ OrderStateLabels[order.state] }}
-                </span>
-              </td>
-              <td class="max-w-[280px] truncate">{{ order.description }}</td>
-              <td (click)="verDetalle(order)" class="cursor-pointer">
-                <div class="flex items-center max-w-[180px] gap-2">
-                  <span
-                    class="badge badge-outline px-3 py-2 rounded-full bg-blue-50 text-blue-800 font-semibold flex items-center whitespace-nowrap overflow-hidden truncate"
+                  Tipo Asignación
+                </th>
+                <th>
+                  <svg class="h-5 w-5 text-blue-400 inline mr-2" fill="none" stroke="currentColor" stroke-width="2"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  Creada
+                </th>
+                <th class="text-center">
+                  <svg class="h-5 w-5 text-blue-400 inline mr-2" fill="none" stroke="currentColor" stroke-width="2"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  Acciones
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (order of pagedOrders; track order) {
+                <tr class="hover:bg-blue-50 transition">
+                  <!-- Estado con badge -->
+                  <td>
+                    <span
+                      class="badge badge-lg px-5 min-w-[120px] text-base font-semibold whitespace-nowrap flex items-center gap-2"
+                      [ngClass]="OrderStatusColors[order.state]">
+                      @if (order.state === OrderStates.FINISHED) {
+                        <svg class="h-5 w-5 text-success" fill="none"
+                          stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" />
+                        </svg>
+                      }
+                      @if (order.state === OrderStates.CREATED) {
+                        <svg class="h-5 w-5 text-blue-400" fill="none"
+                          viewBox="0 0 24 24">
+                          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="#3B82F6"
+                            fill-opacity="0.1" />
+                          <circle cx="12" cy="12" r="3" fill="#3B82F6" />
+                        </svg>
+                      }
+                      @if (order.state === OrderStates.DISPATCHED) {
+                        <svg class="h-5 w-5 text-primary" fill="none"
+                          stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <polygon points="9,12 17,8 17,16" fill="currentColor" />
+                          <rect x="6" y="6" width="12" height="12" rx="4" stroke="currentColor" stroke-width="2"
+                            fill="none" />
+                        </svg>
+                      }
+                      @if (order.state === OrderStates.IN_PROCESS) {
+                        <svg class="h-5 w-5 text-warning" fill="none"
+                          stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none" />
+                          <path d="M12 8v4l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                        </svg>
+                      }
+                      @if (order.state === OrderStates.CREATED_WITH_ERRORS) {
+                        <svg class="h-5 w-5 text-error" fill="none"
+                          stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none" />
+                          <path d="M12 8v4l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                        </svg>
+                      }
+                      {{ OrderStateLabels[order.state] }}
+                    </span>
+                  </td>
+                  <td class="max-w-[280px] truncate">{{ order.description }}</td>
+                  <td (click)="verDetalle(order)" class="cursor-pointer">
+                    <div class="flex items-center max-w-[180px] gap-2">
+                      <span
+                        class="badge badge-outline px-3 py-2 rounded-full bg-blue-50 text-blue-800 font-semibold flex items-center whitespace-nowrap overflow-hidden truncate"
                     [ngClass]="{
                         'badge-success': order.assigneeType === 'EMPLOYEE',
                         'badge-info': order.assigneeType === 'GROUP'
@@ -243,198 +262,199 @@
                         ? (order.assignee?.name + ' (' + order.assignee?.employees?.length + ' emplead@s)')
                         : order.assignee?.fullName || order.assignee?.name
                       ">
-                    <svg *ngIf="order.assigneeType === 'EMPLOYEE'" class="h-5 w-5 text-blue-400 mr-1 flex-shrink-0"
-                      fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <circle cx="12" cy="8" r="4" />
-                      <path d="M4 20c0-4 4-6 8-6s8 2 8 6" />
-                    </svg>
-                    <svg *ngIf="order.assigneeType === 'GROUP'" class="h-5 w-5 text-blue-600 mr-1 flex-shrink-0"
-                      fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <rect x="6" y="9" width="12" height="6" rx="3" />
-                      <circle cx="9" cy="12" r="2" />
-                      <circle cx="15" cy="12" r="2" />
-                    </svg>
-                    <span class="truncate">
-                      <!-- EMPLEADO -->
-                      <ng-container *ngIf="order.assigneeType === 'EMPLOYEE'; else renderGrupo">
-                        {{ order.assignee?.fullName || order.assignee?.name || order.assigneeId }}
-                      </ng-container>
-                      <!-- GRUPO -->
-                      <ng-template #renderGrupo>
-                        <span class="font-bold mr-1">{{ order.assignee?.name }}</span>
-                        <span *ngIf="order.assignee?.employees?.length"
-                          class="badge badge-success badge-xs px-2 font-mono whitespace-nowrap">
-                          {{ order.assignee.employees.length }}
+                        @if (order.assigneeType === 'EMPLOYEE') {
+                          <svg class="h-5 w-5 text-blue-400 mr-1 flex-shrink-0"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <circle cx="12" cy="8" r="4" />
+                            <path d="M4 20c0-4 4-6 8-6s8 2 8 6" />
+                          </svg>
+                        }
+                        @if (order.assigneeType === 'GROUP') {
+                          <svg class="h-5 w-5 text-blue-600 mr-1 flex-shrink-0"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <rect x="6" y="9" width="12" height="6" rx="3" />
+                            <circle cx="9" cy="12" r="2" />
+                            <circle cx="15" cy="12" r="2" />
+                          </svg>
+                        }
+                        <span class="truncate">
+                          <!-- EMPLEADO -->
+                          @if (order.assigneeType === 'EMPLOYEE') {
+                            {{ order.assignee?.fullName || order.assignee?.name || order.assigneeId }}
+                          } @else {
+                            <span class="font-bold mr-1">{{ order.assignee?.name }}</span>
+                            @if (order.assignee?.employees?.length) {
+                              <span
+                                class="badge badge-success badge-xs px-2 font-mono whitespace-nowrap">
+                                {{ order.assignee.employees.length }}
+                              </span>
+                            }
+                          }
+                          <!-- GRUPO -->
                         </span>
-                      </ng-template>
+                      </span>
+                    </div>
+                  </td>
+                  <td class="justify-center text-center">
+                    <span class="badge badge-outline badge-md px-3 bg-gray-100 text-gray-700 font-medium">
+                      {{ order.assigneeType | titlecase }}
                     </span>
-                  </span>
-                </div>
-              </td>
-              <td class="justify-center text-center">
-                <span class="badge badge-outline badge-md px-3 bg-gray-100 text-gray-700 font-medium">
-                  {{ order.assigneeType | titlecase }}
-                </span>
-              </td>
-              <td>
-                <span
-                  class="badge badge-outline px-3 py-2 rounded-full bg-blue-50 text-blue-800 font-semibold flex items-center whitespace-nowrap overflow-hidden truncate">
-                  {{ order.createdAt | date }}
-                </span>
-              </td>
-              <td class="flex gap-2 justify-center text-center">
-                <button (click)="goDetailOrder(order.id) "
-                  class="btn btn-sm min-w-10 min-h-10 border-2 border-blue-400 bg-white text-blue-600 flex items-center justify-center hover:bg-blue-100 hover:border-blue-500 hover:text-blue-700 transition-all duration-150"
-                  [attr.aria-label]="'Ver detalles de la orden'" [attr.title]="'Ver detalles de la orden'"
-                  type="button">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                </button>
-                <button
-                  class="btn btn-sm min-w-10 min-h-10 border-2 border-yellow-400 bg-white text-yellow-600 flex items-center justify-center hover:bg-yellow-100 hover:border-yellow-500 hover:text-yellow-700 transition-all duration-150"
-                  (click)="orderToEdit = order; showEditModal = true; formMode = 'edit';"
-                  [attr.aria-label]="'Editar orden'" [attr.title]="'Editar orden'" type="button">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M16.862 4.487l1.651 1.651a2.131 2.131 0 010 3.016l-9.193 9.193a1.5 1.5 0 01-.61.378l-3.12.937a.376.376 0 01-.47-.47l.938-3.12a1.5 1.5 0 01.378-.61l9.193-9.193a2.132 2.132 0 013.017 0z" />
-                  </svg>
-                </button>
-                <button
-                  class="btn btn-sm min-w-10 min-h-10 border-2 border-red-400 bg-white text-red-600 flex items-center justify-center hover:bg-red-100 hover:border-red-500 hover:text-red-700 transition-all duration-150"
-                  (click)="orderToDelete = order; showDeleteModal = true;" [attr.aria-label]="'Eliminar orden'"
-                  [attr.title]="'Eliminar orden'" type="button">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7M9 10v6m6-6v6m2-10V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2M4 7h16" />
-                  </svg>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
+                  </td>
+                  <td>
+                    <span
+                      class="badge badge-outline px-3 py-2 rounded-full bg-blue-50 text-blue-800 font-semibold flex items-center whitespace-nowrap overflow-hidden truncate">
+                      {{ order.createdAt | date }}
+                    </span>
+                  </td>
+                  <td class="flex gap-2 justify-center text-center">
+                    <button (click)="goDetailOrder(order.id) "
+                      class="btn btn-sm min-w-10 min-h-10 border-2 border-blue-400 bg-white text-blue-600 flex items-center justify-center hover:bg-blue-100 hover:border-blue-500 hover:text-blue-700 transition-all duration-150"
+                      [attr.aria-label]="'Ver detalles de la orden'" [attr.title]="'Ver detalles de la orden'"
+                      type="button">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    </button>
+                    <button
+                      class="btn btn-sm min-w-10 min-h-10 border-2 border-yellow-400 bg-white text-yellow-600 flex items-center justify-center hover:bg-yellow-100 hover:border-yellow-500 hover:text-yellow-700 transition-all duration-150"
+                      (click)="orderToEdit = order; showEditModal = true; formMode = 'edit';"
+                      [attr.aria-label]="'Editar orden'" [attr.title]="'Editar orden'" type="button">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M16.862 4.487l1.651 1.651a2.131 2.131 0 010 3.016l-9.193 9.193a1.5 1.5 0 01-.61.378l-3.12.937a.376.376 0 01-.47-.47l.938-3.12a1.5 1.5 0 01.378-.61l9.193-9.193a2.132 2.132 0 013.017 0z" />
+                      </svg>
+                    </button>
+                    <button
+                      class="btn btn-sm min-w-10 min-h-10 border-2 border-red-400 bg-white text-red-600 flex items-center justify-center hover:bg-red-100 hover:border-red-500 hover:text-red-700 transition-all duration-150"
+                      (click)="orderToDelete = order; showDeleteModal = true;" [attr.aria-label]="'Eliminar orden'"
+                      [attr.title]="'Eliminar orden'" type="button">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7M9 10v6m6-6v6m2-10V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2M4 7h16" />
+                      </svg>
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
         <!-- PAGINADOR MODERNO -->
-        <div *ngIf="totalItems > 0" class="mt-8 px-4">
-          <div
-            class="flex flex-col sm:flex-row justify-between items-center gap-4 bg-base-200/50 rounded-2xl p-6 shadow-xl border border-base-300">
-
-            <!-- INFO: Mostrando X-Y de Z registros -->
-            <div class="flex items-center gap-3 order-2 sm:order-1">
-              <div class="badge badge-primary badge-lg gap-2 px-4 py-3">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <span class="font-bold">{{ totalItems }}</span>
-                <span class="font-normal">{{ totalItems === 1 ? 'dispositivo' : 'dispositivos' }}</span>
-              </div>
-
-              <div class="hidden md:flex items-center gap-2 text-sm text-base-content/70">
-                <span>Mostrando</span>
-                <span class="font-semibold text-primary">{{ (page - 1) * pageSize + 1 }}</span>
-                <span>-</span>
-                <span class="font-semibold text-primary">{{ page * pageSize > totalItems ? totalItems : page * pageSize
+        @if (totalItems > 0) {
+          <div class="mt-8 px-4">
+            <div
+              class="flex flex-col sm:flex-row justify-between items-center gap-4 bg-base-200/50 rounded-2xl p-6 shadow-xl border border-base-300">
+              <!-- INFO: Mostrando X-Y de Z registros -->
+              <div class="flex items-center gap-3 order-2 sm:order-1">
+                <div class="badge badge-primary badge-lg gap-2 px-4 py-3">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span class="font-bold">{{ totalItems }}</span>
+                  <span class="font-normal">{{ totalItems === 1 ? 'dispositivo' : 'dispositivos' }}</span>
+                </div>
+                <div class="hidden md:flex items-center gap-2 text-sm text-base-content/70">
+                  <span>Mostrando</span>
+                  <span class="font-semibold text-primary">{{ (page - 1) * pageSize + 1 }}</span>
+                  <span>-</span>
+                  <span class="font-semibold text-primary">{{ page * pageSize > totalItems ? totalItems : page * pageSize
                   }}</span>
+                </div>
+              </div>
+              <!-- CONTROLES DE PAGINACIÓN -->
+              <div class="order-1 sm:order-2">
+                @if (getTotalPages() > 1) {
+                  <div class="join shadow-lg">
+                    <!-- Primera página -->
+                    <button class="join-item btn btn-sm sm:btn-md hover:btn-primary transition-all duration-200"
+                      [disabled]="page === 1" (click)="goToPage(1)" title="Primera página">
+                      <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    <!-- Anterior -->
+                    <button class="join-item btn btn-sm sm:btn-md gap-2 hover:btn-primary transition-all duration-200"
+                      [disabled]="page === 1" (click)="previousPage()" title="Página anterior">
+                      <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                      </svg>
+                      <span class="hidden sm:inline font-medium">Anterior</span>
+                    </button>
+                    <!-- Indicador de página -->
+                    <button
+                      class="join-item btn btn-sm sm:btn-md btn-primary pointer-events-none min-w-[120px] sm:min-w-[140px]">
+                      <span class="font-bold">{{ page }}</span>
+                      <span class="mx-1">/</span>
+                      <span class="font-bold">{{ getTotalPages() }}</span>
+                    </button>
+                    <!-- Siguiente -->
+                    <button class="join-item btn btn-sm sm:btn-md gap-2 hover:btn-primary transition-all duration-200"
+                      [disabled]="page === getTotalPages()" (click)="nextPage()" title="Página siguiente">
+                      <span class="hidden sm:inline font-medium">Siguiente</span>
+                      <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                    <!-- Última página -->
+                    <button class="join-item btn btn-sm sm:btn-md hover:btn-primary transition-all duration-200"
+                      [disabled]="page === getTotalPages()" (click)="goToPage(getTotalPages())" title="Última página">
+                      <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
+                }
+                <!-- Mensaje cuando solo hay 1 página -->
+                @if (getTotalPages() === 1) {
+                  <div
+                    class="flex items-center gap-3 px-6 py-3 bg-success/10 rounded-full border-2 border-success/20">
+                    <svg class="w-5 h-5 text-success" fill="none" stroke="currentColor" stroke-width="2"
+                      viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="text-sm font-medium text-success">
+                      Mostrando todos los dispositivos
+                    </span>
+                  </div>
+                }
+              </div>
+              <!-- SELECTOR DE TAMAÑO DE PÁGINA -->
+              <div class="flex items-center gap-3 order-3">
+                <label class="text-sm font-medium text-base-content/70 hidden sm:inline">
+                  Por página:
+                </label>
+                <select
+                  class="select select-bordered select-sm sm:select-md w-20 sm:w-24 font-semibold hover:select-primary transition-all duration-200"
+                  [(ngModel)]="pageSize" (ngModelChange)="page = 1">
+                  <option [value]="5">5</option>
+                  <option [value]="10">10</option>
+                  <option [value]="20">20</option>
+                  <option [value]="50">50</option>
+                  <option [value]="100">100</option>
+                </select>
               </div>
             </div>
-
-            <!-- CONTROLES DE PAGINACIÓN -->
-            <div class="order-1 sm:order-2">
-              <div *ngIf="getTotalPages() > 1" class="join shadow-lg">
-                <!-- Primera página -->
-                <button class="join-item btn btn-sm sm:btn-md hover:btn-primary transition-all duration-200"
-                  [disabled]="page === 1" (click)="goToPage(1)" title="Primera página">
-                  <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" stroke-width="2"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-                  </svg>
-                </button>
-
-                <!-- Anterior -->
-                <button class="join-item btn btn-sm sm:btn-md gap-2 hover:btn-primary transition-all duration-200"
-                  [disabled]="page === 1" (click)="previousPage()" title="Página anterior">
-                  <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" stroke-width="2"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-                  </svg>
-                  <span class="hidden sm:inline font-medium">Anterior</span>
-                </button>
-
-                <!-- Indicador de página -->
-                <button
-                  class="join-item btn btn-sm sm:btn-md btn-primary pointer-events-none min-w-[120px] sm:min-w-[140px]">
-                  <span class="font-bold">{{ page }}</span>
-                  <span class="mx-1">/</span>
-                  <span class="font-bold">{{ getTotalPages() }}</span>
-                </button>
-
-                <!-- Siguiente -->
-                <button class="join-item btn btn-sm sm:btn-md gap-2 hover:btn-primary transition-all duration-200"
-                  [disabled]="page === getTotalPages()" (click)="nextPage()" title="Página siguiente">
-                  <span class="hidden sm:inline font-medium">Siguiente</span>
-                  <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" stroke-width="2"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-
-                <!-- Última página -->
-                <button class="join-item btn btn-sm sm:btn-md hover:btn-primary transition-all duration-200"
-                  [disabled]="page === getTotalPages()" (click)="goToPage(getTotalPages())" title="Última página">
-                  <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" stroke-width="2"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-                  </svg>
-                </button>
-              </div>
-
-              <!-- Mensaje cuando solo hay 1 página -->
-              <div *ngIf="getTotalPages() === 1"
-                class="flex items-center gap-3 px-6 py-3 bg-success/10 rounded-full border-2 border-success/20">
-                <svg class="w-5 h-5 text-success" fill="none" stroke="currentColor" stroke-width="2"
-                  viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span class="text-sm font-medium text-success">
-                  Mostrando todos los dispositivos
-                </span>
-              </div>
-            </div>
-
-            <!-- SELECTOR DE TAMAÑO DE PÁGINA -->
-            <div class="flex items-center gap-3 order-3">
-              <label class="text-sm font-medium text-base-content/70 hidden sm:inline">
-                Por página:
-              </label>
-              <select
-                class="select select-bordered select-sm sm:select-md w-20 sm:w-24 font-semibold hover:select-primary transition-all duration-200"
-                [(ngModel)]="pageSize" (ngModelChange)="page = 1">
-                <option [value]="5">5</option>
-                <option [value]="10">10</option>
-                <option [value]="20">20</option>
-                <option [value]="50">50</option>
-                <option [value]="100">100</option>
-              </select>
-            </div>
-
           </div>
-        </div>
-
-        <div *ngIf="pagedOrders.length === 0" class="py-12 text-center opacity-80">
-          No hay órdenes
-        </div>
-      </ng-container>
+        }
+        @if (pagedOrders.length === 0) {
+          <div class="py-12 text-center opacity-80">
+            No hay órdenes
+          </div>
+        }
+      }
     </div>
-  </ng-container>
-
-  <ng-template #errorBlock>
+  } @else {
     <div class="flex flex-col items-center justify-center py-16 px-4 text-center">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-32 w-32 text-error opacity-20 mb-6" fill="none"
         viewBox="0 0 24 24" stroke="currentColor">
@@ -449,14 +469,19 @@
         Por favor verifica tu conexión e intenta nuevamente.
       </p>
       <button class="btn btn-primary gap-2" (click)="loadOrders()" [disabled]="loading$ | async">
-        <span *ngIf="loading$ | async" class="loading loading-spinner loading-sm"></span>
-        <svg *ngIf="!(loading$ | async)" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-          viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-        </svg>
+        @if (loading$ | async) {
+          <span class="loading loading-spinner loading-sm"></span>
+        }
+        @if (!(loading$ | async)) {
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+        }
         Volver a intentar
       </button>
     </div>
-  </ng-template>
+  }
+
 </div>

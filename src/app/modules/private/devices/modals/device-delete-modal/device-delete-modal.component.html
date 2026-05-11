@@ -18,16 +18,20 @@
       </svg>
       ¿Estás seguro de que deseas eliminar <b class="text-error">{{ device?.name }}</b>?
     </p>
-    <div *ngIf="error" class="alert alert-warning font-semibold mb-4 flex gap-2 items-center">
-      <svg class="h-5 w-5 text-warning" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-      {{ error }}
-    </div>
+    @if (error) {
+      <div class="alert alert-warning font-semibold mb-4 flex gap-2 items-center">
+        <svg class="h-5 w-5 text-warning" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        {{ error }}
+      </div>
+    }
     <!-- Loader -->
-    <div *ngIf="loading" class="flex justify-center mb-4">
-      <span class="loading loading-spinner loading-lg text-error"></span>
-    </div>
+    @if (loading) {
+      <div class="flex justify-center mb-4">
+        <span class="loading loading-spinner loading-lg text-error"></span>
+      </div>
+    }
     <div class="modal-action flex justify-end gap-4">
       <button class="btn btn-ghost btn-lg" (click)="cancelDelete()" [disabled]="loading">
         <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -36,7 +40,9 @@
         Cancelar
       </button>
       <button class="btn btn-error btn-lg" (click)="confirmDelete()" [disabled]="loading">
-        <span *ngIf="loading" class="loading loading-spinner loading-xs mr-2"></span>
+        @if (loading) {
+          <span class="loading loading-spinner loading-xs mr-2"></span>
+        }
         <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>

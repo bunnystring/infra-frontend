@@ -2,7 +2,7 @@ import { Device } from '../../models/device.model';
 import { DevicesService } from './../../services/devices.service';
 import { Component, OnDestroy, OnInit, Output } from '@angular/core';
 import { EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { Subject, of } from 'rxjs';
 import {
   takeUntil,
@@ -24,7 +24,7 @@ import { toast } from 'ngx-sonner';
   selector: 'app-device-bulk-upload-modal',
   templateUrl: './device-bulk-upload-modal.component.html',
   styleUrls: ['./device-bulk-upload-modal.component.css'],
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [ReactiveFormsModule],
 })
 export class DeviceBulkUploadModalComponent implements OnInit, OnDestroy {
   // Outputs para comunicar el resultado de la carga masiva y el cierre del modal

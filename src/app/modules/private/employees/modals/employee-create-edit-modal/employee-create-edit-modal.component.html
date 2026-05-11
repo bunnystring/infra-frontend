@@ -1,0 +1,161 @@
+<div class="modal modal-open bg-transparent">
+  <div class="modal-box bg-white/90 backdrop-blur-sm border border-blue-200 shadow-2xl rounded-xl relative max-w-lg">
+    <div class="absolute top-0 right-0 m-6 z-10 text-blue-300 pointer-events-none">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+      </svg>
+    </div>
+
+    <div class="px-8 py-10">
+      <h3 class="font-bold text-3xl mb-7 text-blue-700 tracking-tight flex items-center gap-3">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+        {{ employee() ? 'Editar empleado' : 'Nuevo empleado' }}
+      </h3>
+
+      <form (submit)="onSubmit(); $event.preventDefault()" class="space-y-5">
+
+        <!-- Nombre completo -->
+        <div>
+          <label class="label text-base font-semibold text-blue-700 mb-1">Nombre completo</label>
+          <div class="relative">
+            <input
+              class="input input-bordered w-full pr-12 text-lg transition-all focus:ring-2 focus:ring-blue-400 bg-white/70"
+              [formField]="employeeForm.fullName"
+              placeholder="Nombre completo del empleado"
+              [class.input-error]="employeeForm.fullName().touched() && employeeForm.fullName().errors().length"
+              autocomplete="off" />
+            @if (employeeForm.fullName().touched() && !employeeForm.fullName().errors().length) {
+              <svg class="h-5 w-5 text-success absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            }
+            @if (employeeForm.fullName().touched() && employeeForm.fullName().errors().length) {
+              <svg class="h-5 w-5 text-error absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            }
+          </div>
+          @if (employeeForm.fullName().touched() && employeeForm.fullName().errors().length) {
+            <div class="text-xs text-error mt-1 transition-all">{{ employeeForm.fullName().errors()[0].message }}</div>
+          }
+        </div>
+
+        <!-- Email -->
+        <div>
+          <label class="label text-base font-semibold text-blue-700 mb-1">Email</label>
+          <div class="relative">
+            <input
+              type="email"
+              class="input input-bordered w-full pr-12 text-lg transition-all focus:ring-2 focus:ring-blue-400 bg-white/70"
+              [formField]="employeeForm.email"
+              placeholder="correo@ejemplo.com"
+              [class.input-error]="employeeForm.email().touched() && employeeForm.email().errors().length"
+              autocomplete="off" />
+            @if (employeeForm.email().touched() && !employeeForm.email().errors().length) {
+              <svg class="h-5 w-5 text-success absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            }
+            @if (employeeForm.email().touched() && employeeForm.email().errors().length) {
+              <svg class="h-5 w-5 text-error absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            }
+          </div>
+          @if (employeeForm.email().touched() && employeeForm.email().errors().length) {
+            <div class="text-xs text-error mt-1 transition-all">{{ employeeForm.email().errors()[0].message }}</div>
+          }
+        </div>
+
+        <!-- Tipo de documento -->
+        <div>
+          <label class="label text-base font-semibold text-blue-700 mb-1">Tipo de documento</label>
+          <select
+            class="select select-bordered w-full text-lg bg-white/70"
+            [formField]="employeeForm.documentType"
+            [class.select-error]="employeeForm.documentType().touched() && employeeForm.documentType().errors().length">
+            <option value="">Seleccionar tipo...</option>
+            @for (dt of documentTypes; track dt.value) {
+              <option [value]="dt.value">{{ dt.label }}</option>
+            }
+          </select>
+          @if (employeeForm.documentType().touched() && employeeForm.documentType().errors().length) {
+            <div class="text-xs text-error mt-1">{{ employeeForm.documentType().errors()[0].message }}</div>
+          }
+        </div>
+
+        <!-- Número de documento -->
+        <div>
+          <label class="label text-base font-semibold text-blue-700 mb-1">Número de documento</label>
+          <div class="relative">
+            <input
+              class="input input-bordered w-full pr-12 text-lg transition-all focus:ring-2 focus:ring-blue-400 bg-white/70"
+              [formField]="employeeForm.documentNumber"
+              placeholder="Número de documento"
+              [class.input-error]="employeeForm.documentNumber().touched() && employeeForm.documentNumber().errors().length"
+              autocomplete="off" />
+            @if (employeeForm.documentNumber().touched() && !employeeForm.documentNumber().errors().length) {
+              <svg class="h-5 w-5 text-success absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            }
+            @if (employeeForm.documentNumber().touched() && employeeForm.documentNumber().errors().length) {
+              <svg class="h-5 w-5 text-error absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            }
+          </div>
+          @if (employeeForm.documentNumber().touched() && employeeForm.documentNumber().errors().length) {
+            <div class="text-xs text-error mt-1">{{ employeeForm.documentNumber().errors()[0].message }}</div>
+          }
+        </div>
+
+        <!-- Estado -->
+        <div>
+          <label class="label text-base font-semibold text-blue-700 mb-1">Estado</label>
+          <select
+            class="select select-bordered w-full text-lg bg-white/70"
+            [formField]="employeeForm.status"
+            [class.select-error]="employeeForm.status().touched() && employeeForm.status().errors().length">
+            <option value="ACTIVE">Activo</option>
+            <option value="INACTIVE">Inactivo</option>
+          </select>
+          @if (employeeForm.status().touched() && employeeForm.status().errors().length) {
+            <div class="text-xs text-error mt-1">{{ employeeForm.status().errors()[0].message }}</div>
+          }
+        </div>
+
+        @if (formLoading()) {
+          <div class="flex justify-center mt-4">
+            <span class="loading loading-spinner loading-lg text-blue-400"></span>
+          </div>
+        }
+        @if (formError()) {
+          <div class="alert alert-error text-center font-semibold text-sm">{{ formError() }}</div>
+        }
+
+        <div class="modal-action flex justify-center gap-4 mt-8">
+          <button type="button" class="btn btn-ghost btn-lg text-red-600 border-red-400" (click)="closeModal()" [disabled]="formLoading()">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary btn-lg shadow-lg" [disabled]="formLoading()">
+            @if (formLoading()) {
+              <span class="loading loading-spinner loading-xs mr-2"></span>
+            }
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+            {{ employee() ? 'Actualizar' : 'Guardar' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

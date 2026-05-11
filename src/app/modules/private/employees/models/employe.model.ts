@@ -1,10 +1,12 @@
 /**
  * Modelo que representa un empleado
  */
-export interface Employee{
+export interface Employee {
   id: string;
   fullName: string;
   email: string;
+  documentType: string;
+  documentNumber: string;
   status: EmployeeStatus;
 }
 
@@ -32,4 +34,12 @@ export enum EmployeeStatus {
  */
 export interface EmployeesAsignment {
   employeesId: string[];
+}
+
+/**
+ * Resultado del modal de creación/edición de un empleado
+ */
+export interface EmployeeFormResult {
+  employee: Employee;
+  mode: 'create' | 'edit';
 }

@@ -1,23 +1,23 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { PrivateLayoutComponent } from './private-layout.component';
 
 describe('PrivateLayoutComponent', () => {
-  let component: PrivateLayoutComponent;
-  let fixture: ComponentFixture<PrivateLayoutComponent>;
-
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PrivateLayoutComponent]
-    })
-    .compileComponents();
-
-    fixture = TestBed.createComponent(PrivateLayoutComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+      imports: [PrivateLayoutComponent],
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
+    }).compileComponents();
   });
 
   it('should create', () => {
-    expect(component).toBeTruthy();
+    const fixture = TestBed.createComponent(PrivateLayoutComponent);
+    expect(fixture.componentInstance).toBeTruthy();
   });
 });

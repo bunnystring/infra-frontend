@@ -6,8 +6,8 @@
           d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
     </div>
-    <div class="px-8 py-10">
-      <h3 class="font-bold text-3xl mb-7 text-blue-700 tracking-tight flex items-center gap-3">
+    <div class="px-4 sm:px-8 py-6 sm:py-10">
+      <h3 class="font-bold text-xl sm:text-3xl mb-5 sm:mb-7 text-blue-700 tracking-tight flex items-center gap-3">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-blue-400" fill="none" viewBox="0 0 24 24"
           stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -163,15 +163,15 @@
           }
         </div>
         <!-- Botones -->
-        <div class="modal-action flex justify-center gap-4 mt-8">
-          <button type="button" class="btn btn-ghost btn-lg text-red-600 border-red-400" (click)="close.emit()">
+        <div class="modal-action flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mt-6 sm:mt-8">
+          <button type="button" class="btn btn-ghost btn-lg w-full sm:w-auto text-red-600 border-red-400" (click)="close.emit()">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
             Cancelar
           </button>
-          <button type="submit" class="btn btn-primary btn-lg shadow-lg">
+          <button type="submit" class="btn btn-primary btn-lg w-full sm:w-auto shadow-lg">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />

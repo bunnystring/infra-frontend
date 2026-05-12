@@ -33,20 +33,12 @@ export const authGuard: CanActivateFn = (route, state) => {
 
   // Si el token ha expirado o está por expirar, intentar refrescarlo
   if (authService.isTokenExpired() || authService.isTokenExpiringSoon()) {
-    /* console.warn(
-      `⚠️ AuthGuard: Token ${authService.isTokenExpired() ? 'expirado' : 'próximo a expirar'} ` +
-        `(${minutesRemaining}m ${secondsRemaining}s restantes), intentando refrescar...`,
-    ); */
-
     return authService.refreshToken().pipe(
       map(() => {
-        // console.log('✅ Token refrescado exitosamente');
         return true;
       }),
       catchError((error) => {
         console.error('❌ Error al refrescar token:', error);
-        // console.log('🔄 Redirigiendo a login con returnUrl:', state.url);
-
         router.navigate(['/auth/login'], {
           queryParams: { returnUrl: state.url },
         });

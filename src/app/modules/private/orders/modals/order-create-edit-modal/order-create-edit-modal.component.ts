@@ -40,6 +40,11 @@ import { OrdersService } from '../../services/orders.service';
 import { toast } from 'ngx-sonner';
 import { EmployeeStatus } from '../../../employees/models/employe.model';
 
+/**
+ * Componente modal para crear o editar una orden, con un formulario que incluye campos para descripción, tipo de asignación, asignado a y dispositivos asociados. Gestiona la carga de datos necesarios para el formulario, validaciones, y emite eventos para guardar los cambios o cerrar el modal.
+ * @since 2026-05-11
+ * @author BunnyString
+ */
 @Component({
   selector: 'app-order-create-edit-modal',
   templateUrl: './order-create-edit-modal.component.html',

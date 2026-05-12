@@ -72,3 +72,14 @@ export type DashboardStatsType = {
   totalDevicesInOrders: number;
   averageItemsPerOrder: number;
 };
+
+/**
+ * Constante que representa las estadísticas por defecto del dashboard, con todos los valores inicializados a cero.
+ * @since 2026-02-05
+ * @author Bunnystring
+ */
+export const DEFAULT_STATS: DashboardStatsType = {
+  totalDevices: 0, goodCondition: 0, occupied: 0, needsRepair: 0, fair: 0,
+  totalOrders: 0, activeOrders: 0, createdOrders: 0, inProcessOrders: 0,
+  despatchedOrders: 0, finishedOrders: 0, totalDevicesInOrders: 0, averageItemsPerOrder: 0,
+};

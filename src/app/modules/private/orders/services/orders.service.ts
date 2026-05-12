@@ -3,6 +3,11 @@ import { ApiService } from '../../../../core/services/api.service';
 import {CreateOrderRequest, Order} from '../models/Orders';
 import { Observable } from 'rxjs';
 
+/**
+ * Servicio para gestionar las operaciones relacionadas con las órdenes, incluyendo la creación, obtención y actualización de órdenes. Utiliza ApiService para comunicarse con el backend y proporciona métodos específicos para cada operación.
+ * @since 2026-05-11
+ * @author BunnyString
+ */
 @Injectable({
   providedIn: 'root'
 })

@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { DevicesResolver } from './resolvers/devices-resolver';
+import { devicesResolver } from './resolvers/devices-resolver';
 
 /**
  * Rutas del módulo de dispositivos con lazy loading
@@ -12,7 +12,7 @@ export const DEVICES_ROUTES: Routes = [
   {
     path: '',
     loadComponent: () => import('./pages/devices/devices.component').then(m => m.DevicesComponent),
-    resolve:{ devices: DevicesResolver },
+    resolve: { devices: devicesResolver },
     data: {
       breadcrumb: 'Dispositivos',
       title: 'Gestión de Dispositivos',

@@ -44,7 +44,7 @@
       </button>
     </div>
     <!-- Stats resumen con iconos SVG y tabla -->
-    @if (filteredStats$ | async; as stats) {
+    @if (filteredStats(); as stats) {
       <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
         <!-- ...stats... -->
         <div class="stat shadow-md rounded-lg">
@@ -208,8 +208,8 @@
       <!-- TABLA principal de dispositivos -->
       @if (stats.totalDevices > 0) {
         <div class="relative">
-          @if (pagedDevices$ | async; as pagedDevices) {
-            @if (pagedDevices.length > 0) {
+          @let devices = pagedDevices();
+            @if (devices.length > 0) {
               <table class="table w-full table-zebra rounded-xl shadow-lg overflow-hidden">
                 <thead class="bg-blue-100">
                   <tr>
@@ -264,11 +264,11 @@
                   </tr>
                 </thead>
                 <tbody>
-                  @for (device of pagedDevices; track device) {
+                  @for (device of devices; track device.id) {
                     <tr class="hover:bg-blue-50 transition">
                       @if (bulkMode) {
                         <td>
-                          <input type="checkbox" [(ngModel)]="device.selected" [disabled]="device.assignmentActive ?? false" />
+                          <input type="checkbox" [checked]="isSelected(device.id)" (change)="toggleSelectDevice(device.id)" [disabled]="device.assignmentActive ?? false" />
                         </td>
                       }
                       <td (click)="goToDetail(device)"
@@ -446,7 +446,7 @@
               </div>
             }
             <!-- Estado vacío -->
-            @if (pagedDevices.length === 0) {
+            @if (devices.length === 0) {
               <div class="py-12 text-center opacity-80">
                 <svg class="mx-auto h-20 w-20 text-blue-300" fill="none" stroke="currentColor" stroke-width="2"
                   viewBox="0 0 24 24">
@@ -457,7 +457,6 @@
                 <div class="text-base-content/60 text-lg">Agrega uno nuevo para comenzar.</div>
               </div>
             }
-          }
         </div>
       }
     }

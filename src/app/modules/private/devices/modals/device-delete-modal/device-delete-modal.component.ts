@@ -1,10 +1,8 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { Device } from '../../models/device.model';
 import { DevicesService } from '../../services/devices.service';
-
 import { toast } from 'ngx-sonner';
 import { finalize } from 'rxjs';
-import {} from 'rxjs';
 
 @Component({
   selector: 'app-device-delete-modal',
@@ -12,30 +10,16 @@ import {} from 'rxjs';
   styleUrls: ['./device-delete-modal.component.css'],
   imports: [],
 })
-export class DeviceDeleteModalComponent implements OnInit {
+export class DeviceDeleteModalComponent {
+  private readonly devicesService = inject(DevicesService);
 
-  // Inputs y Outputs
   @Input() device: Device | null = null;
   @Output() deleted = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();
 
-  // Estado de carga y error
   loading = false;
   error = '';
 
-  constructor(private devicesService: DevicesService) {}
-
-  /**
-   * Inicializa el componente
-   */
-  ngOnInit() {}
-
-  /**
-   * Confirma la eliminación del dispositivo
-   * Llama al servicio para eliminar el dispositivo por su ID
-   * Muestra un toast de éxito o error según corresponda
-   * @returns
-   */
   confirmDelete(): void {
     if (!this.device) return;
     this.loading = true;
@@ -52,20 +36,12 @@ export class DeviceDeleteModalComponent implements OnInit {
             err?.error?.message ||
             err?.message ||
             'Error al eliminar el dispositivo';
-
           this.error = msg;
-          toast.error('Error al eliminar el dispositivo', {
-            description: msg,
-          });
+          toast.error('Error al eliminar el dispositivo', { description: msg });
         },
       });
   }
 
-  /**
-   * Cancela la eliminación y cierra el modal
-   * Emite un evento de cancelación para que el componente padre pueda manejarlo
-   * @returns void
-   */
   cancelDelete(): void {
     this.cancel.emit();
   }

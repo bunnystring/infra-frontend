@@ -171,7 +171,6 @@ export class OrderCreateEditModalComponent
           this.filterDevices();
           this.updateDeviceNameMap();
           this.cd.detectChanges();
-          console.log('Dispositivos cargados:', devices.length);
         },
         error: (error) => {
           console.error('Error al cargar dispositivos:', error);
@@ -199,7 +198,6 @@ export class OrderCreateEditModalComponent
         next: (groups) => {
           this.groups = groups;
           this.cd.detectChanges();
-          console.log('Grupos cargados:', groups.length);
         },
         error: (error) => {
           console.error('Error al cargar grupos:', error);
@@ -224,7 +222,6 @@ export class OrderCreateEditModalComponent
         next: (employees) => {
           this.employees = employees;
           this.cd.detectChanges();
-          console.log('Empleados cargados:', employees.length);
         },
         error: (error) => {
           console.error('Error al cargar empleados:', error);

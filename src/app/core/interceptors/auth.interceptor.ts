@@ -48,13 +48,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         !req.url.includes('/auth/refresh') &&
         authService.getRefreshToken()
       ) {
-        // console.warn('⚠️ Error 401 detectado, intentando refrescar token...');
-
         // Intentar refrescar el token
         return authService.refreshToken().pipe(
           switchMap((response) => {
-            // console.log('✅ Token refrescado exitosamente');
-
             // Clonar la petición original con el nuevo token
             const newToken = response.accessToken;
             const retryReq = req.clone({
@@ -62,8 +58,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
                 Authorization: `Bearer ${newToken}`,
               },
             });
-
-            // console.log('🔄 Reintentando petición original...');
             // Reintentar la petición original con el nuevo token
             return next(retryReq);
           }),

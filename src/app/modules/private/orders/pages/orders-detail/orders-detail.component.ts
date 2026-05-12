@@ -67,7 +67,6 @@ export class OrdersDetailComponent implements OnInit, OnDestroy {
 
   // Obtener la clase CSS para el color del estado de la orden
   getOrderStateBadge(state?: OrderStates| null): string {
-    console.log('Estado de la orden:', state, 'Clase CSS:', 'badge badge-' + (state && OrderStatusColors[state] ? OrderStatusColors[state] : 'neutral') + ' text-xl p-4');
     return (
       'badge badge-' +
       (state && OrderStatusColors[state] ? OrderStatusColors[state] : 'neutral') +
@@ -149,7 +148,6 @@ export class OrdersDetailComponent implements OnInit, OnDestroy {
           this.ordersService.getOrderById(params['id']).pipe(
             tap((order) => {
               this.order = order;
-              console.log('Orden cargada:', order);
             }),
             catchError((err) => {
               this.error = err?.error?.message || 'Error al cargar orden';

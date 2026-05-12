@@ -1,7 +1,5 @@
 import { Routes } from "@angular/router";
-import { OrdersComponent } from "./pages/orders/orders.component";
-import { OrdersDetailComponent } from "./pages/orders-detail/orders-detail.component";
-import { OrdersResolver } from "./resolvers/orders-resolver";
+import { ordersResolver } from "./resolvers/orders-resolver";
 
 /**
  * Rutas del módulo de órdenes con lazy loading
@@ -14,7 +12,7 @@ export const ORDERS_ROUTES: Routes = [
   {
     path: '',
     loadComponent: () => import('./pages/orders/orders.component').then(m => m.OrdersComponent),
-    resolve: { orders: OrdersResolver },
+    resolve: { orders: ordersResolver },
     data: {
       breadcrumb: 'Órdenes',
       title: 'Gestión de Órdenes',

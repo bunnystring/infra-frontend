@@ -117,5 +117,10 @@ export interface OrderFormResult {
   mode: 'create' | 'edit';
 }
 
+export interface OrdersState {
+  orders: Order[];
+  isLoading: boolean;
+  error: string | null;
+}
 
 

@@ -14,22 +14,27 @@ RUN npm ci --legacy-peer-deps
 COPY . .
 RUN npm run build -- --configuration production
 
-# Etapa final: usa Nginx para servir archivos estáticos
-FROM nginx:alpine
+# Etapa final: usa Node.js para ejecutar el servidor SSR generado por Angular
+FROM node:20-alpine
 
-# Copia el build generado al directorio público de Nginx
-COPY --from=build /app/dist/infragest-frontend/browser /usr/share/nginx/html
-RUN cp /usr/share/nginx/html/index.csr.html /usr/share/nginx/html/index.html
+WORKDIR /app
 
-# Copia configuración de nginx
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Define entorno de producción
+ENV NODE_ENV=production
 
-# Expone el puerto 80 para servir la aplicación
-EXPOSE 80
+# Copia archivos de dependencias e instala solo las dependencias necesarias de runtime
+COPY package*.json ./
+RUN npm ci --omit=dev --legacy-peer-deps
+
+# Copia el build generado por Angular (cliente + servidor)
+COPY --from=build /app/dist /app/dist
+
+# Expone el puerto del servidor SSR
+EXPOSE 4000
 
 # Healthcheck
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD wget --quiet --tries=1 --spider http://localhost/ || exit 1
+    CMD wget --quiet --tries=1 --spider http://127.0.0.1:4000/ || exit 1
 
-# Comando por defecto para arrancar Nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Comando por defecto para arrancar el servidor SSR
+CMD ["node", "dist/infragest-frontend/server/server.mjs"]

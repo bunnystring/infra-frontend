@@ -23,7 +23,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 # Define hosts permitidos para SSR
-ENV NG_ALLOWED_HOSTS=localhost:4200,127.0.0.1:4200,localhost:4000,127.0.0.1:4000
+ENV NG_ALLOWED_HOSTS=localhost,127.0.0.1
 
 # Copia archivos de dependencias e instala solo las dependencias necesarias de runtime
 COPY package*.json ./
@@ -37,7 +37,7 @@ EXPOSE 4000
 
 # Healthcheck
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD wget --quiet --header="Host: localhost:4000" --tries=1 --spider http://127.0.0.1:4000/ || exit 1
+    CMD wget --quiet --header="Host: localhost" --tries=1 --spider http://127.0.0.1:4000/ || exit 1
 
 # Comando por defecto para arrancar el servidor SSR
 CMD ["node", "dist/infragest-frontend/server/server.mjs"]

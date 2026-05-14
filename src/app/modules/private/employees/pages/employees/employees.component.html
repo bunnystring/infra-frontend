@@ -8,7 +8,7 @@
 }
 
 <div class="container mx-auto px-4 py-6">
-  @if (!employeesResource.error()) {
+  @if (!store.error()) {
 
     <!-- HEADER -->
     <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-8">
@@ -93,7 +93,7 @@
         </svg>
         Limpiar
       </button>
-      <button class="btn btn-ghost gap-2 ml-auto" (click)="employeesResource.reload()" [disabled]="loading()">
+      <button class="btn btn-ghost gap-2 ml-auto" (click)="loadEmployees()" [disabled]="loading()">
         @if (loading()) {
           <span class="loading loading-spinner loading-xs"></span>
         } @else {
@@ -288,7 +288,7 @@
     }
 
     <!-- SIN DATOS -->
-    @if (stats.total === 0 && !employeesResource.isLoading()) {
+    @if (stats.total === 0 && !store.isLoading()) {
       <div class="py-16 text-center opacity-80">
         <svg class="mx-auto h-24 w-24 text-blue-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round"
@@ -317,7 +317,7 @@
       <p class="text-base-content/60 mb-6 max-w-md">
         Hubo un problema al conectar con el servidor. Por favor verifica tu conexión e intenta nuevamente.
       </p>
-      <button class="btn btn-primary gap-2" (click)="employeesResource.reload()" [disabled]="loading()">
+      <button class="btn btn-primary gap-2" (click)="loadEmployees()" [disabled]="loading()">
         @if (loading()) {
           <span class="loading loading-spinner loading-sm"></span>
         } @else {

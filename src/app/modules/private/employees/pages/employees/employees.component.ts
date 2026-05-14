@@ -1,26 +1,25 @@
 import {
-  Component,
   ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  OnInit,
   computed,
-  effect,
   inject,
-  resource,
   signal,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
 import { Employee, EmployeeFormResult, EmployeeStatus } from '../../models/employe.model';
 import { toast } from 'ngx-sonner';
 import { EmployeeCreateEditModalComponent } from '../../modals/employee-create-edit-modal/employee-create-edit-modal.component';
 import { EmployeeDeleteModalComponent } from '../../modals/employee-delete-modal/employee-delete-modal.component';
 import { LoadingService } from '../../../../../core/services/loading.service';
-import { EmployeesService } from '../../services/employees.service';
+import { EmployeesStore } from '../../store/employees.store';
 
 /**
  * Componente principal del módulo de empleados
  *
- * @since 2026-05-10
+ * @since 2026-05-13
  * @author Bunnystring
  */
 @Component({
@@ -31,42 +30,33 @@ import { EmployeesService } from '../../services/employees.service';
   templateUrl: './employees.component.html',
   styleUrl: './employees.component.css',
 })
-export class EmployeesComponent {
-  private readonly employeesService = inject(EmployeesService);
-  private readonly loadingService = inject(LoadingService);
+export class EmployeesComponent implements OnInit {
+  protected readonly store = inject(EmployeesStore);
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly EmployeeStatus = EmployeeStatus;
 
-  // Estado de carga del interceptor HTTP
-  readonly loading = toSignal(this.loadingService.loading$, { initialValue: false });
+  readonly loading = toSignal(inject(LoadingService).loading$, { initialValue: false });
 
-  // Recurso reactivo: carga empleados del servidor
-  readonly employeesResource = resource({
-    loader: () => firstValueFrom(this.employeesService.getAllEmployees()),
-  });
-
-  // Búsqueda y paginación
   readonly search = signal('');
   readonly page = signal(1);
   readonly pageSize = signal(10);
 
-  // Estado de modales
   readonly showCreateModal = signal(false);
   readonly showEditModal = signal(false);
   readonly showDeleteModal = signal(false);
   readonly employeeToEdit = signal<Employee | null>(null);
   readonly employeeToDelete = signal<Employee | null>(null);
 
-  // Estado derivado con computed()
   readonly filteredEmployees = computed(() => {
-    const employees = this.employeesResource.value() ?? [];
-    const search = this.search().toLowerCase();
-    if (!search) return employees;
+    const s = this.search().toLowerCase();
+    const employees = this.store.employees();
+    if (!s) return employees;
     return employees.filter(
       (e) =>
-        e.fullName.toLowerCase().includes(search) ||
-        e.email.toLowerCase().includes(search),
+        e.fullName.toLowerCase().includes(s) ||
+        e.email.toLowerCase().includes(s),
     );
   });
 
@@ -90,19 +80,18 @@ export class EmployeesComponent {
     return this.filteredEmployees().slice(start, start + this.pageSize());
   });
 
-  constructor() {
-    // Efectos de notificación (side effects sobre signals)
-    effect(() => {
-      if (this.employeesResource.error()) {
-        toast.error('Error al obtener empleados');
-      }
-    });
-    effect(() => {
-      const employees = this.employeesResource.value();
-      if (employees !== undefined && employees.length === 0) {
-        toast.info('No hay empleados para mostrar actualmente.');
-      }
-    });
+  get employeeError() { return !!this.store.error(); }
+
+  ngOnInit(): void {
+    if (this.store.error()) {
+      toast.error('No se pudo conectar al microservicio de empleados.');
+    } else if (this.store.employees().length === 0) {
+      toast.info('No hay empleados para mostrar actualmente.');
+    }
+  }
+
+  loadEmployees(): void {
+    this.store.loadEmployees().pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
   }
 
   onSearchChange(value: string): void {
@@ -140,7 +129,7 @@ export class EmployeesComponent {
   onEmployeeDeleted(): void {
     this.showDeleteModal.set(false);
     this.employeeToDelete.set(null);
-    this.employeesResource.reload();
+    this.loadEmployees();
   }
 
   cancelDelete(): void {
@@ -158,8 +147,12 @@ export class EmployeesComponent {
 
   handleModalSave({ mode }: EmployeeFormResult): void {
     toast.success(mode === 'create' ? 'Empleado creado' : 'Empleado actualizado');
-    this.employeesResource.reload();
+    this.loadEmployees();
     this.closeModals();
+  }
+
+  clearError(): void {
+    this.store.clearError();
   }
 
   goToDetail(employee: Employee): void {

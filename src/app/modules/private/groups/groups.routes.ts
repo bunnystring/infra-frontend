@@ -1,4 +1,5 @@
-import { Routes } from "@angular/router";
+import { Routes } from '@angular/router';
+import { groupsResolver } from './resolvers/groups-resolver';
 
 /**
  * Rutas del módulo de grupos con lazy loading
@@ -11,6 +12,7 @@ export const GROUPS_ROUTES: Routes = [
   {
     path: '',
     loadComponent: () => import('./pages/groups/groups.component').then(m => m.GroupsComponent),
+    resolve: { groups: groupsResolver },
     data: {
       breadcrumb: 'Grupos',
       title: 'Gestión de Grupos',
@@ -28,5 +30,5 @@ export const GROUPS_ROUTES: Routes = [
     path: '**',
     redirectTo: '',
     pathMatch: 'full',
-  }
+  },
 ];

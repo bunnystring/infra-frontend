@@ -9,13 +9,13 @@
 
 <div class="container mx-auto px-4 py-6">
 
-  @if (groupsResource.isLoading()) {
+  @if (store.isLoading()) {
     <div class="flex justify-center py-16">
       <span class="loading loading-spinner loading-lg text-blue-400"></span>
     </div>
   }
 
-  @if (groupsResource.error()) {
+  @if (store.error()) {
     <!-- ERROR DE CONEXIÓN -->
     <div class="flex flex-col items-center justify-center py-16 px-4 text-center">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-32 w-32 text-error opacity-20 mb-6" fill="none"
@@ -27,8 +27,8 @@
       <p class="text-base-content/60 mb-6 max-w-md">
         Hubo un problema al conectar con el servidor. Por favor verifica tu conexión e intenta nuevamente.
       </p>
-      <button class="btn btn-primary gap-2" (click)="groupsResource.reload()" [disabled]="groupsResource.isLoading()">
-        @if (groupsResource.isLoading()) {
+      <button class="btn btn-primary gap-2" (click)="loadGroups()" [disabled]="store.isLoading()">
+        @if (store.isLoading()) {
           <span class="loading loading-spinner loading-sm"></span>
         } @else {
           <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -123,7 +123,7 @@
         </svg>
         Limpiar
       </button>
-      <button class="btn btn-ghost gap-2 ml-auto" (click)="groupsResource.reload()" [disabled]="loading()">
+      <button class="btn btn-ghost gap-2 ml-auto" (click)="loadGroups()" [disabled]="loading()">
         @if (loading()) {
           <span class="loading loading-spinner loading-xs"></span>
         } @else {
@@ -340,7 +340,7 @@
     }
 
     <!-- SIN DATOS -->
-    @if (stats.total === 0 && !groupsResource.isLoading()) {
+    @if (stats.total === 0 && !store.isLoading()) {
       <div class="py-16 text-center opacity-80">
         <svg class="mx-auto h-24 w-24 text-blue-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round"

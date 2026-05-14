@@ -19,6 +19,7 @@ FROM nginx:alpine
 
 # Copia el build generado al directorio público de Nginx
 COPY --from=build /app/dist/infragest-frontend/browser /usr/share/nginx/html
+RUN cp /usr/share/nginx/html/index.csr.html /usr/share/nginx/html/index.html
 
 # Copia configuración de nginx
 COPY nginx.conf /etc/nginx/conf.d/default.conf

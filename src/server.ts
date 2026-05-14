@@ -39,11 +39,18 @@ app.use(
  * Handle all other requests by rendering the Angular application.
  */
 app.use((req, res, next) => {
+  console.log(`\n[SSR SERVER] ➜ ${req.method} ${req.url}`);
   angularApp
     .handle(req)
-    .then((response) =>
-      response ? writeResponseToNodeResponse(response, res) : next(),
-    )
+    .then((response) => {
+      if (response) {
+        console.log(`[SSR SERVER] ✅ Angular renderizó SSR para: ${req.url}`);
+        writeResponseToNodeResponse(response, res);
+      } else {
+        console.log(`[SSR SERVER] ⏭  Sin render SSR (estático o CSR): ${req.url}`);
+        next();
+      }
+    })
     .catch(next);
 });
 

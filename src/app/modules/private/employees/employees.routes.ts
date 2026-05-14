@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { employeesResolver } from './resolvers/employees-resolver';
 
 /**
  * Rutas del módulo de empleados con lazy loading
@@ -11,6 +12,7 @@ export const EMPLOYEES_ROUTES: Routes = [
   {
     path: '',
     loadComponent: () => import('./pages/employees/employees.component').then(m => m.EmployeesComponent),
+    resolve: { employees: employeesResolver },
     data: {
       breadcrumb: 'Empleados',
       title: 'Gestión de Empleados',

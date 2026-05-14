@@ -1,27 +1,27 @@
 import {
-  Component,
   ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  OnInit,
   computed,
-  effect,
   inject,
-  resource,
   signal,
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
 import { Group, GroupFormResult } from '../../models/groups.model';
 import { toast } from 'ngx-sonner';
 import { GroupCreateEditModalComponent } from '../../modals/group-create-edit-modal/group-create-edit-modal.component';
 import { GroupDeleteModalComponent } from '../../modals/group-delete-modal/group-delete-modal.component';
 import { LoadingService } from '../../../../../core/services/loading.service';
-import { GroupsService } from '../../services/groups.service';
+import { GroupsStore } from '../../store/groups.store';
 
 /**
  * Componente principal del módulo de grupos
  *
- * @since 2026-05-11
+ * @since 2026-05-13
  * @author Bunnystring
  */
 @Component({
@@ -32,16 +32,12 @@ import { GroupsService } from '../../services/groups.service';
   templateUrl: './groups.component.html',
   styleUrl: './groups.component.css',
 })
-export class GroupsComponent {
-  private readonly groupsService = inject(GroupsService);
-  private readonly loadingService = inject(LoadingService);
+export class GroupsComponent implements OnInit {
+  protected readonly store = inject(GroupsStore);
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
 
-  readonly loading = toSignal(this.loadingService.loading$, { initialValue: false });
-
-  readonly groupsResource = resource({
-    loader: () => firstValueFrom(this.groupsService.getAllGroups()),
-  });
+  readonly loading = toSignal(inject(LoadingService).loading$, { initialValue: false });
 
   readonly search = signal('');
   readonly page = signal(1);
@@ -54,13 +50,13 @@ export class GroupsComponent {
   readonly groupToDelete = signal<Group | null>(null);
 
   readonly filteredGroups = computed(() => {
-    const groups = this.groupsResource.value() ?? [];
-    const search = this.search().toLowerCase();
-    if (!search) return groups;
+    const s = this.search().toLowerCase();
+    const groups = this.store.groups();
+    if (!s) return groups;
     return groups.filter(
       (g) =>
-        g.name.toLowerCase().includes(search) ||
-        g.address.toLowerCase().includes(search),
+        g.name.toLowerCase().includes(s) ||
+        g.address.toLowerCase().includes(s),
     );
   });
 
@@ -84,18 +80,18 @@ export class GroupsComponent {
     return this.filteredGroups().slice(start, start + this.pageSize());
   });
 
-  constructor() {
-    effect(() => {
-      if (this.groupsResource.error()) {
-        toast.error('Error al obtener grupos');
-      }
-    });
-    effect(() => {
-      const groups = this.groupsResource.value();
-      if (groups !== undefined && groups.length === 0) {
-        toast.info('No hay grupos para mostrar actualmente.');
-      }
-    });
+  get groupError() { return !!this.store.error(); }
+
+  ngOnInit(): void {
+    if (this.store.error()) {
+      toast.error('No se pudo conectar al microservicio de grupos.');
+    } else if (this.store.groups().length === 0) {
+      toast.info('No hay grupos para mostrar actualmente.');
+    }
+  }
+
+  loadGroups(): void {
+    this.store.loadGroups().pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
   }
 
   onSearchChange(value: string): void {
@@ -133,7 +129,7 @@ export class GroupsComponent {
   onGroupDeleted(): void {
     this.showDeleteModal.set(false);
     this.groupToDelete.set(null);
-    this.groupsResource.reload();
+    this.loadGroups();
   }
 
   cancelDelete(): void {
@@ -151,8 +147,12 @@ export class GroupsComponent {
 
   handleModalSave({ mode }: GroupFormResult): void {
     toast.success(mode === 'create' ? 'Grupo creado' : 'Grupo actualizado');
-    this.groupsResource.reload();
+    this.loadGroups();
     this.closeModals();
+  }
+
+  clearError(): void {
+    this.store.clearError();
   }
 
   goToDetail(group: Group): void {

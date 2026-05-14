@@ -1,6 +1,7 @@
 import { Device, DevicesBatchRq, DeviceStatus } from './../../../devices/models/device.model';
 import { DevicesService } from './../../../devices/services/devices.service';
 import {
+  ChangeDetectionStrategy,
   Component,
   OnChanges,
   OnDestroy,
@@ -50,7 +51,8 @@ import { EmployeeStatus } from '../../../employees/models/employe.model';
   templateUrl: './order-create-edit-modal.component.html',
   styleUrls: ['./order-create-edit-modal.component.css'],
   imports: [ReactiveFormsModule, FormsModule],
-  standalone: true
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OrderCreateEditModalComponent
   implements OnInit, OnDestroy, OnChanges

@@ -1,6 +1,6 @@
 import { Device } from '../../models/device.model';
 import { DevicesService } from './../../services/devices.service';
-import { Component, OnDestroy, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, Output } from '@angular/core';
 import { EventEmitter } from '@angular/core';
 
 import { Subject, of } from 'rxjs';
@@ -25,6 +25,7 @@ import { toast } from 'ngx-sonner';
   templateUrl: './device-bulk-upload-modal.component.html',
   styleUrls: ['./device-bulk-upload-modal.component.css'],
   imports: [ReactiveFormsModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DeviceBulkUploadModalComponent implements OnInit, OnDestroy {
   // Outputs para comunicar el resultado de la carga masiva y el cierre del modal
@@ -41,6 +42,7 @@ export class DeviceBulkUploadModalComponent implements OnInit, OnDestroy {
   constructor(
     private devicesService: DevicesService,
     private fb: FormBuilder,
+    private readonly cd: ChangeDetectorRef,
   ) {}
 
   ngOnInit() {
@@ -110,7 +112,7 @@ export class DeviceBulkUploadModalComponent implements OnInit, OnDestroy {
             }),
           ),
         ),
-        finalize(() => (this.loading = false)),
+        finalize(() => { this.loading = false; this.cd.markForCheck(); }),
         takeUntil(this.destroy$),
       )
       .subscribe();

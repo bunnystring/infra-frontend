@@ -1,11 +1,16 @@
 
 import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   OnInit,
   OnDestroy,
+  PLATFORM_ID,
   ViewChild,
   ElementRef,
+  inject,
 } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import {
   ReactiveFormsModule,
   FormBuilder,
@@ -45,9 +50,10 @@ import { AnimatedPetComponent } from '../../../../shared/animated-pet/animated-p
     ReactiveFormsModule,
     RouterLink,
     AnimatedPetComponent
-],
+  ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginComponent implements OnInit, OnDestroy {
   // Referencia al componente de la mascota animada
@@ -71,6 +77,8 @@ export class LoginComponent implements OnInit, OnDestroy {
   // URL de retorno después del login
   returnUrl = '/app/dashboard';
 
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+
   // Subjects para manejo de observables
   private readonly destroy$ = new Subject<void>();
   private readonly loginSubject$ = new Subject<void>();
@@ -80,6 +88,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     private readonly authService: AuthService,
     private readonly router: Router,
     private readonly route: ActivatedRoute,
+    private readonly cd: ChangeDetectorRef,
   ) {}
 
   /**
@@ -199,6 +208,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   private stopLoading(): void {
     this.loading = false;
     this.loginForm.enable();
+    this.cd.markForCheck();
   }
 
   /**
@@ -259,13 +269,15 @@ export class LoginComponent implements OnInit, OnDestroy {
    */
   private handleLoginSuccess(): void {
     // Manejar "Recordarme"
-    const rememberMe = this.loginForm.get('rememberMe')?.value;
-    const email = this.loginForm.get('email')?.value;
+    if (this.isBrowser) {
+      const rememberMe = this.loginForm.get('rememberMe')?.value;
+      const email = this.loginForm.get('email')?.value;
 
-    if (rememberMe) {
-      localStorage.setItem('rememberedEmail', email);
-    } else {
-      localStorage.removeItem('rememberedEmail');
+      if (rememberMe) {
+        localStorage.setItem('rememberedEmail', email);
+      } else {
+        localStorage.removeItem('rememberedEmail');
+      }
     }
 
     // Mostrar notificación de éxito usando ngx-sonner
@@ -396,6 +408,7 @@ export class LoginComponent implements OnInit, OnDestroy {
    * @returns void
    */
   private loadRememberedEmail(): void {
+    if (!this.isBrowser) return;
     const rememberedEmail = localStorage.getItem('rememberedEmail');
 
     if (rememberedEmail) {

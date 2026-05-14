@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NgxSonnerToaster } from 'ngx-sonner';
 
@@ -14,6 +14,7 @@ import { NgxSonnerToaster } from 'ngx-sonner';
     <router-outlet />
   `,
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './app.component.css'
 })
 export class AppComponent {

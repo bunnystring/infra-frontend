@@ -1,5 +1,7 @@
 import { RegisterRequest } from './../models/auth.model';
 import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   OnInit,
   OnDestroy,
@@ -50,9 +52,10 @@ import { AuthResponse } from '../models/auth.model';
     ReactiveFormsModule,
     RouterLink,
     AnimatedPetComponent
-],
+  ],
   templateUrl: './register.component.html',
   styleUrl: './register.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RegisterComponent implements OnInit, OnDestroy {
   // Refencias a elementos del DOM
@@ -91,6 +94,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private router: Router,
     private readonly route: ActivatedRoute,
+    private readonly cd: ChangeDetectorRef,
   ) {}
 
   /**
@@ -228,6 +232,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
    */
   private stopLoading(): void {
     this.loading = false;
+    this.cd.markForCheck();
   }
 
   /**

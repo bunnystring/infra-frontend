@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 
 import { ThemeService } from '../../../core/services/theme.service';
@@ -15,7 +15,8 @@ import { ThemeService } from '../../../core/services/theme.service';
   standalone: true,
   imports: [RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './public-layout.component.html',
-  styleUrl: './public-layout.component.css'
+  styleUrl: './public-layout.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PublicLayoutComponent {
 

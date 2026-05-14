@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DevicesService } from '../../services/devices.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -24,9 +24,11 @@ import { toast } from 'ngx-sonner';
   templateUrl: './devices-detail.component.html',
   styleUrls: ['./devices-detail.component.css'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule],
 })
 export class DevicesDetailComponent implements OnInit {
+  private readonly cd = inject(ChangeDetectorRef);
   private readonly route = inject(ActivatedRoute);
   private readonly devicesService = inject(DevicesService);
   private readonly location = inject(Location);
@@ -67,6 +69,7 @@ export class DevicesDetailComponent implements OnInit {
           this.device$ = of(result.device);
           this.deviceAssignments$ = of(result.assignments);
         }
+        this.cd.markForCheck();
       });
   }
 

@@ -1,5 +1,5 @@
 import { DevicesBatchRq } from './../../../devices/models/device.model';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { Location } from '@angular/common';
 import { OrdersService } from '../../services/orders.service';
 import { CommonModule } from '@angular/common';
@@ -34,9 +34,11 @@ import { EmployeesService } from '../../../employees/services/employees.service'
   templateUrl: './orders-detail.component.html',
   styleUrls: ['./orders-detail.component.css'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule],
 })
 export class OrdersDetailComponent implements OnInit, OnDestroy {
+  private readonly cd = inject(ChangeDetectorRef);
   // Modelo de vista para la orden
   order: Order | null = null;
 
@@ -226,7 +228,7 @@ export class OrdersDetailComponent implements OnInit, OnDestroy {
           }
         }),
       )
-      .subscribe(() => {});
+      .subscribe(() => { this.cd.markForCheck(); });
   }
 
   /**

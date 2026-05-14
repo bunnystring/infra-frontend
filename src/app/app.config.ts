@@ -1,12 +1,11 @@
 import {
   ApplicationConfig,
-  provideZoneChangeDetection,
-  importProvidersFrom,
+  provideZonelessChangeDetection,
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { provideAnimations } from '@angular/platform-browser/animations';
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
+import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { provideLottieOptions } from 'ngx-lottie';
 import player from 'lottie-web';
 
@@ -14,7 +13,6 @@ import player from 'lottie-web';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { loadingInterceptor } from './core/interceptors/loading.interceptor';
-import { ThemeService } from './core/services/theme.service';
 
 export function playerFactory() {
   return player;
@@ -22,12 +20,12 @@ export function playerFactory() {
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideZonelessChangeDetection(),
+    provideClientHydration(withEventReplay()),
     provideRouter(routes),
-    ThemeService,
-    provideAnimations(),
     provideHttpClient(
-      withInterceptors([loadingInterceptor, authInterceptor, errorInterceptor ]),
+      withFetch(),
+      withInterceptors([loadingInterceptor, authInterceptor, errorInterceptor]),
     ),
     provideLottieOptions({ player: playerFactory }),
   ],

@@ -1,12 +1,15 @@
 import { CommonModule } from '@angular/common';
 import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
+  Input,
   OnChanges,
   OnDestroy,
   OnInit,
   SimpleChanges,
+  inject,
 } from '@angular/core';
-import { Input } from '@angular/core';
 
 /**
  * Componente de Mascota Animada
@@ -21,8 +24,10 @@ import { Input } from '@angular/core';
   imports: [CommonModule],
   templateUrl: './animated-pet.component.html',
   styleUrls: ['./animated-pet.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AnimatedPetComponent implements OnInit, OnDestroy, OnChanges {
+  private readonly cd = inject(ChangeDetectorRef);
 
   // Inputs para controlar el estado de la mascota desde el componente padre (LoginComponent)
   @Input() isPasswordFocused = false;
@@ -183,6 +188,7 @@ export class AnimatedPetComponent implements OnInit, OnDestroy, OnChanges {
     this.isBlinking = true;
     setTimeout(() => {
       this.isBlinking = false;
+      this.cd.markForCheck();
     }, 150);
   }
 

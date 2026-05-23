@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { Employee, EmployeeFormResult, EmployeeStatus } from '../../models/employe.model';
+import { Employee, EmployeeFormResult, EmployeeStatus } from '../../models/employee.model';
 import { toast } from 'ngx-sonner';
 import { EmployeeCreateEditModalComponent } from '../../modals/employee-create-edit-modal/employee-create-edit-modal.component';
 import { EmployeeDeleteModalComponent } from '../../modals/employee-delete-modal/employee-delete-modal.component';

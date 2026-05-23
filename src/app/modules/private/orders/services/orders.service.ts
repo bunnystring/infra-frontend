@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { ApiService } from '../../../../core/services/api.service';
-import {CreateOrderRequest, Order} from '../models/Orders';
+import {CreateOrderRequest, Order} from '../models/orders.model';
 import { Observable } from 'rxjs';
 
 /**

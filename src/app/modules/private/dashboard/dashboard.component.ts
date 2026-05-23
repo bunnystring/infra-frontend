@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { Order, OrderStateLabels } from '../orders/models/Orders';
+import { Order, OrderStateLabels } from '../orders/models/orders.model';
 import { DevicesService } from '../devices/services/devices.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { User } from '../../public/auth/models/user.model';
@@ -17,7 +17,7 @@ import { forkJoin, catchError, of, finalize } from 'rxjs';
 import { Device, DeviceStatus } from '../devices/models/device.model';
 import { OrdersStore } from '../orders/store/orders.store';
 import { LoadingService } from '../../../core/services/loading.service';
-import { Alerta, DashboardStatsType, DEFAULT_STATS } from './models/DashboardStats';
+import { Alerta, DashboardStatsType, DEFAULT_STATS } from './models/dashboard-stats.model';
 
 
 /**

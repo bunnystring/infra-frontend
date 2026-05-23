@@ -3,7 +3,7 @@ import { ApiService } from '../../../../core/services/api.service';
 import { inject } from '@angular/core';
 import { CreateGroupRq, Group } from '../models/groups.model';
 import { Observable } from 'rxjs';
-import { EmployeesAsignment } from '../../employees/models/employe.model';
+import { EmployeesAsignment } from '../../employees/models/employee.model';
 
 /**
  * Servicio para gestionar grupos

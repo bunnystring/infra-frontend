@@ -10,7 +10,7 @@ import {
   OrderStateLabels,
   OrderStatusColors,
   OrderFormResult,
-} from '../../models/Orders';
+} from '../../models/orders.model';
 import { LoadingService } from '../../../../../core/services/loading.service';
 import { OrderCreateEditModalComponent } from '../../modals/order-create-edit-modal/order-create-edit-modal.component';
 import { OrderDeleteModalComponent } from '../../modals/order-delete-modal/order-delete-modal.component';

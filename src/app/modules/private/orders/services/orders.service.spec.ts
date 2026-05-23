@@ -3,7 +3,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { OrdersService } from './orders.service';
 import { ApiService } from '../../../../core/services/api.service';
-import { Order, CreateOrderRequest, OrderStates } from '../models/Orders';
+import { Order, CreateOrderRequest, OrderStates } from '../models/orders.model';
 import { DeviceStatus } from '../../devices/models/device.model';
 
 describe('OrdersService', () => {

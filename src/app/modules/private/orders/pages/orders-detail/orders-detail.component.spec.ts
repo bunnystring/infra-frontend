@@ -10,9 +10,9 @@ import { LoadingService } from '../../../../../core/services/loading.service';
 import { DevicesService } from '../../../devices/services/devices.service';
 import { EmployeesService } from '../../../employees/services/employees.service';
 import { GroupsService } from '../../../groups/services/groups.service';
-import { Order, OrderStates, OrderStatusColors } from '../../models/Orders';
+import { Order, OrderStates, OrderStatusColors } from '../../models/orders.model';
 import { Device, DeviceStatus, DeviceStatusLabels, DeviceStatusColors } from '../../../devices/models/device.model';
-import { Employee, EmployeeStatus } from '../../../employees/models/employe.model';
+import { Employee, EmployeeStatus } from '../../../employees/models/employee.model';
 import { Group } from '../../../groups/models/groups.model';
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────

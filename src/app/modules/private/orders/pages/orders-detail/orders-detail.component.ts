@@ -19,7 +19,7 @@ import {
   Order,
   OrderStates,
   OrderStatusColors,
-} from '../../models/Orders';
+} from '../../models/orders.model';
 import { DevicesService } from '../../../devices/services/devices.service';
 import {
   DeviceStatus,

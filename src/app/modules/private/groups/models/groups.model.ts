@@ -1,4 +1,4 @@
-import { Employee } from "../../employees/models/employe.model";
+import { Employee } from "../../employees/models/employee.model";
 
 export interface CreateGroupRq {
   name: string;

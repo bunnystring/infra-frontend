@@ -7,7 +7,7 @@ import { GroupsComponent } from './groups.component';
 import { GroupsStore } from '../../store/groups.store';
 import { GroupsService } from '../../services/groups.service';
 import { Group } from '../../models/groups.model';
-import { EmployeeStatus } from '../../../employees/models/employe.model';
+import { EmployeeStatus } from '../../../employees/models/employee.model';
 
 const mockEmployee = { id: 'e1', fullName: 'Ana', email: 'ana@mail.com', documentType: 'CC', documentNumber: '111', status: EmployeeStatus.ACTIVE };
 

@@ -5,10 +5,10 @@ import { OrdersService } from '../../services/orders.service';
 import { DevicesService } from '../../../devices/services/devices.service';
 import { GroupsService } from '../../../groups/services/groups.service';
 import { EmployeesService } from '../../../employees/services/employees.service';
-import { Order, OrderStates } from '../../models/Orders';
+import { Order, OrderStates } from '../../models/orders.model';
 import { Device, DeviceStatus } from '../../../devices/models/device.model';
 import { Group } from '../../../groups/models/groups.model';
-import { Employee, EmployeeStatus } from '../../../employees/models/employe.model';
+import { Employee, EmployeeStatus } from '../../../employees/models/employee.model';
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 const mockOrder: Order = {

@@ -190,17 +190,17 @@ describe('OrdersComponent', () => {
   describe('closeModals', () => {
     it('resetea todos los estados de modal y referencias de orden', async () => {
       await setup();
-      component.showCreateModal = true;
-      component.showEditModal = true;
-      component.showDeleteModal = true;
-      component.orderToEdit = mockOrder;
-      component.orderToDelete = mockOrder;
+      component.showCreateModal.set(true);
+      component.showEditModal.set(true);
+      component.showDeleteModal.set(true);
+      component.orderToEdit.set(mockOrder);
+      component.orderToDelete.set(mockOrder);
       component.closeModals();
-      expect(component.showCreateModal).toBe(false);
-      expect(component.showEditModal).toBe(false);
-      expect(component.showDeleteModal).toBe(false);
-      expect(component.orderToEdit).toBeNull();
-      expect(component.orderToDelete).toBeNull();
+      expect(component.showCreateModal()).toBe(false);
+      expect(component.showEditModal()).toBe(false);
+      expect(component.showDeleteModal()).toBe(false);
+      expect(component.orderToEdit()).toBeNull();
+      expect(component.orderToDelete()).toBeNull();
     });
   });
 
@@ -230,11 +230,11 @@ describe('OrdersComponent', () => {
     it('resetea el estado de eliminación y recarga', async () => {
       await setup();
       const loadSpy = vi.spyOn(component, 'loadOrders');
-      component.showDeleteModal = true;
-      component.orderToDelete = mockOrder;
+      component.showDeleteModal.set(true);
+      component.orderToDelete.set(mockOrder);
       component.onOrderDeleted();
-      expect(component.showDeleteModal).toBe(false);
-      expect(component.orderToDelete).toBeNull();
+      expect(component.showDeleteModal()).toBe(false);
+      expect(component.orderToDelete()).toBeNull();
       expect(loadSpy).toHaveBeenCalled();
     });
   });
@@ -243,11 +243,11 @@ describe('OrdersComponent', () => {
     it('cierra el modal sin recargar órdenes', async () => {
       await setup();
       const loadSpy = vi.spyOn(component, 'loadOrders');
-      component.showDeleteModal = true;
-      component.orderToDelete = mockOrder;
+      component.showDeleteModal.set(true);
+      component.orderToDelete.set(mockOrder);
       component.cancelDelete();
-      expect(component.showDeleteModal).toBe(false);
-      expect(component.orderToDelete).toBeNull();
+      expect(component.showDeleteModal()).toBe(false);
+      expect(component.orderToDelete()).toBeNull();
       expect(loadSpy).not.toHaveBeenCalled();
     });
   });

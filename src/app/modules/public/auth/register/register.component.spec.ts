@@ -31,7 +31,6 @@ describe('RegisterComponent', () => {
 
     fixture = TestBed.createComponent(RegisterComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
     await fixture.whenStable();
   }
 
@@ -47,37 +46,37 @@ describe('RegisterComponent', () => {
   describe('initForm', () => {
     it('crea el formulario con los controles requeridos', async () => {
       await setup();
-      expect(component.registerForm.contains('name')).toBe(true);
-      expect(component.registerForm.contains('email')).toBe(true);
-      expect(component.registerForm.contains('password')).toBe(true);
-      expect(component.registerForm.contains('confirmPassword')).toBe(true);
+      expect(component.registerForm.name).toBeDefined();
+      expect(component.registerForm.email).toBeDefined();
+      expect(component.registerForm.password).toBeDefined();
+      expect(component.registerForm.confirmPassword).toBeDefined();
     });
 
     it('formulario es inválido cuando está vacío', async () => {
       await setup();
-      expect(component.registerForm.invalid).toBe(true);
+      expect(component.registerForm().invalid()).toBe(true);
     });
 
     it('formulario es válido con datos correctos', async () => {
       await setup();
-      component.registerForm.setValue({
+      component.registerModel.set({
         name: 'Juan Pérez',
         email: 'juan@test.com',
         password: 'Password1!',
         confirmPassword: 'Password1!',
       });
-      expect(component.registerForm.valid).toBe(true);
+      expect(component.registerForm().valid()).toBe(true);
     });
 
     it('invalida si las contraseñas no coinciden', async () => {
       await setup();
-      component.registerForm.setValue({
+      component.registerModel.set({
         name: 'Juan Pérez',
         email: 'juan@test.com',
         password: 'Password1!',
         confirmPassword: 'OtraPassword1!',
       });
-      expect(component.registerForm.invalid).toBe(true);
+      expect(component.registerForm().invalid()).toBe(true);
     });
   });
 
@@ -185,14 +184,14 @@ describe('RegisterComponent', () => {
   describe('resetForm', () => {
     it('limpia el formulario', async () => {
       await setup();
-      component.registerForm.setValue({
+      component.registerModel.set({
         name: 'Juan',
         email: 'j@j.com',
         password: 'Password1!',
         confirmPassword: 'Password1!',
       });
       component.resetForm();
-      expect(component.registerForm.value.name).toBeFalsy();
+      expect(component.registerModel().name).toBeFalsy();
     });
 
     it('restablece submitted a false', async () => {

@@ -5,7 +5,7 @@
     <app-animated-pet
       [isPasswordFocused]="isPasswordFocused()"
       [isTextFieldFocused]="isNameFocused() || isEmailFocused()"
-      [textFieldValue]="isNameFocused() ? f['name'].value : f['email'].value"
+      [textFieldValue]="isNameFocused() ? registerModel().name : registerModel().email"
       [focusedFieldType]="currentFieldType()">
     </app-animated-pet>
 
@@ -20,7 +20,7 @@
     </div>
 
     <!-- Register Form -->
-    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+    <form (submit)="onSubmit(); $event.preventDefault()">
 
       <!-- Name Field -->
       <div class="form-control">
@@ -28,31 +28,26 @@
           <span class="label-text font-semibold">Nombre Completo</span>
         </label>
         <label class="input input-bordered flex items-center gap-2"
-          [class.input-error]="submitted() && f['name'].errors">
+          [class.input-error]="registerForm.name().touched() && registerForm.name().errors().length">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 opacity-70">
             <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12.735 14c.618 0 1.093-.561.872-1.139a6.002 6.002 0 0 0-11.215 0c-.22.578.254 1.139.872 1.139h9.47Z" />
           </svg>
           <input
+            #nameInput
             type="text"
-            formControlName="name"
+            [formField]="registerForm.name"
             class="grow"
             placeholder="Juan Pérez García"
-            [class.input-error]="submitted() && f['name'].errors"
+            [class.input-error]="registerForm.name().touched() && registerForm.name().errors().length"
             autocomplete="name"
             (focus)="onNameFocus()"
             (blur)="onNameBlur()" />
         </label>
-        @if (submitted() && f['name'].errors) {
+        @if (registerForm.name().touched() && registerForm.name().errors().length) {
           <label class="label">
             <span class="label-text-alt text-error">
-              @if (f['name'].errors['required']) {
-                <span>El nombre es requerido</span>
-              }
-              @if (f['name'].errors['minlength']) {
-                <span>Mínimo 3 caracteres</span>
-              }
-              @if (f['name'].errors['invalidFullName']) {
-                <span>Ingresa tu nombre completo (nombre y apellido)</span>
+              @for (error of registerForm.name().errors(); track error.kind) {
+                <span>{{ error.message }}</span>
               }
             </span>
           </label>
@@ -65,7 +60,7 @@
           <span class="label-text font-semibold">Correo Electrónico</span>
         </label>
         <label class="input input-bordered flex items-center gap-2"
-          [class.input-error]="submitted() && f['email'].errors">
+          [class.input-error]="registerForm.email().touched() && registerForm.email().errors().length">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 opacity-70">
             <path
               d="M2.5 3A1.5 1.5 0 0 0 1 4.5v.793c.026.009.051.02.076.032L7.674 8.51c.206.1.446.1.652 0l6.598-3.185A.755.755 0 0 1 15 5.293V4.5A1.5 1.5 0 0 0 13.5 3h-11Z" />
@@ -74,22 +69,19 @@
           </svg>
           <input
             type="email"
-            formControlName="email"
+            [formField]="registerForm.email"
             class="grow"
             placeholder="correo@ejemplo.com"
-            [class.input-error]="submitted() && f['email'].errors"
+            [class.input-error]="registerForm.email().touched() && registerForm.email().errors().length"
             autocomplete="email"
             (focus)="onEmailFocus()"
             (blur)="onEmailBlur()" />
         </label>
-        @if (submitted() && f['email'].errors) {
+        @if (registerForm.email().touched() && registerForm.email().errors().length) {
           <label class="label">
             <span class="label-text-alt text-error">
-              @if (f['email'].errors['required']) {
-                <span>El correo es requerido</span>
-              }
-              @if (f['email'].errors['email']) {
-                <span>Ingresa un correo válido</span>
+              @for (error of registerForm.email().errors(); track error.kind) {
+                <span>{{ error.message }}</span>
               }
             </span>
           </label>
@@ -103,7 +95,7 @@
         </label>
         <label
           class="input input-bordered flex items-center gap-2"
-          [class.input-error]="submitted() && f['password'].errors"
+          [class.input-error]="registerForm.password().touched() && registerForm.password().errors().length"
           (focusin)="onPasswordAreaFocus()"
           (focusout)="onPasswordAreaBlur($event)">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 opacity-70">
@@ -114,10 +106,10 @@
           <input
             #passwordInput
             [type]="showPassword() ? 'text' : 'password'"
-            formControlName="password"
+            [formField]="registerForm.password"
             class="grow"
             placeholder="••••••••"
-            [class.input-error]="submitted() && f['password'].errors"
+            [class.input-error]="registerForm.password().touched() && registerForm.password().errors().length"
             autocomplete="new-password" />
           <button
             type="button"
@@ -143,23 +135,16 @@
             }
           </button>
         </label>
-        @if (submitted() && f['password'].errors) {
+        @if (registerForm.password().touched() && registerForm.password().errors().length) {
           <label class="label">
             <span class="label-text-alt text-error">
-              @if (f['password'].errors['required']) {
-                <span>La contraseña es requerida</span>
-              }
-              @if (f['password'].errors['minlength']) {
-                <span>Mínimo 8 caracteres</span>
-              }
-              @if (f['password'].errors['weakPassword']) {
-                <span>Debe tener mayúsculas, minúsculas y números</span>
+              @for (error of registerForm.password().errors(); track error.kind) {
+                <span>{{ error.message }}</span>
               }
             </span>
           </label>
         }
-        <!-- Password strength indicator -->
-        @if (f['password'].value && !f['password'].errors) {
+        @if (registerForm.password().value() && registerForm.password().valid()) {
           <label class="label">
             <span class="label-text-alt text-success flex items-center gap-1">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -178,8 +163,8 @@
         </label>
         <label
           class="input input-bordered flex items-center gap-2"
-          [class.input-error]="submitted() && (f['confirmPassword'].errors || registerForm.errors?.['passwordMismatch'])"
-          [class.input-success]="f['confirmPassword'].value && !f['confirmPassword'].errors && !registerForm.errors?.['passwordMismatch']"
+          [class.input-error]="registerForm.confirmPassword().touched() && registerForm.confirmPassword().errors().length"
+          [class.input-success]="registerForm.confirmPassword().value() && registerForm.confirmPassword().valid()"
           (focusin)="onPasswordAreaFocus()"
           (focusout)="onPasswordAreaBlur($event)">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 opacity-70">
@@ -190,10 +175,10 @@
           <input
             #confirmPasswordInput
             [type]="showConfirmPassword() ? 'text' : 'password'"
-            formControlName="confirmPassword"
+            [formField]="registerForm.confirmPassword"
             class="grow"
             placeholder="••••••••"
-            [class.input-error]="submitted() && (f['confirmPassword'].errors || registerForm.errors?.['passwordMismatch'])"
+            [class.input-error]="registerForm.confirmPassword().touched() && registerForm.confirmPassword().errors().length"
             autocomplete="new-password" />
           <button
             type="button"
@@ -219,20 +204,16 @@
             }
           </button>
         </label>
-        @if (submitted() && (f['confirmPassword'].errors || registerForm.errors?.['passwordMismatch'])) {
+        @if (registerForm.confirmPassword().touched() && registerForm.confirmPassword().errors().length) {
           <label class="label">
             <span class="label-text-alt text-error">
-              @if (f['confirmPassword'].errors?.['required']) {
-                <span>Confirma tu contraseña</span>
-              }
-              @if (registerForm.errors?.['passwordMismatch'] && !f['confirmPassword'].errors?.['required']) {
-                <span>Las contraseñas no coinciden</span>
+              @for (error of registerForm.confirmPassword().errors(); track error.kind) {
+                <span>{{ error.message }}</span>
               }
             </span>
           </label>
         }
-        <!-- Match indicator -->
-        @if (f['confirmPassword'].value && !registerForm.errors?.['passwordMismatch'] && f['password'].value === f['confirmPassword'].value) {
+        @if (registerForm.confirmPassword().value() && registerForm.confirmPassword().valid()) {
           <label class="label">
             <span class="label-text-alt text-success flex items-center gap-1">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -264,7 +245,7 @@
       </div>
 
       <!-- Reset Button -->
-      @if (submitted() && registerForm.dirty) {
+      @if (submitted() && registerForm().dirty()) {
         <div class="form-control mt-2">
           <button type="button" (click)="resetForm()" class="btn btn-ghost btn-sm">
             Limpiar formulario

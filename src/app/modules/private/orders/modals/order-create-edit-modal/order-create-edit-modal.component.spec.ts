@@ -1,5 +1,6 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
+import { toast } from 'ngx-sonner';
 import { OrderCreateEditModalComponent } from './order-create-edit-modal.component';
 import { OrdersService } from '../../services/orders.service';
 import { DevicesService } from '../../../devices/services/devices.service';
@@ -116,33 +117,33 @@ describe('OrderCreateEditModalComponent', () => {
   describe('initForm', () => {
     it('inicia el formulario vacío en modo crear', async () => {
       await setup();
-      expect(component.orderForm.get('description')?.value).toBe('');
-      expect(component.orderForm.get('assignedType')?.value).toBe('');
-      expect(component.orderForm.get('assigneeId')?.value).toBe('');
-      expect(component.orderForm.get('devicesIds')?.value).toEqual([]);
+      expect(component.orderModel().description).toBe('');
+      expect(component.orderModel().assignedType).toBe('');
+      expect(component.orderModel().assigneeId).toBe('');
+      expect(component.orderModel().devicesIds).toEqual([]);
     });
 
     it('precarga valores de la orden en modo editar', async () => {
       await setup(mockOrder);
-      expect(component.orderForm.get('description')?.value).toBe(mockOrder.description);
-      expect(component.orderForm.get('assignedType')?.value).toBe(mockOrder.assigneeType);
-      expect(component.orderForm.get('assigneeId')?.value).toBe(mockOrder.assigneeId);
+      expect(component.orderModel().description).toBe(mockOrder.description);
+      expect(component.orderModel().assignedType).toBe(mockOrder.assigneeType);
+      expect(component.orderModel().assigneeId).toBe(mockOrder.assigneeId);
     });
 
     it('el formulario es inválido cuando los campos requeridos están vacíos', async () => {
       await setup();
-      expect(component.orderForm.invalid).toBe(true);
+      expect(component.orderForm().invalid()).toBe(true);
     });
 
     it('el formulario es válido con todos los campos requeridos', async () => {
       await setup();
-      component.orderForm.patchValue({
+      component.orderModel.set({
         description: 'Descripción válida',
         assignedType: 'EMPLOYEE',
         assigneeId: 'emp-1',
         devicesIds: ['dev-1'],
       });
-      expect(component.orderForm.valid).toBe(true);
+      expect(component.orderForm().valid()).toBe(true);
     });
   });
 
@@ -150,16 +151,14 @@ describe('OrderCreateEditModalComponent', () => {
   describe('filterDevices', () => {
     it('excluye dispositivos ya seleccionados', async () => {
       await setup();
-      component.orderForm.get('devicesIds')?.setValue(['dev-1']);
-      component.filterDevices();
-      expect(component.filteredDevices.every(d => d.id !== 'dev-1')).toBe(true);
+      component.orderModel.update(m => ({ ...m, devicesIds: ['dev-1'] }));
+      expect(component.filteredDevices().every(d => d.id !== 'dev-1')).toBe(true);
     });
 
     it('filtra por nombre cuando hay búsqueda', async () => {
       await setup();
-      component.deviceSearch = 'laptop';
-      component.filterDevices();
-      expect(component.filteredDevices.every(d =>
+      component.deviceSearch.set('laptop');
+      expect(component.filteredDevices().every(d =>
         d.name.toLowerCase().includes('laptop') ||
         (d.brand && d.brand.toLowerCase().includes('laptop'))
       )).toBe(true);
@@ -167,35 +166,34 @@ describe('OrderCreateEditModalComponent', () => {
 
     it('retorna todos los no-seleccionados sin búsqueda', async () => {
       await setup();
-      component.orderForm.get('devicesIds')?.setValue([]);
-      component.filterDevices();
-      expect(component.filteredDevices.length).toBeGreaterThanOrEqual(0);
+      component.orderModel.update(m => ({ ...m, devicesIds: [] }));
+      expect(component.filteredDevices().length).toBeGreaterThanOrEqual(0);
     });
   });
 
   // ── addDevice / removeDevice ───────────────────────────────────────────────
   describe('addDevice', () => {
-    it('agrega el ID al control devicesIds', async () => {
+    it('agrega el ID a devicesIds', async () => {
       await setup();
       component.addDevice('dev-2');
-      expect(component.orderForm.get('devicesIds')?.value).toContain('dev-2');
+      expect(component.orderModel().devicesIds).toContain('dev-2');
     });
 
     it('limpia el término de búsqueda al agregar', async () => {
       await setup();
-      component.deviceSearch = 'HP';
+      component.deviceSearch.set('HP');
       component.addDevice('dev-2');
-      expect(component.deviceSearch).toBe('');
+      expect(component.deviceSearch()).toBe('');
     });
   });
 
   describe('removeDevice', () => {
-    it('elimina el ID del control devicesIds', async () => {
+    it('elimina el ID de devicesIds', async () => {
       await setup();
-      component.orderForm.get('devicesIds')?.setValue(['dev-1', 'dev-2']);
+      component.orderModel.update(m => ({ ...m, devicesIds: ['dev-1', 'dev-2'] }));
       component.removeDevice('dev-1');
-      expect(component.orderForm.get('devicesIds')?.value).not.toContain('dev-1');
-      expect(component.orderForm.get('devicesIds')?.value).toContain('dev-2');
+      expect(component.orderModel().devicesIds).not.toContain('dev-1');
+      expect(component.orderModel().devicesIds).toContain('dev-2');
     });
   });
 
@@ -289,7 +287,7 @@ describe('OrderCreateEditModalComponent', () => {
       vi.spyOn(ordersServiceSpy, 'createOrder').mockReturnValue(of(mockOrder));
       const saveSpy = vi.spyOn(component.save, 'emit');
 
-      component.orderForm.patchValue({
+      component.orderModel.set({
         description: 'Nueva orden',
         assignedType: 'EMPLOYEE',
         assigneeId: 'emp-1',
@@ -303,8 +301,8 @@ describe('OrderCreateEditModalComponent', () => {
       );
     });
 
-    it('emite save con mode "edit" en modo editar', async () => {
-      const { providers, ordersServiceSpy } = buildProviders(mockOrder);
+    it('muestra advertencia si no hay cambios en modo editar', async () => {
+      const { providers } = buildProviders(mockOrder);
 
       await TestBed.configureTestingModule({
         imports: [OrderCreateEditModalComponent],
@@ -317,16 +315,14 @@ describe('OrderCreateEditModalComponent', () => {
       await fixture.whenStable();
       await fixture.whenStable();
 
-      vi.spyOn(ordersServiceSpy, 'updateOrder').mockReturnValue(of(mockOrder));
       const saveSpy = vi.spyOn(component.save, 'emit');
+      vi.spyOn(toast, 'warning');
 
-      component.orderForm.patchValue({ description: 'Descripción modificada' });
       component.onSubmit();
       await fixture.whenStable();
 
-      expect(saveSpy).toHaveBeenCalledWith(
-        expect.objectContaining({ mode: 'edit' })
-      );
+      expect(toast.warning).toHaveBeenCalledWith('No se detectaron cambios en la orden');
+      expect(saveSpy).not.toHaveBeenCalled();
     });
 
     it('establece formError cuando el servicio falla', async () => {
@@ -347,7 +343,7 @@ describe('OrderCreateEditModalComponent', () => {
       );
       vi.spyOn(component.save, 'emit');
 
-      component.orderForm.patchValue({
+      component.orderModel.set({
         description: 'Orden',
         assignedType: 'EMPLOYEE',
         assigneeId: 'emp-1',
@@ -365,7 +361,7 @@ describe('OrderCreateEditModalComponent', () => {
     it('limpia assigneeId al cambiar el tipo de asignación', async () => {
       await setup(mockOrder);
       component.onAssignedTypeChange();
-      expect(component.orderForm.get('assigneeId')?.value).toBe('');
+      expect(component.orderModel().assigneeId).toBe('');
     });
   });
 
@@ -380,11 +376,6 @@ describe('OrderCreateEditModalComponent', () => {
 
   // ── Estado inicial ────────────────────────────────────────────────────────
   describe('estado inicial', () => {
-    it('submitted inicia en false', async () => {
-      await setup();
-      expect(component.submitted()).toBe(false);
-    });
-
     it('formLoading inicia en false', async () => {
       await setup();
       expect(component.formLoading()).toBe(false);

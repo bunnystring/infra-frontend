@@ -26,7 +26,7 @@
           Gestión y seguimiento de órdenes en el sistema
         </div>
       </div>
-      <button class="btn btn-primary btn-lg gap-3 shadow-lg w-full md:w-auto" (click)="showCreateModal = true"
+      <button class="btn btn-primary btn-lg gap-3 shadow-lg w-full md:w-auto" (click)="showCreateModal.set(true)"
         [disabled]="!buttonsIsAvailable">
         <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
@@ -131,13 +131,13 @@
     </div>
 
     <!-- MODALES -->
-    @if (showCreateModal || showEditModal) {
-      <app-order-create-edit-modal [order]="orderToEdit"
+    @if (showCreateModal() || showEditModal()) {
+      <app-order-create-edit-modal [order]="orderToEdit()"
         (save)="handleModalSave($event)" (close)="closeModals()">
       </app-order-create-edit-modal>
     }
-    @if (showDeleteModal) {
-      <app-order-delete-modal [order]="orderToDelete" (deleted)="onOrderDeleted()"
+    @if (showDeleteModal()) {
+      <app-order-delete-modal [order]="orderToDelete()" (deleted)="onOrderDeleted()"
         (cancel)="cancelDelete()"></app-order-delete-modal>
     }
 
@@ -298,7 +298,7 @@
                   </button>
                   <button
                     class="btn btn-sm min-w-10 min-h-10 border-2 border-yellow-400 bg-white text-yellow-600 flex items-center justify-center hover:bg-yellow-100 hover:border-yellow-500 hover:text-yellow-700 transition-all duration-150"
-                    (click)="orderToEdit = order; showEditModal = true;"
+                    (click)="orderToEdit.set(order); showEditModal.set(true);"
                     [attr.aria-label]="'Editar orden'" [attr.title]="'Editar orden'" type="button">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round"
@@ -307,7 +307,7 @@
                   </button>
                   <button
                     class="btn btn-sm min-w-10 min-h-10 border-2 border-red-400 bg-white text-red-600 flex items-center justify-center hover:bg-red-100 hover:border-red-500 hover:text-red-700 transition-all duration-150"
-                    (click)="orderToDelete = order; showDeleteModal = true;"
+                    (click)="orderToDelete.set(order); showDeleteModal.set(true);"
                     [attr.aria-label]="'Eliminar orden'" [attr.title]="'Eliminar orden'" type="button">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round"

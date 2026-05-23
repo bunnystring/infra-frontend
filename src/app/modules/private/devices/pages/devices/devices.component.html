@@ -1,4 +1,4 @@
-@if (loading$ | async) {
+@if (isLoading()) {
   <div class="toast toast-top toast-center z-50">
     <div class="alert alert-info gap-2">
       <span class="loading loading-spinner loading-sm"></span>
@@ -131,7 +131,7 @@
           Limpiar
         </button>
         <!-- Botón masivo OR bloque masivo (solo uno visible según modo) -->
-        @if (!bulkMode) {
+        @if (!bulkMode()) {
           <button class="btn btn-warning" (click)="activateBulkMode()">
             <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" stroke-width="2"
               viewBox="0 0 24 24">
@@ -140,7 +140,7 @@
             Actualizar estados masivamente
           </button>
         } @else {
-          <select [(ngModel)]="bulkStatus" class="select select-bordered w-48">
+          <select [ngModel]="bulkStatus()" (ngModelChange)="bulkStatus.set($event)" class="select select-bordered w-48">
             <option [ngValue]="null">Selecciona nuevo estado…</option>
             @for (s of [DeviceStatus.GOOD_CONDITION, DeviceStatus.FAIR, DeviceStatus.OCCUPIED, DeviceStatus.NEEDS_REPAIR]; track s) {
               <option
@@ -150,7 +150,7 @@
             }
           </select>
           <button class="btn btn-success flex items-center gap-2"
-            [disabled]="countSelectedDevices() === 0 || !bulkStatus" (click)="updateDevicesStatus()">
+            [disabled]="countSelectedDevices() === 0 || !bulkStatus()" (click)="updateDevicesStatus()">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" />
             </svg>
@@ -170,13 +170,13 @@
           </button>
         }
         <!-- Botón actualizar -->
-        @if (!bulkMode) {
+        @if (!bulkMode()) {
           <button class="btn btn-ghost gap-2 ml-auto" (click)="refreshData()"
-            [disabled]="loading$ | async">
-            @if (loading$ | async) {
+            [disabled]="isLoading()">
+            @if (isLoading()) {
               <span class="loading loading-spinner loading-xs"></span>
             }
-            @if (!(loading$ | async)) {
+            @if (!isLoading()) {
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
                 viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -184,23 +184,23 @@
               </svg>
             }
             <span class="hidden sm:inline">
-              {{ (loading$ | async) ? 'Actualizando...' : 'Actualizar' }}
+              {{ isLoading() ? 'Actualizando...' : 'Actualizar' }}
             </span>
           </button>
         }
       </div>
       <!-- MODALES -->
-      @if (showCreateModal || showEditModal) {
-        <app-device-create-edit-modal [device]="deviceToEdit"
+      @if (showCreateModal() || showEditModal()) {
+        <app-device-create-edit-modal [device]="deviceToEdit()"
           (save)="handleModalSave($event)" (close)="closeModals()">
         </app-device-create-edit-modal>
       }
-      @if (showDeleteModal) {
-        <app-device-delete-modal [device]="deviceToDelete" (deleted)="onDeviceDeleted()"
+      @if (showDeleteModal()) {
+        <app-device-delete-modal [device]="deviceToDelete()" (deleted)="onDeviceDeleted()"
           (cancel)="cancelDelete()">
         </app-device-delete-modal>
       }
-      @if (showBulkUploadModal) {
+      @if (showBulkUploadModal()) {
         <app-device-bulk-upload-modal (uploaded)="onBulkUploadSuccess($event)"
           (close)="closeBulkUploadModal()">
         </app-device-bulk-upload-modal>
@@ -213,7 +213,7 @@
               <table class="table w-full table-zebra rounded-xl shadow-lg overflow-hidden">
                 <thead class="bg-blue-100">
                   <tr>
-                    @if (bulkMode) {
+                    @if (bulkMode()) {
                       <th>
                         <input type="checkbox" [checked]="allSelectedFiltered()" (change)="toggleSelectAllFiltered($event)">
                       </th>
@@ -266,7 +266,7 @@
                 <tbody>
                   @for (device of devices; track device.id) {
                     <tr class="hover:bg-blue-50 transition">
-                      @if (bulkMode) {
+                      @if (bulkMode()) {
                         <td>
                           <input type="checkbox" [checked]="isSelected(device.id)" (change)="toggleSelectDevice(device.id)" [disabled]="device.assignmentActive ?? false" />
                         </td>

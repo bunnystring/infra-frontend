@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { toast } from 'ngx-sonner';
@@ -15,7 +15,7 @@ export class PrivateLayoutComponent {
   protected readonly authService = inject(AuthService);
   protected readonly themeService = inject(ThemeService);
 
-  isSidebarOpen = true;
+  readonly isSidebarOpen = signal(true);
 
   get currentTheme(): Theme { return this.themeService.currentTheme(); }
   get user() { return this.authService.currentUser(); }
@@ -37,7 +37,7 @@ export class PrivateLayoutComponent {
   }
 
   toggleSidebar(): void {
-    this.isSidebarOpen = !this.isSidebarOpen;
+    this.isSidebarOpen.update(v => !v);
   }
 
   changeTheme(theme: 'light' | 'dark' | 'infragest'): void {

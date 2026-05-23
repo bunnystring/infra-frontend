@@ -5,7 +5,7 @@ import { of, throwError } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 import { EmployeesStore } from './employees.store';
 import { EmployeesService } from '../services/employees.service';
-import { Employee, EmployeeStatus } from '../models/employe.model';
+import { Employee, EmployeeStatus } from '../models/employee.model';
 
 const mockEmployees: Employee[] = [
   { id: 'e1', fullName: 'Ana García', email: 'ana@mail.com', documentType: 'CC', documentNumber: '111', status: EmployeeStatus.ACTIVE },

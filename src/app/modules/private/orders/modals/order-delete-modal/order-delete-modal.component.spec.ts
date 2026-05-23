@@ -1,6 +1,6 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { OrderDeleteModalComponent } from './order-delete-modal.component';
-import { Order, OrderStates } from '../../models/Orders';
+import { Order, OrderStates } from '../../models/orders.model';
 
 const mockOrder: Order = {
   id: 'order-1',

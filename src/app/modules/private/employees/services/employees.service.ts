@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from '../../../../core/services/api.service';
 import { inject } from '@angular/core';
-import { CreateEmployeeRq, Employee } from '../models/employe.model';
+import { CreateEmployeeRq, Employee } from '../models/employee.model';
 import { Observable } from 'rxjs';
 
 @Injectable({

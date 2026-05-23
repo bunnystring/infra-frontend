@@ -7,7 +7,7 @@ import {
   withState,
 } from '@ngrx/signals';
 import { Observable, catchError, of, tap } from 'rxjs';
-import { Employee, EmployeeStatus } from '../models/employe.model';
+import { Employee, EmployeeStatus } from '../models/employee.model';
 import { EmployeesService } from '../services/employees.service';
 
 interface EmployeesState {

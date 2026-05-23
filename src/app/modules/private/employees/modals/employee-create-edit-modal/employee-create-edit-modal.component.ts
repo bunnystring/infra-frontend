@@ -21,7 +21,7 @@ import {
   EmployeeStatus,
   CreateEmployeeRq,
   EmployeeFormResult,
-} from '../../models/employe.model';
+} from '../../models/employee.model';
 import { EmployeesService } from '../../services/employees.service';
 import { toast } from 'ngx-sonner';
 

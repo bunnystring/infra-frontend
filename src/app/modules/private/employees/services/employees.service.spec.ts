@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { EmployeesService } from './employees.service';
-import { Employee, EmployeeStatus, CreateEmployeeRq } from '../models/employe.model';
+import { Employee, EmployeeStatus, CreateEmployeeRq } from '../models/employee.model';
 import { environment } from '../../../../../environments/environment';
 
 const BASE = environment.apiUrl;

@@ -5,7 +5,7 @@ import { of } from 'rxjs';
 import { OrdersComponent } from './orders.component';
 import { OrdersStore } from '../../store/orders.store';
 import { LoadingService } from '../../../../../core/services/loading.service';
-import { Order, OrderStates, OrderFormResult } from '../../models/Orders';
+import { Order, OrderStates, OrderFormResult } from '../../models/orders.model';
 import { toast } from 'ngx-sonner';
 
 const mockOrder: Order = {

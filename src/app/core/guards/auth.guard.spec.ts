@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { of, throwError, isObservable } from 'rxjs';
-import { authGuard } from './auth.guards';
+import { authGuard } from './auth.guard';
 import { AuthService } from '../services/auth.service';
 import { AuthResponse } from '../../modules/public/auth/models/auth.model';
 

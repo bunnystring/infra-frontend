@@ -10,7 +10,7 @@ import { Location } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { map } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
-import { EmployeeStatus } from '../../models/employe.model';
+import { EmployeeStatus } from '../../models/employee.model';
 import { EmployeesService } from '../../services/employees.service';
 import { LoadingService } from '../../../../../core/services/loading.service';
 

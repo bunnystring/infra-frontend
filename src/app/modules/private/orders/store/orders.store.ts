@@ -15,7 +15,7 @@ import {
   of,
   tap,
 } from 'rxjs';
-import { Order, OrderStates, OrdersState } from '../models/Orders';
+import { Order, OrderStates, OrdersState } from '../models/orders.model';
 import { OrdersService } from '../services/orders.service';
 import { EmployeesService } from '../../employees/services/employees.service';
 import { GroupsService } from '../../groups/services/groups.service';

@@ -3,7 +3,7 @@ import { inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformServer } from '@angular/common';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
-import { catchError, switchMap, throwError } from 'rxjs';
+import { EMPTY, catchError, switchMap, throwError } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 
 /**
@@ -68,12 +68,10 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
           }),
           catchError((refreshError) => {
             console.error('❌ Fallo al refrescar token:', refreshError);
-
-            // Si el refresh falla, hacer logout y redirigir
-            // console.log('🚪 Cerrando sesión y redirigiendo al login...');
             authService.logout();
-
-            return throwError(() => refreshError);
+            // EMPTY evita que el error llegue a errorInterceptor, que también
+            // navega a /auth/login en 401 — previniendo doble navegación.
+            return EMPTY;
           }),
         );
       }

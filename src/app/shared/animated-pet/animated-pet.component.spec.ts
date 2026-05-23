@@ -12,7 +12,7 @@ describe('AnimatedPetComponent', () => {
 
     fixture = TestBed.createComponent(AnimatedPetComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {

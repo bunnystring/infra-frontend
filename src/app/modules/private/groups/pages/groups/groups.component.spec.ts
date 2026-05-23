@@ -20,11 +20,11 @@ const mockGroups: Group[] = [
 describe('GroupsComponent', () => {
   let component: GroupsComponent;
   let fixture: ComponentFixture<GroupsComponent>;
-  let groupsServiceSpy: jasmine.SpyObj<GroupsService>;
+  let groupsServiceSpy: { getAllGroups: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
-    groupsServiceSpy = jasmine.createSpyObj('GroupsService', ['getAllGroups']);
-    groupsServiceSpy.getAllGroups.and.returnValue(of(mockGroups));
+    groupsServiceSpy = { getAllGroups: vi.fn() };
+    groupsServiceSpy.getAllGroups.mockReturnValue(of(mockGroups));
 
     await TestBed.configureTestingModule({
       imports: [GroupsComponent],
@@ -146,30 +146,30 @@ describe('GroupsComponent', () => {
   describe('gestión de modales', () => {
     it('openCreateModal debe activar showCreateModal', () => {
       component.openCreateModal();
-      expect(component.showCreateModal()).toBeTrue();
-      expect(component.showEditModal()).toBeFalse();
+      expect(component.showCreateModal()).toBe(true);
+      expect(component.showEditModal()).toBe(false);
       expect(component.groupToEdit()).toBeNull();
     });
 
     it('openEditModal debe activar showEditModal con el grupo', () => {
       component.openEditModal(mockGroups[0]);
-      expect(component.showEditModal()).toBeTrue();
-      expect(component.showCreateModal()).toBeFalse();
+      expect(component.showEditModal()).toBe(true);
+      expect(component.showCreateModal()).toBe(false);
       expect(component.groupToEdit()).toEqual(mockGroups[0]);
     });
 
     it('openDeleteModal debe activar showDeleteModal con el grupo', () => {
       component.openDeleteModal(mockGroups[1]);
-      expect(component.showDeleteModal()).toBeTrue();
+      expect(component.showDeleteModal()).toBe(true);
       expect(component.groupToDelete()).toEqual(mockGroups[1]);
     });
 
     it('closeModals debe cerrar todos los modales', () => {
       component.openCreateModal();
       component.closeModals();
-      expect(component.showCreateModal()).toBeFalse();
-      expect(component.showEditModal()).toBeFalse();
-      expect(component.showDeleteModal()).toBeFalse();
+      expect(component.showCreateModal()).toBe(false);
+      expect(component.showEditModal()).toBe(false);
+      expect(component.showDeleteModal()).toBe(false);
       expect(component.groupToEdit()).toBeNull();
       expect(component.groupToDelete()).toBeNull();
     });
@@ -177,7 +177,7 @@ describe('GroupsComponent', () => {
     it('cancelDelete debe cerrar modal de eliminación', () => {
       component.openDeleteModal(mockGroups[0]);
       component.cancelDelete();
-      expect(component.showDeleteModal()).toBeFalse();
+      expect(component.showDeleteModal()).toBe(false);
       expect(component.groupToDelete()).toBeNull();
     });
   });
@@ -186,7 +186,7 @@ describe('GroupsComponent', () => {
     it('debe truncar texto largo', () => {
       const result = component.getShortText('Este es un texto muy largo que debe ser truncado');
       expect(result.length).toBeLessThanOrEqual(31); // 30 chars + '…'
-      expect(result.endsWith('…')).toBeTrue();
+      expect(result.endsWith('…')).toBe(true);
     });
 
     it('debe devolver texto corto sin truncar', () => {

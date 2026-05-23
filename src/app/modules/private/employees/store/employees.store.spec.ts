@@ -15,10 +15,10 @@ const mockEmployees: Employee[] = [
 
 describe('EmployeesStore', () => {
   let store: InstanceType<typeof EmployeesStore>;
-  let employeesServiceSpy: jasmine.SpyObj<EmployeesService>;
+  let employeesServiceSpy: { getAllEmployees: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
-    employeesServiceSpy = jasmine.createSpyObj('EmployeesService', ['getAllEmployees']);
+    employeesServiceSpy = { getAllEmployees: vi.fn() };
 
     TestBed.configureTestingModule({
       providers: [
@@ -38,7 +38,7 @@ describe('EmployeesStore', () => {
     });
 
     it('debe inicializar sin carga activa', () => {
-      expect(store.isLoading()).toBeFalse();
+      expect(store.isLoading()).toBe(false);
     });
 
     it('debe inicializar sin error', () => {
@@ -55,29 +55,29 @@ describe('EmployeesStore', () => {
 
   describe('loadEmployees()', () => {
     it('debe cargar empleados y actualizar el estado', async () => {
-      employeesServiceSpy.getAllEmployees.and.returnValue(of(mockEmployees));
+      employeesServiceSpy.getAllEmployees.mockReturnValue(of(mockEmployees));
 
       await firstValueFrom(store.loadEmployees());
 
       expect(store.employees()).toEqual(mockEmployees);
-      expect(store.isLoading()).toBeFalse();
+      expect(store.isLoading()).toBe(false);
       expect(store.error()).toBeNull();
     });
 
     it('debe manejar error del servicio y actualizar store.error()', async () => {
-      employeesServiceSpy.getAllEmployees.and.returnValue(throwError(() => new Error('Network error')));
+      employeesServiceSpy.getAllEmployees.mockReturnValue(throwError(() => new Error('Network error')));
 
       await firstValueFrom(store.loadEmployees());
 
       expect(store.error()).toBe('Error al cargar empleados');
-      expect(store.isLoading()).toBeFalse();
+      expect(store.isLoading()).toBe(false);
       expect(store.employees()).toEqual([]);
     });
   });
 
   describe('stats computed', () => {
     it('debe calcular estadísticas correctamente', async () => {
-      employeesServiceSpy.getAllEmployees.and.returnValue(of(mockEmployees));
+      employeesServiceSpy.getAllEmployees.mockReturnValue(of(mockEmployees));
       await firstValueFrom(store.loadEmployees());
 
       const stats = store.stats();
@@ -89,7 +89,7 @@ describe('EmployeesStore', () => {
 
   describe('upsertEmployee()', () => {
     beforeEach(async () => {
-      employeesServiceSpy.getAllEmployees.and.returnValue(of(mockEmployees));
+      employeesServiceSpy.getAllEmployees.mockReturnValue(of(mockEmployees));
       await firstValueFrom(store.loadEmployees());
     });
 
@@ -113,7 +113,7 @@ describe('EmployeesStore', () => {
 
   describe('removeEmployee()', () => {
     beforeEach(async () => {
-      employeesServiceSpy.getAllEmployees.and.returnValue(of(mockEmployees));
+      employeesServiceSpy.getAllEmployees.mockReturnValue(of(mockEmployees));
       await firstValueFrom(store.loadEmployees());
     });
 
@@ -132,7 +132,7 @@ describe('EmployeesStore', () => {
 
   describe('clearError()', () => {
     it('debe limpiar el error del estado', async () => {
-      employeesServiceSpy.getAllEmployees.and.returnValue(throwError(() => new Error('fail')));
+      employeesServiceSpy.getAllEmployees.mockReturnValue(throwError(() => new Error('fail')));
       await firstValueFrom(store.loadEmployees());
       expect(store.error()).not.toBeNull();
 

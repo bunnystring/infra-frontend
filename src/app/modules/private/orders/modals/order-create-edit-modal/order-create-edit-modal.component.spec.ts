@@ -95,7 +95,7 @@ describe('OrderCreateEditModalComponent', () => {
     fixture = TestBed.createComponent(OrderCreateEditModalComponent);
     component = fixture.componentInstance;
     if (order) component.order = order;
-    fixture.detectChanges();
+    await fixture.whenStable();
     await fixture.whenStable();
   }
 
@@ -131,7 +131,7 @@ describe('OrderCreateEditModalComponent', () => {
 
     it('el formulario es inválido cuando los campos requeridos están vacíos', async () => {
       await setup();
-      expect(component.orderForm.invalid).toBeTrue();
+      expect(component.orderForm.invalid).toBe(true);
     });
 
     it('el formulario es válido con todos los campos requeridos', async () => {
@@ -142,7 +142,7 @@ describe('OrderCreateEditModalComponent', () => {
         assigneeId: 'emp-1',
         devicesIds: ['dev-1'],
       });
-      expect(component.orderForm.valid).toBeTrue();
+      expect(component.orderForm.valid).toBe(true);
     });
   });
 
@@ -152,7 +152,7 @@ describe('OrderCreateEditModalComponent', () => {
       await setup();
       component.orderForm.get('devicesIds')?.setValue(['dev-1']);
       component.filterDevices();
-      expect(component.filteredDevices.every(d => d.id !== 'dev-1')).toBeTrue();
+      expect(component.filteredDevices.every(d => d.id !== 'dev-1')).toBe(true);
     });
 
     it('filtra por nombre cuando hay búsqueda', async () => {
@@ -162,7 +162,7 @@ describe('OrderCreateEditModalComponent', () => {
       expect(component.filteredDevices.every(d =>
         d.name.toLowerCase().includes('laptop') ||
         (d.brand && d.brand.toLowerCase().includes('laptop'))
-      )).toBeTrue();
+      )).toBe(true);
     });
 
     it('retorna todos los no-seleccionados sin búsqueda', async () => {
@@ -268,7 +268,7 @@ describe('OrderCreateEditModalComponent', () => {
   describe('onSubmit', () => {
     it('no emite save si el formulario es inválido', async () => {
       await setup();
-      const saveSpy = spyOn(component.save, 'emit');
+      const saveSpy = vi.spyOn(component.save, 'emit');
       component.onSubmit();
       expect(saveSpy).not.toHaveBeenCalled();
     });
@@ -283,11 +283,11 @@ describe('OrderCreateEditModalComponent', () => {
 
       fixture = TestBed.createComponent(OrderCreateEditModalComponent);
       component = fixture.componentInstance;
-      fixture.detectChanges();
+      await fixture.whenStable();
       await fixture.whenStable();
 
-      spyOn(ordersServiceSpy, 'createOrder').and.returnValue(of(mockOrder));
-      const saveSpy = spyOn(component.save, 'emit');
+      vi.spyOn(ordersServiceSpy, 'createOrder').mockReturnValue(of(mockOrder));
+      const saveSpy = vi.spyOn(component.save, 'emit');
 
       component.orderForm.patchValue({
         description: 'Nueva orden',
@@ -299,7 +299,7 @@ describe('OrderCreateEditModalComponent', () => {
       await fixture.whenStable();
 
       expect(saveSpy).toHaveBeenCalledWith(
-        jasmine.objectContaining({ mode: 'create' })
+        expect.objectContaining({ mode: 'create' })
       );
     });
 
@@ -314,18 +314,18 @@ describe('OrderCreateEditModalComponent', () => {
       fixture = TestBed.createComponent(OrderCreateEditModalComponent);
       component = fixture.componentInstance;
       component.order = mockOrder;
-      fixture.detectChanges();
+      await fixture.whenStable();
       await fixture.whenStable();
 
-      spyOn(ordersServiceSpy, 'updateOrder').and.returnValue(of(mockOrder));
-      const saveSpy = spyOn(component.save, 'emit');
+      vi.spyOn(ordersServiceSpy, 'updateOrder').mockReturnValue(of(mockOrder));
+      const saveSpy = vi.spyOn(component.save, 'emit');
 
       component.orderForm.patchValue({ description: 'Descripción modificada' });
       component.onSubmit();
       await fixture.whenStable();
 
       expect(saveSpy).toHaveBeenCalledWith(
-        jasmine.objectContaining({ mode: 'edit' })
+        expect.objectContaining({ mode: 'edit' })
       );
     });
 
@@ -339,13 +339,13 @@ describe('OrderCreateEditModalComponent', () => {
 
       fixture = TestBed.createComponent(OrderCreateEditModalComponent);
       component = fixture.componentInstance;
-      fixture.detectChanges();
+      await fixture.whenStable();
       await fixture.whenStable();
 
-      spyOn(ordersServiceSpy, 'createOrder').and.returnValue(
+      vi.spyOn(ordersServiceSpy, 'createOrder').mockReturnValue(
         throwError(() => ({ error: { message: 'Error del servidor' } }))
       );
-      spyOn(component.save, 'emit');
+      vi.spyOn(component.save, 'emit');
 
       component.orderForm.patchValue({
         description: 'Orden',
@@ -382,12 +382,12 @@ describe('OrderCreateEditModalComponent', () => {
   describe('estado inicial', () => {
     it('submitted inicia en false', async () => {
       await setup();
-      expect(component.submitted).toBeFalse();
+      expect(component.submitted).toBe(false);
     });
 
     it('formLoading inicia en false', async () => {
       await setup();
-      expect(component.formLoading).toBeFalse();
+      expect(component.formLoading).toBe(false);
     });
 
     it('formError inicia como cadena vacía', async () => {

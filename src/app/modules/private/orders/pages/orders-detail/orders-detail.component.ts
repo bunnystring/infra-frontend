@@ -1,25 +1,20 @@
 import { DevicesBatchRq } from './../../../devices/models/device.model';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
-import { Location } from '@angular/common';
-import { OrdersService } from '../../services/orders.service';
-import { CommonModule } from '@angular/common';
-import { LoadingService } from '../../../../../core/services/loading.service';
 import {
-  tap,
-  catchError,
-  takeUntil,
-  switchMap,
-  of,
-  concatMap,
-} from 'rxjs';
-import { Subject } from 'rxjs';
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  OnInit,
+  inject,
+  signal,
+} from '@angular/core';
+import { DatePipe, Location, NgClass, TitleCasePipe } from '@angular/common';
+import { OrdersService } from '../../services/orders.service';
+import { LoadingService } from '../../../../../core/services/loading.service';
+import { tap, catchError, switchMap, of, concatMap } from 'rxjs';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { toast } from 'ngx-sonner';
-import {
-  Order,
-  OrderStates,
-  OrderStatusColors,
-} from '../../models/orders.model';
+import { Order, OrderStates, OrderStatusColors } from '../../models/orders.model';
 import { DevicesService } from '../../../devices/services/devices.service';
 import {
   DeviceStatus,
@@ -35,29 +30,116 @@ import { EmployeesService } from '../../../employees/services/employees.service'
   styleUrls: ['./orders-detail.component.css'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule],
+  imports: [NgClass, TitleCasePipe, DatePipe],
 })
-export class OrdersDetailComponent implements OnInit, OnDestroy {
-  private readonly cd = inject(ChangeDetectorRef);
-  // Modelo de vista para la orden
-  order: Order | null = null;
+export class OrdersDetailComponent implements OnInit {
+  private readonly location = inject(Location);
+  private readonly ordersService = inject(OrdersService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly devicesService = inject(DevicesService);
+  private readonly employeeService = inject(EmployeesService);
+  private readonly groupsService = inject(GroupsService);
+  private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
 
-  // Estado de error
-  error: string = '';
+  readonly loading = toSignal(inject(LoadingService).loading$, { initialValue: false });
+  readonly order = signal<Order | null>(null);
+  readonly error = signal('');
+  readonly groupName = signal('');
 
-  // Observable para el estado de carga
-  get loading$() {
-    return this.loadingService.loading$;
+  readonly DeviceStatusLabels = DeviceStatusLabels;
+  readonly DeviceStatusColors = DeviceStatusColors;
+
+  get groupNameTooltip(): string {
+    return this.groupName() ? 'Grupo: ' + this.groupName() : '';
   }
 
-  // Obtener la etiqueta legible para el estado del dispositivo
+  get employeeNameTooltip(): string {
+    return this.order()?.assigneeId ? 'Empleado: ' + this.order()?.assigneeId : '';
+  }
+
+  ngOnInit(): void {
+    this.getOrderDetail();
+  }
+
+  getOrderDetail(): void {
+    this.route.params
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        tap(() => this.error.set('')),
+        switchMap((params) =>
+          this.ordersService.getOrderById(params['id']).pipe(
+            tap((order) => this.order.set(order)),
+            catchError((err) => {
+              const msg = err?.error?.message || 'Error al cargar orden';
+              this.error.set(msg);
+              toast.error('Error al cargar la orden', { description: msg });
+              this.order.set(null);
+              return of(null);
+            }),
+          ),
+        ),
+        concatMap((order) => {
+          if (order && Array.isArray(order.items) && order.items.length > 0) {
+            const rq: DevicesBatchRq = { ids: order.items.map((item) => item.deviceId) };
+            return this.devicesService.getDevicesBatch(rq).pipe(
+              tap((devices) => {
+                if (devices && Array.isArray(devices)) {
+                  order.items.forEach((item) => {
+                    item.device = devices.find((device) => device.id === item.deviceId)!;
+                  });
+                  this.order.set({ ...order });
+                }
+              }),
+              catchError(() => of(null)),
+            );
+          }
+          return of(null);
+        }),
+        concatMap(() => {
+          const order = this.order();
+          if (!order) return of(null);
+          if (order.assigneeType !== 'GROUP') {
+            return this.employeeService.getEmployeeById(order.assigneeId).pipe(
+              tap((employee) => {
+                this.order.update((o) => (o ? { ...o, assigneeId: employee.fullName } : null));
+              }),
+              catchError(() => of(null)),
+            );
+          }
+          return this.groupsService.getGroupById(order.assigneeId).pipe(
+            tap((group) => {
+              const label = group.employees?.length
+                ? `(${group.employees.length} empleados)`
+                : group.name;
+              this.order.update((o) => (o ? { ...o, assigneeId: label } : null));
+              this.groupName.set(group.name);
+            }),
+            catchError(() => of(null)),
+          );
+        }),
+      )
+      .subscribe();
+  }
+
+  goBack(): void {
+    this.location.back();
+  }
+
+  getShortId(id: string): string {
+    return id.substring(0, 8);
+  }
+
+  refreshData(): void {
+    this.getOrderDetail();
+  }
+
   getDeviceStatusLabel(status: string | undefined | null): string {
     return status && DeviceStatusLabels[status as DeviceStatus]
       ? DeviceStatusLabels[status as DeviceStatus]
       : '-';
   }
 
-  // Obtener la clase CSS para el color del estado del dispositivo
   getDeviceStatusColor(status: string | undefined | null): string {
     return (
       'badge-' +
@@ -67,8 +149,7 @@ export class OrdersDetailComponent implements OnInit, OnDestroy {
     );
   }
 
-  // Obtener la clase CSS para el color del estado de la orden
-  getOrderStateBadge(state?: OrderStates| null): string {
+  getOrderStateBadge(state?: OrderStates | null): string {
     return (
       'badge badge-' +
       (state && OrderStatusColors[state] ? OrderStatusColors[state] : 'neutral') +
@@ -76,202 +157,18 @@ export class OrdersDetailComponent implements OnInit, OnDestroy {
     );
   }
 
-  // Obtener la etiqueta legible para el estado de la orden
   getOrderStateLabel(state?: OrderStates | null): string {
     return (state ? OrderStates[state] : '-') ?? '-';
   }
 
-  // Obtener el estado del dispositivo para mostrar en la plantilla, para mostar el nombre del estado en vez del código
-  DeviceStatusLabels = DeviceStatusLabels;
-
-  // Obtener el color del estado del dispositivo para usar en la plantilla
-  DeviceStatusColors = DeviceStatusColors;
-
-  // Variable para almacenar el nombre del grupo, se muestra en el tooltip del badge de grupo
-  groupName: string = '';
-
-  // Variable para almacenar el nombre del empleado, se muestra en el tooltip del badge de empleado
-  get groupNameTooltip() {
-    return this.groupName ? 'Grupo: ' + this.groupName : '';
-  }
-
-  // Variable para almacenar el nombre del empleado, se muestra en el tooltip del badge de empleado
-  get employeeNameTooltip() {
-    return this.order?.assigneeId ? 'Empleado: ' + this.order?.assigneeId : '';
-  }
-
-  // Subject para manejar la destrucción del componente y evitar fugas de memoria
-  private readonly destroy$ = new Subject<void>();
-
-  constructor(
-    private location: Location,
-    private ordersService: OrdersService,
-    private loadingService: LoadingService,
-    private route: ActivatedRoute,
-    private devicesService: DevicesService,
-    private employeeService: EmployeesService,
-    private groupsService: GroupsService,
-    private router: Router,
-  ) {}
-
-  /**
-   * Inicializar el componente y cargar los detalles de la orden
-   * Llama al método getOrderDetail para cargar los detalles de la orden cuando el componente se inicializa. Este método se suscribe a los parámetros de la ruta para obtener el ID de la orden y luego llama al servicio para obtener los detalles de la orden, manejando cualquier error que pueda ocurrir durante la carga.
-   * @returns void
-   */
-  ngOnInit() {
-    this.getOrderDetail();
-  }
-
-  /**
-   * Limpiar los recursos y evitar fugas de memoria al destruir el componente
-   * Emite un valor al Subject destroy$ para completar cualquier suscripción que esté escuchando este Subject, lo que ayuda a evitar fugas de memoria al asegurarse de que las suscripciones se limpien correctamente cuando el componente se destruya.
-   * @returns void
-   */
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  /**
-   * Cargar los detalles de la orden utilizando el ID de la ruta y manejar errores.
-   * Obtiene el ID de la orden desde los parámetros de la ruta, luego llama al servicio
-   * para obtener los detalles de la orden y los devices asociados a cada item, si existen.
-   * @returns void
-   */
-  getOrderDetail(): void {
-    this.route.params
-      .pipe(
-        takeUntil(this.destroy$),
-        tap(() => {
-          this.error = '';
-        }),
-        switchMap((params) =>
-          this.ordersService.getOrderById(params['id']).pipe(
-            tap((order) => {
-              this.order = order;
-            }),
-            catchError((err) => {
-              this.error = err?.error?.message || 'Error al cargar orden';
-              toast.error('Error al cargar la orden', {
-                description: this.error,
-              });
-              this.order = null;
-              return of(null);
-            }),
-          ),
-        ),
-        concatMap((order) => {
-          if (order && Array.isArray(order.items) && order.items.length > 0) {
-            const rq = {} as DevicesBatchRq;
-            rq.ids = order.items.map((item) => item.deviceId);
-            return this.devicesService.getDevicesBatch(rq).pipe(
-              tap((devices) => {
-                if (devices && Array.isArray(devices)) {
-                  order.items.forEach((item) => {
-                    item.device = devices.find(
-                      (device) => device.id === item.deviceId,
-                    )!;
-                  });
-                }
-              }),
-              catchError((err) => {
-                console.error(
-                  `Error al cargar dispositivos con IDs ${rq.ids.join(', ')}:`,
-                  err,
-                );
-                return of(null);
-              }),
-            );
-          } else {
-            return of(null);
-          }
-        }),
-        concatMap(() => {
-          if (!this.order) return of(null);
-
-          if (this.order.assigneeType !== 'GROUP') {
-            return this.employeeService
-              .getEmployeeById(this.order.assigneeId)
-              .pipe(
-                tap((employee) => {
-                  if (this.order) {
-                    this.order.assigneeId = employee.fullName;
-                  }
-                }),
-                catchError((err) => {
-                  console.error(
-                    `Error al cargar empleado con ID ${this.order!.assigneeId}:`,
-                    err,
-                  );
-                  return of(null);
-                }),
-              );
-          } else {
-            return this.groupsService.getGroupById(this.order.assigneeId).pipe(
-              tap((group) => {
-                if (this.order) {
-                  this.order.assigneeId = group.employees?.length
-                    ? `(${group.employees.length} empleados)`
-                    : group.name;
-                  this.groupName = group.name;
-                }
-              }),
-              catchError((err) => {
-                console.error(
-                  `Error al cargar grupo con ID ${this.order!.assigneeId}:`,
-                  err,
-                );
-                return of(null);
-              }),
-            );
-          }
-        }),
-      )
-      .subscribe(() => { this.cd.markForCheck(); });
-  }
-
-  /**
-   * Navegar hacia atrás en la historia del navegador
-   * Llama al método back del servicio Location para navegar hacia atrás en la historia del navegador, lo que permite al usuario regresar a la página anterior.
-   * @returns void
-   */
-  goBack(): void {
-    this.location.back();
-  }
-
-  /**
-   * Formatear UUID corto (primeros 8 caracteres)
-   * @param id UUID completo
-   * @returns UUID truncado
-   */
-  getShortId(id: string): string {
-    return id.substring(0, 8);
-  }
-
-  /**
-   * Refrescar los detalles de la orden
-   * Llama al método getOrderDetail para recargar los detalles de la orden, lo que permite al usuario actualizar la información mostrada en la página.
-   * @returns void
-   */
-  refreshData(): void {
-    this.getOrderDetail();
-  }
-
-  /**
-   * Ir al detalle de la asignación segun el tipo de asignación (empleado o grupo)
-   * Navega al detalle del empleado o grupo asignado a la orden, dependiendo del tipo de asignación. Si la orden está asignada a un empleado, navega al detalle del empleado; si está asignada a un grupo, navega al detalle del grupo.
-   * @returns void
-   */
   goAsignedDetail(): void {
-    switch (this.order?.assigneeType) {
+    const order = this.order();
+    switch (order?.assigneeType) {
       case 'EMPLOYEE':
-        this.router.navigate(['/app/employees/', this.order.assigneeId]);
+        this.router.navigate(['/app/employees/', order.assigneeId]);
         break;
       case 'GROUP':
-        this.router.navigate(['/app/groups/', this.order.assigneeId]);
-        break;
-      default:
+        this.router.navigate(['/app/groups/', order.assigneeId]);
         break;
     }
   }

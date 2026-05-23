@@ -1,20 +1,10 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, OnInit, inject } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { DevicesService } from '../../services/devices.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Device, DeviceAssignment } from '../../models/device.model';
-import {
-  Observable,
-  catchError,
-  concatMap,
-  finalize,
-  forkJoin,
-  map,
-  of,
-  switchMap,
-  tap,
-} from 'rxjs';
-import { CommonModule, Location } from '@angular/common';
+import { catchError, concatMap, forkJoin, map, of, switchMap, tap } from 'rxjs';
+import { DatePipe, Location } from '@angular/common';
 import { OrdersService } from '../../../orders/services/orders.service';
 import { LoadingService } from '../../../../../core/services/loading.service';
 import { toast } from 'ngx-sonner';
@@ -25,10 +15,9 @@ import { toast } from 'ngx-sonner';
   styleUrls: ['./devices-detail.component.css'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule],
+  imports: [DatePipe],
 })
 export class DevicesDetailComponent implements OnInit {
-  private readonly cd = inject(ChangeDetectorRef);
   private readonly route = inject(ActivatedRoute);
   private readonly devicesService = inject(DevicesService);
   private readonly location = inject(Location);
@@ -36,28 +25,22 @@ export class DevicesDetailComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
-  readonly loading$ = inject(LoadingService).loading$;
+  readonly loading = toSignal(inject(LoadingService).loading$, { initialValue: false });
+  readonly device = signal<Device | null>(null);
+  readonly deviceAssignments = signal<DeviceAssignment[]>([]);
+  readonly error = signal('');
 
-  device$: Observable<Device | null> = of();
-  deviceAssignments$: Observable<DeviceAssignment[]> = of([]);
-
-  loading = false;
-  error = '';
-
-  ngOnInit() {
+  ngOnInit(): void {
     this.initParams();
   }
 
   initParams(): void {
-    this.device$ = of();
-    this.deviceAssignments$ = of([]);
+    this.device.set(null);
+    this.deviceAssignments.set([]);
 
     this.route.params
       .pipe(
-        tap(() => {
-          this.loading = true;
-          this.error = '';
-        }),
+        tap(() => this.error.set('')),
         switchMap((params) => this.getDeviceAndAssignments(params['id'])),
         concatMap(({ device, assignments }) =>
           this.enrichAssignmentsWithOrder(assignments, device),
@@ -66,10 +49,9 @@ export class DevicesDetailComponent implements OnInit {
       )
       .subscribe((result) => {
         if (result) {
-          this.device$ = of(result.device);
-          this.deviceAssignments$ = of(result.assignments);
+          this.device.set(result.device);
+          this.deviceAssignments.set(result.assignments);
         }
-        this.cd.markForCheck();
       });
   }
 
@@ -78,33 +60,26 @@ export class DevicesDetailComponent implements OnInit {
       device: this.devicesService.getDeviceById(deviceId).pipe(
         catchError((err) => {
           toast.error('Error al cargar el dispositivo');
-          this.error = err?.error?.message || 'Error al cargar dispositivo';
+          this.error.set(err?.error?.message || 'Error al cargar dispositivo');
           return of(null);
         }),
       ),
       assignments: this.devicesService
         .getDeviceAssignmentHistory(deviceId)
         .pipe(catchError(() => of([]))),
-    }).pipe(finalize(() => (this.loading = false)));
+    });
   }
 
-  private enrichAssignmentsWithOrder(
-    assignments: DeviceAssignment[],
-    device: Device | null,
-  ) {
+  private enrichAssignmentsWithOrder(assignments: DeviceAssignment[], device: Device | null) {
     if (!assignments.length) {
-      this.device$ = of(device);
-      this.deviceAssignments$ = of([]);
+      this.device.set(device);
+      this.deviceAssignments.set([]);
       return of(null);
     }
     return forkJoin(
       assignments.map((a) => {
         if (!a.orderId) {
-          return of({
-            ...a,
-            orderName: this.getShortId(a.orderId || ''),
-            orderFound: false,
-          });
+          return of({ ...a, orderName: this.getShortId(a.orderId || ''), orderFound: false });
         }
         return this.ordersService.getOrderById(a.orderId).pipe(
           map((order) => ({
@@ -113,20 +88,11 @@ export class DevicesDetailComponent implements OnInit {
             orderFound: !!order,
           })),
           catchError(() =>
-            of({
-              ...a,
-              orderName: this.getShortId(a.orderId),
-              orderFound: false,
-            }),
+            of({ ...a, orderName: this.getShortId(a.orderId), orderFound: false }),
           ),
         );
       }),
-    ).pipe(
-      map((assignmentsWithOrderName) => ({
-        device,
-        assignments: assignmentsWithOrderName,
-      })),
-    );
+    ).pipe(map((assignmentsWithOrderName) => ({ device, assignments: assignmentsWithOrderName })));
   }
 
   goBack(): void {

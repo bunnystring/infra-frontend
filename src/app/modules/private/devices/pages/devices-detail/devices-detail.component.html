@@ -1,4 +1,4 @@
-@if (loading$ | async) {
+@if (loading()) {
   <div class="toast toast-top toast-center z-50">
     <div class="alert alert-info gap-2">
       <span class="loading loading-spinner loading-sm"></span>
@@ -15,17 +15,17 @@
 </button>
 
 <!-- ERROR -->
-@if (error) {
+@if (error()) {
   <div class="alert alert-error mt-8 mx-auto w-fit text-lg shadow-lg">
     <svg class="h-6 w-6 text-error" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg>
-    {{ error }}
+    {{ error() }}
   </div>
 }
 
 <!-- DETALLE DEL DISPOSITIVO -->
-@if (device$ | async; as device) {
+@if (device(); as device) {
   <div
     class="mx-auto max-w-4xl bg-white border border-blue-200 rounded-2xl shadow-xl p-8 mt-10">
     <div class="flex items-center gap-4 mb-5">
@@ -68,11 +68,11 @@
       </svg>
       Historial de asignaciones
     </h3>
-    <button class="btn btn-ghost gap-2" (click)="refreshData()" [disabled]="loading$ | async">
-      @if (loading$ | async) {
+    <button class="btn btn-ghost gap-2" (click)="refreshData()" [disabled]="loading()">
+      @if (loading()) {
         <span class="loading loading-spinner loading-xs"></span>
       }
-      @if (!(loading$ | async)) {
+      @if (!loading()) {
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
           stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -80,60 +80,59 @@
         </svg>
       }
       <span class="hidden sm:inline">
-        {{ (loading$ | async) ? 'Actualizando...' : 'Actualizar' }}
+        {{ loading() ? 'Actualizando...' : 'Actualizar' }}
       </span>
     </button>
   </div>
-  @if (deviceAssignments$ | async; as deviceAssignments) {
-    @if (deviceAssignments.length > 0) {
-      <table class="table w-full rounded-xl shadow-md overflow-hidden text-blue-900">
-        <thead>
-          <tr>
-            <th class="bg-blue-50 text-blue-800">Descripción de la órden</th>
-            <th class="bg-blue-50 text-blue-800">Estado</th>
-            <th class="bg-blue-50 text-blue-800">Asignado</th>
-            <th class="bg-blue-50 text-blue-800">Liberado</th>
+  @let assignments = deviceAssignments();
+  @if (assignments.length > 0) {
+    <table class="table w-full rounded-xl shadow-md overflow-hidden text-blue-900">
+      <thead>
+        <tr>
+          <th class="bg-blue-50 text-blue-800">Descripción de la órden</th>
+          <th class="bg-blue-50 text-blue-800">Estado</th>
+          <th class="bg-blue-50 text-blue-800">Asignado</th>
+          <th class="bg-blue-50 text-blue-800">Liberado</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (a of assignments; track a) {
+          <tr class="hover:bg-blue-100">
+            <td>
+              @if (a.orderFound) {
+                <button class="link link-primary font-semibold" (click)="goDetailOrder(a.orderId)">
+                  {{ a.orderName }}
+                </button>
+              } @else {
+                <span class="badge badge-ghost">{{ a.orderName }}</span>
+              }
+            </td>
+            <td>
+              <span class="badge badge-info">{{ a.deviceStatus }}</span>
+            </td>
+            <td>
+              <span class="text-green-700">{{ a.assignedAt | date }}</span>
+            </td>
+            <td>
+              @if (a.releasedAt) {
+                <span class="text-amber-700">{{ a.releasedAt | date }}</span>
+              }
+              @if (!a.releasedAt) {
+                <span class="text-gray-400">Sin liberar</span>
+              }
+            </td>
           </tr>
-        </thead>
-        <tbody>
-          @for (a of deviceAssignments; track a) {
-            <tr class="hover:bg-blue-100">
-              <td>
-                @if (a.orderFound) {
-                  <button class="link link-primary font-semibold" (click)="goDetailOrder(a.orderId)">
-                    {{ a.orderName }}
-                  </button>
-                } @else {
-                  <span class="badge badge-ghost">{{ a.orderName }}</span>
-                }
-              </td>
-              <td>
-                <span class="badge badge-info">{{ a.deviceStatus }}</span>
-              </td>
-              <td>
-                <span class="text-green-700">{{ a.assignedAt | date }}</span>
-              </td>
-              <td>
-                @if (a.releasedAt) {
-                  <span class="text-amber-700">{{ a.releasedAt | date }}</span>
-                }
-                @if (!a.releasedAt) {
-                  <span class="text-gray-400">Sin liberar</span>
-                }
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    }
-    @if (deviceAssignments.length === 0) {
-      <div class="py-12 text-center opacity-80">
-        <svg class="mx-auto h-12 w-12 text-blue-300 mb-2" fill="none" stroke="currentColor" stroke-width="2"
-          viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <div class="text-xl font-semibold text-blue-900">Sin historial de asignaciones</div>
-      </div>
-    }
+        }
+      </tbody>
+    </table>
+  }
+  @if (assignments.length === 0) {
+    <div class="py-12 text-center opacity-80">
+      <svg class="mx-auto h-12 w-12 text-blue-300 mb-2" fill="none" stroke="currentColor" stroke-width="2"
+        viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <div class="text-xl font-semibold text-blue-900">Sin historial de asignaciones</div>
+    </div>
   }
 </div>

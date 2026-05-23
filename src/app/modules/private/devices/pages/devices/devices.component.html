@@ -101,7 +101,7 @@
         <!-- Buscador -->
         <div class="relative w-full sm:w-60">
           <input class="input input-bordered w-full pl-12 bg-white/90 shadow focus:ring-2 focus:ring-blue-400"
-            placeholder="Buscar por nombre, marca o código..." [value]="search"
+            placeholder="Buscar por nombre, marca o código..." [value]="search()"
             (input)="onSearchChange($any($event.target).value)">
           <svg class="h-5 w-5 text-blue-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" fill="none"
             stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -111,7 +111,7 @@
         <!-- Selector estado -->
         <div class="relative w-40">
           <select class="select select-bordered w-full bg-white/90 shadow focus:ring-2 focus:ring-blue-400"
-            [ngModel]="statusFilter" (ngModelChange)="filterByStatus($event)">
+            [ngModel]="statusFilter()" (ngModelChange)="filterByStatus($event)">
             <option [ngValue]="'ALL'">Todos los estados</option>
             @for (s of [DeviceStatus.GOOD_CONDITION, DeviceStatus.FAIR, DeviceStatus.OCCUPIED, DeviceStatus.NEEDS_REPAIR]; track s) {
               <option
@@ -286,7 +286,7 @@
                         <span class="badge badge-ghost badge-lg text-blue-700 bg-blue-50">{{ device.barcode }}</span>
                       </td>
                       <td>
-                        <span [class]="getStatusBadge(device.status)">
+                        <span [class]="'badge ' + DeviceStatusColors[device.status] + ' capitalize'">
                           {{ DeviceStatusLabels[device.status] }}
                         </span>
                       </td>
@@ -343,7 +343,7 @@
               </table>
             }
             <!-- PAGINADOR -->
-            @if (totalItems > 0) {
+            @if (totalItems() > 0) {
               <div class="mt-8 px-4">
                 <div
                   class="flex flex-col sm:flex-row justify-between items-center gap-4 bg-base-200/50 rounded-2xl p-6 shadow-xl border border-base-300">
@@ -354,24 +354,23 @@
                         <path stroke-linecap="round" stroke-linejoin="round"
                           d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
-                      <span class="font-bold">{{ totalItems }}</span>
-                      <span class="font-normal">{{ totalItems === 1 ? 'dispositivo' : 'dispositivos' }}</span>
+                      <span class="font-bold">{{ totalItems() }}</span>
+                      <span class="font-normal">{{ totalItems() === 1 ? 'dispositivo' : 'dispositivos' }}</span>
                     </div>
                     <div class="hidden md:flex items-center gap-2 text-sm text-base-content/70">
                       <span>Mostrando</span>
-                      <span class="font-semibold text-primary">{{ (page - 1) * pageSize + 1 }}</span>
+                      <span class="font-semibold text-primary">{{ (page() - 1) * pageSize() + 1 }}</span>
                       <span>-</span>
-                      <span class="font-semibold text-primary">{{ page * pageSize > totalItems ? totalItems : page *
-                      pageSize }}</span>
+                      <span class="font-semibold text-primary">{{ page() * pageSize() > totalItems() ? totalItems() : page() * pageSize() }}</span>
                     </div>
                   </div>
                   <!-- CONTROLES DE PAGINACIÓN -->
                   <div class="order-1 sm:order-2">
-                    @if (getTotalPages() > 1) {
+                    @if (totalPages() > 1) {
                       <div class="join shadow-lg">
                         <!-- Primera página -->
                         <button class="join-item btn btn-sm sm:btn-md hover:btn-primary transition-all duration-200"
-                          [disabled]="page === 1" (click)="goToPage(1)" title="Primera página">
+                          [disabled]="page() === 1" (click)="goToPage(1)" title="Primera página">
                           <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" stroke-width="2"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
@@ -379,7 +378,7 @@
                         </button>
                         <!-- Anterior -->
                         <button class="join-item btn btn-sm sm:btn-md gap-2 hover:btn-primary transition-all duration-200"
-                          [disabled]="page === 1" (click)="previousPage()" title="Página anterior">
+                          [disabled]="page() === 1" (click)="previousPage()" title="Página anterior">
                           <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" stroke-width="2"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
@@ -389,13 +388,13 @@
                         <!-- Indicador de página -->
                         <button
                           class="join-item btn btn-sm sm:btn-md btn-primary pointer-events-none min-w-[120px] sm:min-w-[140px]">
-                          <span class="font-bold">{{ page }}</span>
+                          <span class="font-bold">{{ page() }}</span>
                           <span class="mx-1">/</span>
-                          <span class="font-bold">{{ getTotalPages() }}</span>
+                          <span class="font-bold">{{ totalPages() }}</span>
                         </button>
                         <!-- Siguiente -->
                         <button class="join-item btn btn-sm sm:btn-md gap-2 hover:btn-primary transition-all duration-200"
-                          [disabled]="page === getTotalPages()" (click)="nextPage()" title="Página siguiente">
+                          [disabled]="page() === totalPages()" (click)="nextPage()" title="Página siguiente">
                           <span class="hidden sm:inline font-medium">Siguiente</span>
                           <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" stroke-width="2"
                             viewBox="0 0 24 24">
@@ -404,7 +403,7 @@
                         </button>
                         <!-- Última página -->
                         <button class="join-item btn btn-sm sm:btn-md hover:btn-primary transition-all duration-200"
-                          [disabled]="page === getTotalPages()" (click)="goToPage(getTotalPages())" title="Última página">
+                          [disabled]="page() === totalPages()" (click)="goToPage(totalPages())" title="Última página">
                           <svg class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" stroke-width="2"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
@@ -413,7 +412,7 @@
                       </div>
                     }
                     <!-- Mensaje cuando solo hay 1 página -->
-                    @if (getTotalPages() === 1) {
+                    @if (totalPages() === 1) {
                       <div
                         class="flex items-center gap-3 px-6 py-3 bg-success/10 rounded-full border-2 border-success/20">
                         <svg class="w-5 h-5 text-success" fill="none" stroke="currentColor" stroke-width="2"
@@ -434,7 +433,7 @@
                     </label>
                     <select
                       class="select select-bordered select-sm sm:select-md w-20 sm:w-24 font-semibold hover:select-primary transition-all duration-200"
-                      [(ngModel)]="pageSize" (ngModelChange)="page = 1">
+                      [ngModel]="pageSize()" (ngModelChange)="setPageSize($event)">
                       <option [value]="5">5</option>
                       <option [value]="10">10</option>
                       <option [value]="20">20</option>

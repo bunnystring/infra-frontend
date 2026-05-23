@@ -69,29 +69,17 @@ export class DevicesComponent implements OnInit {
   bulkMode = false;
   bulkStatus: DeviceStatus | null = null;
 
-  // Filter & pagination state as signals
-  private readonly _search = signal('');
-  private readonly _statusFilter = signal<DeviceStatus | 'ALL'>('ALL');
-  private readonly _page = signal(1);
-  private readonly _pageSize = signal(10);
+  // Filter & pagination state
+  readonly search = signal('');
+  readonly statusFilter = signal<DeviceStatus | 'ALL'>('ALL');
+  readonly page = signal(1);
+  readonly pageSize = signal(10);
   private readonly _selectedIds = signal<Set<string>>(new Set());
 
-  get search() { return this._search(); }
-  set search(v: string) { this._search.set(v); this._page.set(1); }
-
-  get statusFilter() { return this._statusFilter(); }
-  set statusFilter(v: DeviceStatus | 'ALL') { this._statusFilter.set(v); this._page.set(1); }
-
-  get page() { return this._page(); }
-  set page(v: number) { this._page.set(v); }
-
-  get pageSize() { return this._pageSize(); }
-  set pageSize(v: number) { this._pageSize.set(v); this._page.set(1); }
-
-  // Derived state as computed (memoized)
+  // Derived state (memoized)
   readonly filteredDevices = computed(() => {
-    const s = this._search().toLowerCase();
-    const f = this._statusFilter();
+    const s = this.search().toLowerCase();
+    const f = this.statusFilter();
     return this.store.devices().filter(
       (d) => this.matchSearch(d, s) && (f === 'ALL' || d.status === f),
     );
@@ -108,9 +96,13 @@ export class DevicesComponent implements OnInit {
     };
   });
 
+  readonly totalItems = computed(() => this.filteredDevices().length);
+  readonly totalPages = computed(() => Math.ceil(this.totalItems() / this.pageSize()) || 1);
+  readonly pages = computed(() => Array.from({ length: this.totalPages() }, (_, i) => i + 1));
+
   readonly pagedDevices = computed(() => {
-    const p = this._page();
-    const ps = this._pageSize();
+    const p = this.page();
+    const ps = this.pageSize();
     return this.filteredDevices().slice((p - 1) * ps, p * ps);
   });
 
@@ -118,12 +110,6 @@ export class DevicesComponent implements OnInit {
   get deviceError() { return !!this.store.error(); }
   get buttonsIsAvailable() { return !this.store.error(); }
   get isRetrying() { return this.store.isLoading(); }
-
-  get totalItems() { return this.filteredDevices().length; }
-
-  get pages(): number[] {
-    return Array.from({ length: this.getTotalPages() }, (_, i) => i + 1);
-  }
 
   ngOnInit() {
     if (this.store.error()) {
@@ -142,16 +128,24 @@ export class DevicesComponent implements OnInit {
   }
 
   onSearchChange(value: string): void {
-    this.search = value || '';
+    this.search.set(value || '');
+    this.page.set(1);
   }
 
   filterByStatus(status: DeviceStatus | 'ALL'): void {
-    this.statusFilter = status;
+    this.statusFilter.set(status);
+    this.page.set(1);
+  }
+
+  setPageSize(value: string): void {
+    this.pageSize.set(+value);
+    this.page.set(1);
   }
 
   resetFilters(): void {
-    this.search = '';
-    this.statusFilter = 'ALL';
+    this.search.set('');
+    this.statusFilter.set('ALL');
+    this.page.set(1);
   }
 
   isSelected(deviceId: string): boolean {
@@ -274,10 +268,6 @@ export class DevicesComponent implements OnInit {
     this.store.clearError();
   }
 
-  getStatusBadge(status: DeviceStatus): string {
-    return `badge ${DeviceStatusColors[status]} capitalize`;
-  }
-
   goToDetail(device: Device): void {
     this.router.navigate(['/app/devices', device.id]);
   }
@@ -304,18 +294,14 @@ export class DevicesComponent implements OnInit {
     return texto.substring(0, 15);
   }
 
-  getTotalPages(): number {
-    return Math.ceil(this.totalItems / this._pageSize()) || 1;
-  }
-
   goToPage(pageNumber: number): void {
-    if (pageNumber >= 1 && pageNumber <= this.getTotalPages()) {
-      this._page.set(pageNumber);
+    if (pageNumber >= 1 && pageNumber <= this.totalPages()) {
+      this.page.set(pageNumber);
     }
   }
 
-  nextPage(): void { this.goToPage(this.page + 1); }
-  previousPage(): void { this.goToPage(this.page - 1); }
+  nextPage(): void { this.goToPage(this.page() + 1); }
+  previousPage(): void { this.goToPage(this.page() - 1); }
 
   private matchSearch(device: Device, search: string): boolean {
     if (!search) return true;

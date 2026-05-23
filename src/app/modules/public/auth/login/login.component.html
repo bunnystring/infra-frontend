@@ -2,8 +2,8 @@
   <div class="card-body">
     <!-- Mascota animada -->
     <app-animated-pet
-      [isPasswordFocused]="isPasswordFocused"
-      [isTextFieldFocused]="isEmailFocused"
+      [isPasswordFocused]="isPasswordFocused()"
+      [isTextFieldFocused]="isEmailFocused()"
       [textFieldValue]="loginForm.email().value()"
       [focusedFieldType]="'email'">
     </app-animated-pet>

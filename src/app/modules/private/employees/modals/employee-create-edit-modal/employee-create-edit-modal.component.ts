@@ -25,12 +25,6 @@ import {
 import { EmployeesService } from '../../services/employees.service';
 import { toast } from 'ngx-sonner';
 
-/**
- * Modal para crear o editar un empleado usando Signal Forms (Angular 21)
- *
- * @since 2026-05-10
- * @author Bunnystring
- */
 @Component({
   selector: 'app-employee-create-edit-modal',
   templateUrl: './employee-create-edit-modal.component.html',

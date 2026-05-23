@@ -19,12 +19,6 @@ import { Group, GroupFormResult } from '../../models/groups.model';
 import { GroupsService } from '../../services/groups.service';
 import { toast } from 'ngx-sonner';
 
-/**
- * Modal para crear o editar un grupo usando Signal Forms (Angular 21)
- *
- * @since 2026-05-11
- * @author Bunnystring
- */
 @Component({
   selector: 'app-group-create-edit-modal',
   templateUrl: './group-create-edit-modal.component.html',

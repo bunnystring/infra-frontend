@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, Output, EventEmitter, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, input, output } from '@angular/core';
 import { Device } from '../../models/device.model';
 import { DevicesService } from '../../services/devices.service';
 import { toast } from 'ngx-sonner';
@@ -13,33 +13,29 @@ import { finalize } from 'rxjs';
 })
 export class DeviceDeleteModalComponent {
   private readonly devicesService = inject(DevicesService);
-  private readonly cd = inject(ChangeDetectorRef);
 
-  @Input() device: Device | null = null;
-  @Output() deleted = new EventEmitter<void>();
-  @Output() cancel = new EventEmitter<void>();
+  readonly device = input<Device | null>(null);
+  readonly deleted = output<void>();
+  readonly cancel = output<void>();
 
-  loading = false;
-  error = '';
+  readonly loading = signal(false);
+  readonly error = signal('');
 
   confirmDelete(): void {
-    if (!this.device) return;
-    this.loading = true;
+    const device = this.device();
+    if (!device) return;
+    this.loading.set(true);
     this.devicesService
-      .deleteDevice(this.device.id.toString())
-      .pipe(finalize(() => { this.loading = false; this.cd.markForCheck(); }))
+      .deleteDevice(device.id.toString())
+      .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: () => {
           toast.success('Dispositivo eliminado');
           this.deleted.emit();
         },
         error: (err) => {
-          const msg =
-            err?.error?.message ||
-            err?.message ||
-            'Error al eliminar el dispositivo';
-          this.error = msg;
-          this.cd.markForCheck();
+          const msg = err?.error?.message || err?.message || 'Error al eliminar el dispositivo';
+          this.error.set(msg);
           toast.error('Error al eliminar el dispositivo', { description: msg });
         },
       });

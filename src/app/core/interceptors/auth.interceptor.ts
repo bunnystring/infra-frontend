@@ -1,24 +1,12 @@
-import { HttpInterceptorFn } from '@angular/common/http';
-import { inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformServer } from '@angular/common';
+import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
+import { inject } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
 import { EMPTY, catchError, switchMap, throwError } from 'rxjs';
-import { HttpErrorResponse } from '@angular/common/http';
 
-/**
- * Interceptor para agregar el token de autenticación a las peticiones HTTP
- *
- * @since 2026-02-05
- * @author Bunnystring
- */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const router = inject(Router);
-  const platformId = inject(PLATFORM_ID);
-  const context = isPlatformServer(platformId) ? '[SSR]' : '[BROWSER]';
-
-  console.log(`${context} HTTP ${req.method} → ${req.url}`);
 
   // Lista de endpoints que no requieren token
   const publicEndpoints = ['/auth/login', '/auth/register', '/auth/refresh'];

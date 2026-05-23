@@ -7,7 +7,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { Order, OrderStateLabels } from '../orders/models/Orders';
 import { DevicesService } from '../devices/services/devices.service';
@@ -29,7 +29,7 @@ import { Alerta, DashboardStatsType, DEFAULT_STATS } from './models/DashboardSta
   selector: 'app-dashboard',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule],
+  imports: [NgClass],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
 })

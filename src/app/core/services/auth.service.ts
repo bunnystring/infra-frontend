@@ -8,6 +8,7 @@ import {
   RegisterRequest,
   AuthResponse,
 } from '../../modules/public/auth/models/auth.model';
+import { User } from '../../modules/public/auth/models/user.model';
 import { ApiService } from './api.service';
 
 @Injectable({
@@ -22,12 +23,9 @@ export class AuthService {
   private readonly REFRESH_TOKEN_KEY = 'refresh_token';
   private readonly USER_KEY = 'user_data';
 
-  private readonly _currentUser = signal<any>(this.getUserFromStorage());
+  private readonly _currentUser = signal<User | null>(this.getUserFromStorage());
 
-  /** Signal del usuario autenticado — prefer this over currentUser$ en código nuevo */
   readonly currentUser = this._currentUser.asReadonly();
-
-  /** Observable para compatibilidad con suscripciones RxJS existentes */
   readonly currentUser$ = toObservable(this._currentUser);
 
   login(credentials: LoginRequest): Observable<AuthResponse> {
@@ -66,7 +64,7 @@ export class AuthService {
     return !!this.getToken();
   }
 
-  getCurrentUser(): any {
+  getCurrentUser(): User | null {
     return this._currentUser();
   }
 
@@ -146,9 +144,9 @@ export class AuthService {
     localStorage.removeItem(this.USER_KEY);
   }
 
-  private getUserFromStorage(): any {
+  private getUserFromStorage(): User | null {
     if (!this.isBrowser) return null;
     const userStr = localStorage.getItem(this.USER_KEY);
-    return userStr ? JSON.parse(userStr) : null;
+    return userStr ? (JSON.parse(userStr) as User) : null;
   }
 }

@@ -4,12 +4,6 @@ import { EmployeesService } from '../../services/employees.service';
 import { toast } from 'ngx-sonner';
 import { finalize } from 'rxjs';
 
-/**
- * Modal de confirmación para eliminar un empleado
- *
- * @since 2026-05-10
- * @author Bunnystring
- */
 @Component({
   selector: 'app-employee-delete-modal',
   templateUrl: './employee-delete-modal.component.html',

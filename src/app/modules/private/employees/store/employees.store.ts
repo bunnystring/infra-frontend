@@ -16,11 +16,6 @@ interface EmployeesState {
   error: string | null;
 }
 
-/**
- * Store centralizado para gestionar el estado de los empleados.
- * @since 2026-05-13
- * @author BunnyString
- */
 export const EmployeesStore = signalStore(
   { providedIn: 'root' },
   withState<EmployeesState>({
@@ -47,7 +42,6 @@ export const EmployeesStore = signalStore(
         return employeesService.getAllEmployees().pipe(
           tap((employees) => patchState(store, { employees, isLoading: false })),
           catchError((err) => {
-            console.error('Error al cargar empleados:', err);
             patchState(store, { error: 'Error al cargar empleados', isLoading: false });
             return of([]);
           }),

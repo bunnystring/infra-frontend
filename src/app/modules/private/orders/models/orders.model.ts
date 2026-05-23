@@ -1,9 +1,5 @@
 import { Device, DeviceStatus } from "../../devices/models/device.model";
 
-/**
- * Estados posibles de una orden y su traducción al español.
- * @returns Objeto con los estados de orden y sus traducciones
- */
 export enum OrderStates {
   CREATED = 'CREATED',
   IN_PROCESS = 'IN_PROCESS',
@@ -12,9 +8,6 @@ export enum OrderStates {
   CREATED_WITH_ERRORS = 'CREATED_WITH_ERRORS'
 }
 
-/**
- * Labels para mostrar en UI
- */
 export const OrderStateLabels: { [key in OrderStates]: string } = {
   [OrderStates.CREATED]: 'Creada',
   [OrderStates.IN_PROCESS]: 'En Proceso',
@@ -23,9 +16,6 @@ export const OrderStateLabels: { [key in OrderStates]: string } = {
   [OrderStates.CREATED_WITH_ERRORS]: 'Creada con errores',
 };
 
-/**
- * Colores para badges en UI
- */
 export const OrderStatusColors: { [key in OrderStates]: string } = {
   [OrderStates.CREATED]: 'success',
   [OrderStates.IN_PROCESS]: 'warning',
@@ -34,22 +24,12 @@ export const OrderStatusColors: { [key in OrderStates]: string } = {
   [OrderStates.CREATED_WITH_ERRORS]: 'error'
 };
 
-/**
- * Interfaz que representa los items de una orden y su estado original del dispositivo
- *
- * @returns Interfaz OrderItem
- */
 export interface OrderItem {
   deviceId: string;
   originalDeviceState: DeviceStatus;
   device?: Device | null;
 }
 
-/**
- * Interfaz principal de una orden con campos esenciales para el dashboard
- *
- * @returns Interfaz Order
- */
 export interface Order {
   id: string;
   description: string;
@@ -62,11 +42,6 @@ export interface Order {
   assignee: any;
 }
 
-/**
- * Request para crear una orden con campos necesarios para el backend
- * Incluye descripción, tipo y ID del asignado, y los items de la orden
- * @returns Interfaz CreateOrderRequest
- */
 export interface CreateOrderRequest {
   description: string;
   assigneeType: string;
@@ -75,9 +50,6 @@ export interface CreateOrderRequest {
 }
 
 
-/**
- * Request para actualizar una orden
- */
 export interface UpdateOrderRequest {
   description?: string;
   state?: OrderStates;
@@ -86,9 +58,6 @@ export interface UpdateOrderRequest {
   devicesIds?: string[];
 }
 
-/**
- * Estadísticas de órdenes
- */
 export interface OrderStats {
   total: number;
   created: number;
@@ -99,10 +68,6 @@ export interface OrderStats {
   totalDevicesInOrders: number;
 }
 
-/**
- * Orden con información extendida del dispositivo
- * (para mostrar en el dashboard con datos enriquecidos)
- */
 export interface OrderWithDevice extends Order {
   // Información enriquecida de dispositivos
   deviceNames?: string[];

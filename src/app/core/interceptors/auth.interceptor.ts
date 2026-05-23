@@ -55,7 +55,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
             return next(retryReq);
           }),
           catchError((refreshError) => {
-            console.error('❌ Fallo al refrescar token:', refreshError);
             authService.logout();
             // EMPTY evita que el error llegue a errorInterceptor, que también
             // navega a /auth/login en 401 — previniendo doble navegación.
@@ -66,7 +65,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
       // Para otros errores, simplemente propagarlos
       if (error.status !== 401) {
-        console.error(`❌ Error ${error.status} en petición:`, req.url);
       }
 
       return throwError(() => error);

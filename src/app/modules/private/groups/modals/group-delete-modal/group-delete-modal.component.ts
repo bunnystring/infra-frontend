@@ -11,12 +11,6 @@ import { Group } from '../../models/groups.model';
 import { GroupsService } from '../../services/groups.service';
 import { toast } from 'ngx-sonner';
 
-/**
- * Modal de confirmación para eliminar un grupo (Angular 21)
- *
- * @since 2026-05-11
- * @author Bunnystring
- */
 @Component({
   selector: 'app-group-delete-modal',
   templateUrl: './group-delete-modal.component.html',

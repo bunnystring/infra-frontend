@@ -2,14 +2,6 @@ import { inject } from '@angular/core';
 import { Router, CanActivateFn } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
-/**
- * Guard funcional para proteger rutas públicas (Login, Register).
- * Redirige al dashboard si el usuario YA está autenticado.
- * Previene que usuarios logueados accedan a páginas de autenticación.
- *
- * @author Bunnystring
- * @since 2026-02-10
- */
 export const publicAuthGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);

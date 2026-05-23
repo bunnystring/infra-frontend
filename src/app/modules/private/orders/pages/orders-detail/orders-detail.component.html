@@ -1,4 +1,4 @@
-@if (loading$ | async) {
+@if (loading()) {
   <div class="toast toast-top toast-center z-50">
     <div class="alert alert-info gap-2">
       <span class="loading loading-spinner loading-sm"></span>
@@ -40,21 +40,21 @@
               <button
                 class="flex items-center gap-2 rounded-full pl-3 pr-4 py-1 bg-blue-50 hover:bg-blue-100 shadow transition font-semibold ring-1 ring-blue-200"
                 [ngClass]="{
-                    'bg-blue-50 text-blue-800 hover:bg-blue-100': order?.assigneeType === 'EMPLOYEE',
-                    'bg-green-50 text-green-800 hover:bg-green-100': order?.assigneeType === 'GROUP'
+                    'bg-blue-50 text-blue-800 hover:bg-blue-100': order()?.assigneeType === 'EMPLOYEE',
+                    'bg-green-50 text-green-800 hover:bg-green-100': order()?.assigneeType === 'GROUP'
                   }" (click)="goAsignedDetail()"
-                [attr.title]="order?.assigneeType === 'GROUP' ? groupNameTooltip : employeeNameTooltip" style="cursor:pointer;"
+                [attr.title]="order()?.assigneeType === 'GROUP' ? groupNameTooltip : employeeNameTooltip" style="cursor:pointer;"
                 type="button">
-                @if (order?.assigneeType === 'EMPLOYEE') {
+                @if (order()?.assigneeType === 'EMPLOYEE') {
                   <!-- Icono de usuario -->
                   <svg class="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                     <circle cx="12" cy="8" r="4" />
                     <path d="M4 20c0-4 4-6 8-6s8 2 8 6" />
                   </svg>
-                  <span class="tracking-wider text-base">{{ order?.assigneeId }}</span>
+                  <span class="tracking-wider text-base">{{ order()?.assigneeId }}</span>
                   <span class="ml-1 rounded text-xs bg-blue-200/80 px-2 py-[2px] text-blue-700">Ver perfil</span>
                 }
-                @if (order?.assigneeType === 'GROUP') {
+                @if (order()?.assigneeType === 'GROUP') {
                   <!-- Icono de grupo -->
                   <svg class="h-5 w-5 text-green-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                     <circle cx="6.5" cy="8.5" r="2.5" />
@@ -63,7 +63,7 @@
                   </svg>
                   <span class="tracking-wider text-base">Grupo</span>
                   <span class="ml-2 rounded-full bg-green-200/80 px-2 py-[2px] text-green-700 font-semibold flex items-center">{{
-                  order?.assigneeId }}</span>
+                  order()?.assigneeId }}</span>
                   <span class="ml-1 rounded text-xs bg-green-100 px-2 py-[2px] text-green-900">Ver grupo</span>
                 }
               </button>
@@ -71,8 +71,8 @@
           </div>
         </div>
         <!-- Right: Estado de orden -->
-        <span [ngClass]="getOrderStateBadge(order?.state)">
-          @switch (order?.state) {
+        <span [ngClass]="getOrderStateBadge(order()?.state)">
+          @switch (order()?.state) {
             @case ('FINISHED') {
               <svg class="w-7 h-7 text-green-500" fill="none" stroke="currentColor"
                 viewBox="0 0 24 24">
@@ -106,7 +106,7 @@
               </svg>
             }
           }
-          {{ getOrderStateLabel(order?.state) }}
+          {{ getOrderStateLabel(order()?.state) }}
         </span>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -118,7 +118,7 @@
             </svg>
             Tipo de asignación:
           </span>
-          <div class="font-semibold text-base mt-1">{{order?.assigneeType | titlecase}}</div>
+          <div class="font-semibold text-base mt-1">{{ order()?.assigneeType | titlecase }}</div>
         </div>
         <div>
           <span class="text-sm text-base-content/60 flex items-center gap-2">
@@ -128,7 +128,7 @@
             </svg>
             Creada:
           </span>
-          <div class="font-semibold text-base mt-1">{{order?.createdAt | date:'medium'}}</div>
+          <div class="font-semibold text-base mt-1">{{ order()?.createdAt | date:'medium' }}</div>
         </div>
         <div>
           <span class="text-sm text-base-content/60 flex items-center gap-2">
@@ -137,7 +137,7 @@
             </svg>
             Descripción:
           </span>
-          <div class="italic text-base-content mt-1">{{order?.description || 'Sin descripción'}}</div>
+          <div class="italic text-base-content mt-1">{{ order()?.description || 'Sin descripción' }}</div>
         </div>
       </div>
     </div>
@@ -155,18 +155,18 @@
           </svg>
           Dispositivos Alquilados
         </h2>
-        <button class="btn btn-ghost gap-2" (click)="refreshData()" [disabled]="loading$ | async">
-          @if (loading$ | async) {
+        <button class="btn btn-ghost gap-2" (click)="refreshData()" [disabled]="loading()">
+          @if (loading()) {
             <span class="loading loading-spinner loading-xs"></span>
           }
-          @if (!(loading$ | async)) {
+          @if (!loading()) {
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
           }
           <span class="hidden sm:inline">
-            {{ (loading$ | async) ? 'Actualizando...' : 'Actualizar' }}
+            {{ loading() ? 'Actualizando...' : 'Actualizar' }}
           </span>
         </button>
       </div>
@@ -183,13 +183,13 @@
           </tr>
         </thead>
         <tbody>
-          @for (item of order?.items; track item) {
+          @for (item of order()?.items; track item) {
             <tr>
-              <td class="text-left">{{item.device?.name || '-'}}</td>
-              <td class="text-left">{{item.device?.brand || '-'}}</td>
+              <td class="text-left">{{ item.device?.name || '-' }}</td>
+              <td class="text-left">{{ item.device?.brand || '-' }}</td>
               <td class="text-left">
                 <span class="inline-flex items-center gap-1">
-                  {{item.device?.barcode || '-'}}
+                  {{ item.device?.barcode || '-' }}
                 </span>
               </td>
               <!-- Badge Estado original -->

@@ -233,13 +233,13 @@ describe('OrdersDetailComponent', () => {
   describe('groupNameTooltip', () => {
     it('retorna cadena vacía cuando groupName está vacío', async () => {
       await setup();
-      component.groupName = '';
+      component.groupName.set('');
       expect(component.groupNameTooltip).toBe('');
     });
 
     it('retorna el tooltip con el nombre del grupo', async () => {
       await setup();
-      component.groupName = 'Grupo TI';
+      component.groupName.set('Grupo TI');
       expect(component.groupNameTooltip).toBe('Grupo: Grupo TI');
     });
   });
@@ -247,7 +247,7 @@ describe('OrdersDetailComponent', () => {
   describe('employeeNameTooltip', () => {
     it('retorna cadena vacía cuando no hay orden', async () => {
       await setup(undefined, null);
-      component.order = null;
+      component.order.set(null);
       expect(component.employeeNameTooltip).toBe('');
     });
   });
@@ -256,19 +256,19 @@ describe('OrdersDetailComponent', () => {
   describe('getOrderDetail', () => {
     it('carga la orden correctamente desde la ruta', async () => {
       await setup();
-      expect(component.order).toBeTruthy();
-      expect(component.order?.id).toBe(mockOrder.id);
+      expect(component.order()).toBeTruthy();
+      expect(component.order()?.id).toBe(mockOrder.id);
     });
 
     it('establece error cuando la orden no existe', async () => {
       await setup('bad-id', null);
-      expect(component.error).toBeTruthy();
-      expect(component.order).toBeNull();
+      expect(component.error()).toBeTruthy();
+      expect(component.order()).toBeNull();
     });
 
     it('carga dispositivos al obtener la orden con items', async () => {
       await setup();
-      expect(component.order?.items).toBeDefined();
+      expect(component.order()?.items).toBeDefined();
     });
   });
 
@@ -304,18 +304,10 @@ describe('OrdersDetailComponent', () => {
 
     it('no navega si no hay orden', async () => {
       await setup();
-      component.order = null;
+      component.order.set(null);
       const navigateSpy = vi.spyOn(router, 'navigate');
       component.goAsignedDetail();
       expect(navigateSpy).not.toHaveBeenCalled();
-    });
-  });
-
-  // ── ngOnDestroy ───────────────────────────────────────────────────────────
-  describe('ngOnDestroy', () => {
-    it('completa el subject destroy$ sin errores', async () => {
-      await setup();
-      expect(() => component.ngOnDestroy()).not.toThrow();
     });
   });
 });

@@ -16,11 +16,6 @@ interface GroupsState {
   error: string | null;
 }
 
-/**
- * Store centralizado para gestionar el estado de los grupos.
- * @since 2026-05-13
- * @author BunnyString
- */
 export const GroupsStore = signalStore(
   { providedIn: 'root' },
   withState<GroupsState>({
@@ -47,7 +42,6 @@ export const GroupsStore = signalStore(
         return groupsService.getAllGroups().pipe(
           tap((groups) => patchState(store, { groups, isLoading: false })),
           catchError((err) => {
-            console.error('Error al cargar grupos:', err);
             patchState(store, { error: 'Error al cargar grupos', isLoading: false });
             return of([]);
           }),

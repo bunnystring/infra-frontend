@@ -16,12 +16,6 @@ import { GroupsService } from '../../services/groups.service';
 import { LoadingService } from '../../../../../core/services/loading.service';
 import { toast } from 'ngx-sonner';
 
-/**
- * Componente de detalle de un grupo
- *
- * @since 2026-05-11
- * @author Bunnystring
- */
 @Component({
   selector: 'app-groups-detail',
   templateUrl: './groups-detail.component.html',

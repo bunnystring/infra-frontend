@@ -1,23 +1,5 @@
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 
-/**
- * Utilidades de Validación para Formularios Reactivos
- * Colección de validadores personalizados reutilizables
- * Pattern: Export functions para máxima reutilización
- *
- * @author Bunnystring
- * @since 2026-02-10
- */
-
-
-/**
- * Validator para verificar que dos campos de contraseña coincidan
- * Se aplica a nivel de FormGroup, no a un control individual
- *
- * @param passwordField - Nombre del campo de contraseña
- * @param confirmPasswordField - Nombre del campo de confirmación
- * @returns ValidatorFn que retorna ValidationErrors o null
- */
 export const passwordMatchValidator = (
   passwordField: string,
   confirmPasswordField: string
@@ -56,13 +38,6 @@ export const passwordMatchValidator = (
   };
 };
 
-/**
- * Validator para contraseña segura
- * Requiere: al menos 1 mayúscula, 1 minúscula y 1 número
- *
- * @returns ValidatorFn que retorna ValidationErrors o null
- *
- */
 export const strongPasswordValidator = (): ValidatorFn => {
   return (control: AbstractControl): ValidationErrors | null => {
     const value = control.value;
@@ -81,13 +56,6 @@ export const strongPasswordValidator = (): ValidatorFn => {
   };
 };
 
-/**
- * Validator para contraseña extra segura
- * Requiere: mayúsculas, minúsculas, números Y caracteres especiales
- *
- * @returns ValidatorFn que retorna ValidationErrors o null
- *
- */
 export const extraStrongPasswordValidator = (): ValidatorFn => {
   return (control: AbstractControl): ValidationErrors | null => {
     const value = control.value;
@@ -109,12 +77,6 @@ export const extraStrongPasswordValidator = (): ValidatorFn => {
 };
 
 
-/**
- * Validator para nombre completo
- * Requiere al menos 2 palabras (nombre y apellido)
- *
- * @returns ValidatorFn que retorna ValidationErrors o null
- */
 export const fullNameValidator = (): ValidatorFn => {
   return (control: AbstractControl): ValidationErrors | null => {
     const value = control.value?.trim();
@@ -137,12 +99,6 @@ export const fullNameValidator = (): ValidatorFn => {
   };
 };
 
-/**
- * Validator para nombres sin números
- * Verifica que el nombre solo contenga letras y espacios
- *
- * @returns ValidatorFn que retorna ValidationErrors o null
- */
 export const noNumbersInNameValidator = (): ValidatorFn => {
   return (control: AbstractControl): ValidationErrors | null => {
     const value = control.value;
@@ -158,13 +114,6 @@ export const noNumbersInNameValidator = (): ValidatorFn => {
   };
 };
 
-/**
- * Validator para email con dominios específicos permitidos
- * Útil para restricciones corporativas o educativas
- *
- * @param allowedDomains - Array de dominios permitidos (sin @)
- * @returns ValidatorFn que retorna ValidationErrors o null
- */
 export const emailDomainValidator = (allowedDomains: string[]): ValidatorFn => {
   return (control: AbstractControl): ValidationErrors | null => {
     const value = control.value;
@@ -195,13 +144,6 @@ export const emailDomainValidator = (allowedDomains: string[]): ValidatorFn => {
   };
 };
 
-/**
- * Validator para email corporativo
- * Rechaza dominios de email gratuitos comunes
- *
- * @returns ValidatorFn que retorna ValidationErrors o null
- *
- */
 export const corporateEmailValidator = (): ValidatorFn => {
   const freeDomains = [
     'gmail.com',
@@ -231,13 +173,6 @@ export const corporateEmailValidator = (): ValidatorFn => {
   };
 };
 
-/**
- * Validator para número de teléfono (formato internacional o local)
- * Acepta: +1234567890, (123) 456-7890, 123-456-7890, 1234567890
- *
- * @returns ValidatorFn que retorna ValidationErrors o null
- *
- */
 export const phoneValidator = (): ValidatorFn => {
   return (control: AbstractControl): ValidationErrors | null => {
     const value = control.value;
@@ -254,15 +189,6 @@ export const phoneValidator = (): ValidatorFn => {
 };
 
 
-/**
- * Validator para rango numérico
- * Verifica que un número esté entre min y max (inclusive)
- *
- * @param min - Valor mínimo permitido
- * @param max - Valor máximo permitido
- * @returns ValidatorFn que retorna ValidationErrors o null
- *
- */
 export const rangeValidator = (min: number, max: number): ValidatorFn => {
   return (control: AbstractControl): ValidationErrors | null => {
     const value = control.value;
@@ -291,12 +217,6 @@ export const rangeValidator = (min: number, max: number): ValidatorFn => {
   };
 };
 
-/**
- * Validator para números positivos solamente
- *
- * @returns ValidatorFn que retorna ValidationErrors o null
- *
- */
 export const positiveNumberValidator = (): ValidatorFn => {
   return (control: AbstractControl): ValidationErrors | null => {
     const value = control.value;
@@ -315,14 +235,6 @@ export const positiveNumberValidator = (): ValidatorFn => {
   };
 };
 
-/**
- * Validator para edad mínima
- * Verifica que la fecha de nacimiento corresponda a una edad mínima
- *
- * @param minAge - Edad mínima requerida en años
- * @returns ValidatorFn que retorna ValidationErrors o null
- *
- */
 export const minAgeValidator = (minAge: number): ValidatorFn => {
   return (control: AbstractControl): ValidationErrors | null => {
     const value = control.value;
@@ -354,12 +266,6 @@ export const minAgeValidator = (minAge: number): ValidatorFn => {
   };
 };
 
-/**
- * Validator para fecha no futura
- * Verifica que la fecha no sea posterior a hoy
- *
- * @returns ValidatorFn que retorna ValidationErrors o null
- */
 export const notFutureDateValidator = (): ValidatorFn => {
   return (control: AbstractControl): ValidationErrors | null => {
     const value = control.value;
@@ -376,13 +282,6 @@ export const notFutureDateValidator = (): ValidatorFn => {
   };
 };
 
-/**
- * Validator para URLs válidas
- * Verifica formato de URL con protocolo http/https
- *
- * @returns ValidatorFn que retorna ValidationErrors o null
- *
- */
 export const urlValidator = (): ValidatorFn => {
   return (control: AbstractControl): ValidationErrors | null => {
     const value = control.value;
@@ -404,13 +303,6 @@ export const urlValidator = (): ValidatorFn => {
   };
 };
 
-/**
- * Validator para whitespace
- * Verifica que el campo no contenga solo espacios en blanco
- *
- * @returns ValidatorFn que retorna ValidationErrors o null
- *
- */
 export const noWhitespaceValidator = (): ValidatorFn => {
   return (control: AbstractControl): ValidationErrors | null => {
     const value = control.value;
@@ -425,13 +317,6 @@ export const noWhitespaceValidator = (): ValidatorFn => {
   };
 };
 
-/**
- * Validator para caracteres especiales no permitidos
- * Útil para nombres de usuario, slugs, etc.
- *
- * @returns ValidatorFn que retorna ValidationErrors o null
- *
- */
 export const noSpecialCharsValidator = (): ValidatorFn => {
   return (control: AbstractControl): ValidationErrors | null => {
     const value = control.value;
@@ -447,12 +332,6 @@ export const noSpecialCharsValidator = (): ValidatorFn => {
   };
 };
 
-/**
- * Validator para archivos Excel (.xls, .xlsx)
- * Verifica el tipo MIME y la extensión del archivo
- * @param file - Archivo a validar
- * @returns boolean - true si el archivo es un Excel válido, false en caso contrario
- */
 export function isXlsxFile(file: File): boolean {
   // Accepts .xls, .xlsx mime-types and extension
   const xlsxMimeTypes = [

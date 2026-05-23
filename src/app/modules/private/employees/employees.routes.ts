@@ -1,13 +1,6 @@
 import { Routes } from '@angular/router';
 import { employeesResolver } from './resolvers/employees-resolver';
 
-/**
- * Rutas del módulo de empleados con lazy loading
- *
- * @since 2026-02-19
- * @author Bunnystring
- * @version 2.0
- */
 export const EMPLOYEES_ROUTES: Routes = [
   {
     path: '',

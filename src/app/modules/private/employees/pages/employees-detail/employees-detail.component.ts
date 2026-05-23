@@ -14,12 +14,6 @@ import { EmployeeStatus } from '../../models/employee.model';
 import { EmployeesService } from '../../services/employees.service';
 import { LoadingService } from '../../../../../core/services/loading.service';
 
-/**
- * Componente de detalle de un empleado
- *
- * @since 2026-05-10
- * @author Bunnystring
- */
 @Component({
   selector: 'app-employees-detail',
   templateUrl: './employees-detail.component.html',

@@ -16,12 +16,6 @@ import { EmployeeDeleteModalComponent } from '../../modals/employee-delete-modal
 import { LoadingService } from '../../../../../core/services/loading.service';
 import { EmployeesStore } from '../../store/employees.store';
 
-/**
- * Componente principal del módulo de empleados
- *
- * @since 2026-05-13
- * @author Bunnystring
- */
 @Component({
   selector: 'app-employees',
   standalone: true,

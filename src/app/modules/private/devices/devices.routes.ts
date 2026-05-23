@@ -1,13 +1,6 @@
 import { Routes } from '@angular/router';
 import { devicesResolver } from './resolvers/devices-resolver';
 
-/**
- * Rutas del módulo de dispositivos con lazy loading
- *
- * @author Bunnystring
- * @since 2026-02-19
- * @version 2.0
- */
 export const DEVICES_ROUTES: Routes = [
   {
     path: '',

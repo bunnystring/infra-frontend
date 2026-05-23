@@ -3,13 +3,6 @@ import { Router, CanActivateFn } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { catchError, of, map } from 'rxjs';
 
-/**
- * Guard funcional para proteger rutas privadas.
- * Verifica si el usuario está autenticado y si el token no ha expirado.
- *
- * @author Bunnystring
- * @since 2026-02-06
- */
 export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
@@ -38,7 +31,6 @@ export const authGuard: CanActivateFn = (route, state) => {
         return true;
       }),
       catchError((error) => {
-        console.error('❌ Error al refrescar token:', error);
         router.navigate(['/auth/login'], {
           queryParams: { returnUrl: state.url },
         });

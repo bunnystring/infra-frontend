@@ -56,7 +56,7 @@ describe('OrdersComponent', () => {
     router = TestBed.inject(Router);
   }
 
-  afterEach(() => TestBed.resetTestingModule());
+  afterEach(() => { TestBed.resetTestingModule(); vi.restoreAllMocks(); });
 
   it('debe ser creado', async () => {
     await setup();
@@ -67,25 +67,25 @@ describe('OrdersComponent', () => {
   describe('ngOnInit', () => {
     it('muestra toast.error cuando el store tiene error', async () => {
       await setup([], 'Error de red');
-      spyOn(toast, 'error');
-      fixture.detectChanges();
+      vi.spyOn(toast, 'error');
+      await fixture.whenStable();
       await fixture.whenStable();
       expect(toast.error).toHaveBeenCalledWith('No se pudo conectar al microservicio de órdenes.');
     });
 
     it('muestra toast.info cuando no hay error y lista vacía', async () => {
       await setup([]);
-      spyOn(toast, 'info');
-      fixture.detectChanges();
+      vi.spyOn(toast, 'info');
+      await fixture.whenStable();
       await fixture.whenStable();
       expect(toast.info).toHaveBeenCalledWith('No hay órdenes para mostrar actualmente.');
     });
 
     it('no muestra toast cuando hay órdenes y sin error', async () => {
       await setup([mockOrder]);
-      spyOn(toast, 'info');
-      spyOn(toast, 'error');
-      fixture.detectChanges();
+      vi.spyOn(toast, 'info');
+      vi.spyOn(toast, 'error');
+      await fixture.whenStable();
       await fixture.whenStable();
       expect(toast.info).not.toHaveBeenCalled();
       expect(toast.error).not.toHaveBeenCalled();
@@ -102,7 +102,7 @@ describe('OrdersComponent', () => {
 
     beforeEach(async () => {
       await setup(orders);
-      fixture.detectChanges();
+      await fixture.whenStable();
     });
 
     it('retorna todas las órdenes sin filtros', () => {
@@ -149,7 +149,7 @@ describe('OrdersComponent', () => {
         description: `Orden ${i}`,
       }));
       await setup(orders);
-      fixture.detectChanges();
+      await fixture.whenStable();
     });
 
     it('calcula totalPages correctamente (25 items / 10 = 3)', () => {
@@ -196,9 +196,9 @@ describe('OrdersComponent', () => {
       component.orderToEdit = mockOrder;
       component.orderToDelete = mockOrder;
       component.closeModals();
-      expect(component.showCreateModal).toBeFalse();
-      expect(component.showEditModal).toBeFalse();
-      expect(component.showDeleteModal).toBeFalse();
+      expect(component.showCreateModal).toBe(false);
+      expect(component.showEditModal).toBe(false);
+      expect(component.showDeleteModal).toBe(false);
       expect(component.orderToEdit).toBeNull();
       expect(component.orderToDelete).toBeNull();
     });
@@ -208,9 +208,9 @@ describe('OrdersComponent', () => {
     beforeEach(async () => await setup());
 
     it('muestra "Orden creada" y recarga en modo create', () => {
-      spyOn(component, 'loadOrders');
-      spyOn(component, 'closeModals');
-      spyOn(toast, 'success');
+      vi.spyOn(component, 'loadOrders');
+      vi.spyOn(component, 'closeModals');
+      vi.spyOn(toast, 'success');
       component.handleModalSave({ order: mockOrder, mode: 'create' } as OrderFormResult);
       expect(toast.success).toHaveBeenCalledWith('Orden creada');
       expect(component.loadOrders).toHaveBeenCalled();
@@ -218,9 +218,9 @@ describe('OrdersComponent', () => {
     });
 
     it('muestra "Orden actualizada" en modo edit', () => {
-      spyOn(component, 'loadOrders');
-      spyOn(component, 'closeModals');
-      spyOn(toast, 'success');
+      vi.spyOn(component, 'loadOrders');
+      vi.spyOn(component, 'closeModals');
+      vi.spyOn(toast, 'success');
       component.handleModalSave({ order: mockOrder, mode: 'edit' } as OrderFormResult);
       expect(toast.success).toHaveBeenCalledWith('Orden actualizada');
     });
@@ -229,11 +229,11 @@ describe('OrdersComponent', () => {
   describe('onOrderDeleted', () => {
     it('resetea el estado de eliminación y recarga', async () => {
       await setup();
-      const loadSpy = spyOn(component, 'loadOrders');
+      const loadSpy = vi.spyOn(component, 'loadOrders');
       component.showDeleteModal = true;
       component.orderToDelete = mockOrder;
       component.onOrderDeleted();
-      expect(component.showDeleteModal).toBeFalse();
+      expect(component.showDeleteModal).toBe(false);
       expect(component.orderToDelete).toBeNull();
       expect(loadSpy).toHaveBeenCalled();
     });
@@ -242,11 +242,11 @@ describe('OrdersComponent', () => {
   describe('cancelDelete', () => {
     it('cierra el modal sin recargar órdenes', async () => {
       await setup();
-      const loadSpy = spyOn(component, 'loadOrders');
+      const loadSpy = vi.spyOn(component, 'loadOrders');
       component.showDeleteModal = true;
       component.orderToDelete = mockOrder;
       component.cancelDelete();
-      expect(component.showDeleteModal).toBeFalse();
+      expect(component.showDeleteModal).toBe(false);
       expect(component.orderToDelete).toBeNull();
       expect(loadSpy).not.toHaveBeenCalled();
     });
@@ -255,7 +255,7 @@ describe('OrdersComponent', () => {
   describe('clearError', () => {
     it('delega a store.clearError()', async () => {
       await setup();
-      const clearSpy = spyOn(mockStore, 'clearError');
+      const clearSpy = vi.spyOn(mockStore, 'clearError');
       component.clearError();
       expect(clearSpy).toHaveBeenCalled();
     });
@@ -266,14 +266,14 @@ describe('OrdersComponent', () => {
     beforeEach(async () => await setup());
 
     it('navega al detalle del grupo', () => {
-      const navigateSpy = spyOn(router, 'navigate');
+      const navigateSpy = vi.spyOn(router, 'navigate');
       const order: Order = { ...mockOrder, assigneeType: 'GROUP', assignee: { id: 'group-1' } };
       component.goToAssignee(order);
       expect(navigateSpy).toHaveBeenCalledWith(['/app/groups', 'group-1']);
     });
 
     it('navega al detalle del empleado', () => {
-      const navigateSpy = spyOn(router, 'navigate');
+      const navigateSpy = vi.spyOn(router, 'navigate');
       const order: Order = { ...mockOrder, assigneeType: 'EMPLOYEE', assignee: { id: 'emp-1' } };
       component.goToAssignee(order);
       expect(navigateSpy).toHaveBeenCalledWith(['/app/employees', 'emp-1']);
@@ -284,13 +284,13 @@ describe('OrdersComponent', () => {
     beforeEach(async () => await setup());
 
     it('navega al detalle de la orden con ID válido', () => {
-      const navigateSpy = spyOn(router, 'navigate');
+      const navigateSpy = vi.spyOn(router, 'navigate');
       component.goDetailOrder('order-123');
       expect(navigateSpy).toHaveBeenCalledWith(['/app/orders/', 'order-123']);
     });
 
     it('no navega si el ID está vacío', () => {
-      const navigateSpy = spyOn(router, 'navigate');
+      const navigateSpy = vi.spyOn(router, 'navigate');
       component.goDetailOrder('');
       expect(navigateSpy).not.toHaveBeenCalled();
     });
@@ -327,22 +327,22 @@ describe('OrdersComponent', () => {
   describe('orderError y buttonsIsAvailable', () => {
     it('orderError es true cuando hay error', async () => {
       await setup([], 'Error');
-      expect(component.orderError).toBeTrue();
+      expect(component.orderError).toBe(true);
     });
 
     it('orderError es false cuando no hay error', async () => {
       await setup([], null);
-      expect(component.orderError).toBeFalse();
+      expect(component.orderError).toBe(false);
     });
 
     it('buttonsIsAvailable es false cuando hay error', async () => {
       await setup([], 'Error');
-      expect(component.buttonsIsAvailable).toBeFalse();
+      expect(component.buttonsIsAvailable).toBe(false);
     });
 
     it('buttonsIsAvailable es true cuando no hay error', async () => {
       await setup([], null);
-      expect(component.buttonsIsAvailable).toBeTrue();
+      expect(component.buttonsIsAvailable).toBe(true);
     });
   });
 });

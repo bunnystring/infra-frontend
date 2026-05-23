@@ -21,7 +21,7 @@ describe('RegisterComponent', () => {
 
     fixture = TestBed.createComponent(RegisterComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {

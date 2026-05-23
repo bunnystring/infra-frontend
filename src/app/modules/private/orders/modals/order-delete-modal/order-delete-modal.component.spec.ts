@@ -25,7 +25,7 @@ describe('OrderDeleteModalComponent', () => {
 
     fixture = TestBed.createComponent(OrderDeleteModalComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('debe ser creado', () => {
@@ -34,7 +34,7 @@ describe('OrderDeleteModalComponent', () => {
 
   // ── Estado inicial ────────────────────────────────────────────────────────
   it('loading inicia en false', () => {
-    expect(component.loading).toBeFalse();
+    expect(component.loading).toBe(false);
   });
 
   it('error inicia como cadena vacía', () => {
@@ -67,13 +67,13 @@ describe('OrderDeleteModalComponent', () => {
   // ── cancelDelete ──────────────────────────────────────────────────────────
   describe('cancelDelete', () => {
     it('emite el evento cancel', () => {
-      const emitSpy = spyOn(component.cancel, 'emit');
+      const emitSpy = vi.spyOn(component.cancel, 'emit');
       component.cancelDelete();
       expect(emitSpy).toHaveBeenCalled();
     });
 
     it('no emite el evento deleted al cancelar', () => {
-      const emitSpy = spyOn(component.deleted, 'emit');
+      const emitSpy = vi.spyOn(component.deleted, 'emit');
       component.cancelDelete();
       expect(emitSpy).not.toHaveBeenCalled();
     });

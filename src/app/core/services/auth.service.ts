@@ -53,11 +53,11 @@ export class AuthService {
   }
 
   getToken(): string | null {
-    return this.isBrowser ? localStorage.getItem(this.TOKEN_KEY) : null;
+    return this.isBrowser ? sessionStorage.getItem(this.TOKEN_KEY) : null;
   }
 
   getRefreshToken(): string | null {
-    return this.isBrowser ? localStorage.getItem(this.REFRESH_TOKEN_KEY) : null;
+    return this.isBrowser ? sessionStorage.getItem(this.REFRESH_TOKEN_KEY) : null;
   }
 
   isAuthenticated(): boolean {
@@ -130,23 +130,23 @@ export class AuthService {
 
   private saveAuthData(response: AuthResponse): void {
     if (!this.isBrowser) return;
-    localStorage.setItem(this.TOKEN_KEY, response.accessToken);
+    sessionStorage.setItem(this.TOKEN_KEY, response.accessToken);
     if (response.refreshToken) {
-      localStorage.setItem(this.REFRESH_TOKEN_KEY, response.refreshToken);
+      sessionStorage.setItem(this.REFRESH_TOKEN_KEY, response.refreshToken);
     }
-    localStorage.setItem(this.USER_KEY, JSON.stringify(response.user));
+    sessionStorage.setItem(this.USER_KEY, JSON.stringify(response.user));
   }
 
   private clearAuthData(): void {
     if (!this.isBrowser) return;
-    localStorage.removeItem(this.TOKEN_KEY);
-    localStorage.removeItem(this.REFRESH_TOKEN_KEY);
-    localStorage.removeItem(this.USER_KEY);
+    sessionStorage.removeItem(this.TOKEN_KEY);
+    sessionStorage.removeItem(this.REFRESH_TOKEN_KEY);
+    sessionStorage.removeItem(this.USER_KEY);
   }
 
   private getUserFromStorage(): User | null {
     if (!this.isBrowser) return null;
-    const userStr = localStorage.getItem(this.USER_KEY);
+    const userStr = sessionStorage.getItem(this.USER_KEY);
     return userStr ? (JSON.parse(userStr) as User) : null;
   }
 }

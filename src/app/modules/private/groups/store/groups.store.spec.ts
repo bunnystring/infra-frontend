@@ -16,10 +16,10 @@ const mockGroups: Group[] = [
 
 describe('GroupsStore', () => {
   let store: InstanceType<typeof GroupsStore>;
-  let groupsServiceSpy: jasmine.SpyObj<GroupsService>;
+  let groupsServiceSpy: { getAllGroups: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
-    groupsServiceSpy = jasmine.createSpyObj('GroupsService', ['getAllGroups']);
+    groupsServiceSpy = { getAllGroups: vi.fn() };
 
     TestBed.configureTestingModule({
       providers: [
@@ -39,7 +39,7 @@ describe('GroupsStore', () => {
     });
 
     it('debe inicializar sin carga activa', () => {
-      expect(store.isLoading()).toBeFalse();
+      expect(store.isLoading()).toBe(false);
     });
 
     it('debe inicializar sin error', () => {
@@ -56,37 +56,37 @@ describe('GroupsStore', () => {
 
   describe('loadGroups()', () => {
     it('debe cargar grupos y actualizar el estado', async () => {
-      groupsServiceSpy.getAllGroups.and.returnValue(of(mockGroups));
+      groupsServiceSpy.getAllGroups.mockReturnValue(of(mockGroups));
 
       await firstValueFrom(store.loadGroups());
 
       expect(store.groups()).toEqual(mockGroups);
-      expect(store.isLoading()).toBeFalse();
+      expect(store.isLoading()).toBe(false);
       expect(store.error()).toBeNull();
     });
 
     it('debe activar isLoading al iniciar y desactivarlo al terminar', async () => {
-      groupsServiceSpy.getAllGroups.and.returnValue(of(mockGroups));
+      groupsServiceSpy.getAllGroups.mockReturnValue(of(mockGroups));
       const loading$ = store.loadGroups();
       // Al suscribirse isLoading se activa internamente y luego se desactiva
       await firstValueFrom(loading$);
-      expect(store.isLoading()).toBeFalse();
+      expect(store.isLoading()).toBe(false);
     });
 
     it('debe manejar error del servicio y actualizar store.error()', async () => {
-      groupsServiceSpy.getAllGroups.and.returnValue(throwError(() => new Error('Network error')));
+      groupsServiceSpy.getAllGroups.mockReturnValue(throwError(() => new Error('Network error')));
 
       await firstValueFrom(store.loadGroups());
 
       expect(store.error()).toBe('Error al cargar grupos');
-      expect(store.isLoading()).toBeFalse();
+      expect(store.isLoading()).toBe(false);
       expect(store.groups()).toEqual([]);
     });
   });
 
   describe('stats computed', () => {
     it('debe calcular estadísticas correctamente', async () => {
-      groupsServiceSpy.getAllGroups.and.returnValue(of(mockGroups));
+      groupsServiceSpy.getAllGroups.mockReturnValue(of(mockGroups));
       await firstValueFrom(store.loadGroups());
 
       const stats = store.stats();
@@ -98,7 +98,7 @@ describe('GroupsStore', () => {
 
   describe('upsertGroup()', () => {
     beforeEach(async () => {
-      groupsServiceSpy.getAllGroups.and.returnValue(of(mockGroups));
+      groupsServiceSpy.getAllGroups.mockReturnValue(of(mockGroups));
       await firstValueFrom(store.loadGroups());
     });
 
@@ -122,7 +122,7 @@ describe('GroupsStore', () => {
 
   describe('removeGroup()', () => {
     beforeEach(async () => {
-      groupsServiceSpy.getAllGroups.and.returnValue(of(mockGroups));
+      groupsServiceSpy.getAllGroups.mockReturnValue(of(mockGroups));
       await firstValueFrom(store.loadGroups());
     });
 
@@ -141,7 +141,7 @@ describe('GroupsStore', () => {
 
   describe('clearError()', () => {
     it('debe limpiar el error del estado', async () => {
-      groupsServiceSpy.getAllGroups.and.returnValue(throwError(() => new Error('fail')));
+      groupsServiceSpy.getAllGroups.mockReturnValue(throwError(() => new Error('fail')));
       await firstValueFrom(store.loadGroups());
       expect(store.error()).not.toBeNull();
 

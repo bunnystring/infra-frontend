@@ -101,7 +101,7 @@ function buildProviders(
 describe('OrdersDetailComponent', () => {
   let component: OrdersDetailComponent;
   let fixture: ComponentFixture<OrdersDetailComponent>;
-  let locationSpy: jasmine.SpyObj<Location>;
+  let locationSpy: { back: ReturnType<typeof vi.fn> };
   let router: Router;
 
   async function setup(
@@ -109,7 +109,7 @@ describe('OrdersDetailComponent', () => {
     orderResult: Order | null = mockOrder,
     assigneeType: 'EMPLOYEE' | 'GROUP' = 'EMPLOYEE',
   ) {
-    locationSpy = jasmine.createSpyObj('Location', ['back']);
+    locationSpy = { back: vi.fn() };
     const { providers } = buildProviders(orderId, orderResult, assigneeType);
 
     await TestBed.configureTestingModule({
@@ -123,7 +123,7 @@ describe('OrdersDetailComponent', () => {
     fixture = TestBed.createComponent(OrdersDetailComponent);
     component = fixture.componentInstance;
     router = TestBed.inject(Router);
-    fixture.detectChanges();
+    await fixture.whenStable();
     await fixture.whenStable();
   }
 
@@ -276,7 +276,7 @@ describe('OrdersDetailComponent', () => {
   describe('refreshData', () => {
     it('recarga los detalles de la orden', async () => {
       await setup();
-      const spy = spyOn(component, 'getOrderDetail');
+      const spy = vi.spyOn(component, 'getOrderDetail');
       component.refreshData();
       expect(spy).toHaveBeenCalled();
     });
@@ -286,26 +286,26 @@ describe('OrdersDetailComponent', () => {
   describe('goAsignedDetail', () => {
     it('navega al detalle del empleado', async () => {
       await setup('abc12345-full-uuid', mockOrder, 'EMPLOYEE');
-      const navigateSpy = spyOn(router, 'navigate');
+      const navigateSpy = vi.spyOn(router, 'navigate');
       component.goAsignedDetail();
       expect(navigateSpy).toHaveBeenCalledWith(
-        jasmine.arrayContaining(['/app/employees/'])
+        expect.arrayContaining(['/app/employees/'])
       );
     });
 
     it('navega al detalle del grupo', async () => {
       await setup('abc12345-full-uuid', mockOrder, 'GROUP');
-      const navigateSpy = spyOn(router, 'navigate');
+      const navigateSpy = vi.spyOn(router, 'navigate');
       component.goAsignedDetail();
       expect(navigateSpy).toHaveBeenCalledWith(
-        jasmine.arrayContaining(['/app/groups/'])
+        expect.arrayContaining(['/app/groups/'])
       );
     });
 
     it('no navega si no hay orden', async () => {
       await setup();
       component.order = null;
-      const navigateSpy = spyOn(router, 'navigate');
+      const navigateSpy = vi.spyOn(router, 'navigate');
       component.goAsignedDetail();
       expect(navigateSpy).not.toHaveBeenCalled();
     });

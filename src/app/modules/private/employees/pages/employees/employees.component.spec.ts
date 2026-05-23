@@ -17,11 +17,11 @@ const mockEmployees: Employee[] = [
 describe('EmployeesComponent', () => {
   let component: EmployeesComponent;
   let fixture: ComponentFixture<EmployeesComponent>;
-  let employeesServiceSpy: jasmine.SpyObj<EmployeesService>;
+  let employeesServiceSpy: { getAllEmployees: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
-    employeesServiceSpy = jasmine.createSpyObj('EmployeesService', ['getAllEmployees']);
-    employeesServiceSpy.getAllEmployees.and.returnValue(of(mockEmployees));
+    employeesServiceSpy = { getAllEmployees: vi.fn() };
+    employeesServiceSpy.getAllEmployees.mockReturnValue(of(mockEmployees));
 
     await TestBed.configureTestingModule({
       imports: [EmployeesComponent],
@@ -149,30 +149,30 @@ describe('EmployeesComponent', () => {
   describe('gestión de modales', () => {
     it('openCreateModal debe activar showCreateModal', () => {
       component.openCreateModal();
-      expect(component.showCreateModal()).toBeTrue();
-      expect(component.showEditModal()).toBeFalse();
+      expect(component.showCreateModal()).toBe(true);
+      expect(component.showEditModal()).toBe(false);
       expect(component.employeeToEdit()).toBeNull();
     });
 
     it('openEditModal debe activar showEditModal con el empleado', () => {
       component.openEditModal(mockEmployees[0]);
-      expect(component.showEditModal()).toBeTrue();
-      expect(component.showCreateModal()).toBeFalse();
+      expect(component.showEditModal()).toBe(true);
+      expect(component.showCreateModal()).toBe(false);
       expect(component.employeeToEdit()).toEqual(mockEmployees[0]);
     });
 
     it('openDeleteModal debe activar showDeleteModal con el empleado', () => {
       component.openDeleteModal(mockEmployees[1]);
-      expect(component.showDeleteModal()).toBeTrue();
+      expect(component.showDeleteModal()).toBe(true);
       expect(component.employeeToDelete()).toEqual(mockEmployees[1]);
     });
 
     it('closeModals debe cerrar todos los modales', () => {
       component.openCreateModal();
       component.closeModals();
-      expect(component.showCreateModal()).toBeFalse();
-      expect(component.showEditModal()).toBeFalse();
-      expect(component.showDeleteModal()).toBeFalse();
+      expect(component.showCreateModal()).toBe(false);
+      expect(component.showEditModal()).toBe(false);
+      expect(component.showDeleteModal()).toBe(false);
       expect(component.employeeToEdit()).toBeNull();
       expect(component.employeeToDelete()).toBeNull();
     });
@@ -180,7 +180,7 @@ describe('EmployeesComponent', () => {
     it('cancelDelete debe cerrar modal de eliminación', () => {
       component.openDeleteModal(mockEmployees[0]);
       component.cancelDelete();
-      expect(component.showDeleteModal()).toBeFalse();
+      expect(component.showDeleteModal()).toBe(false);
       expect(component.employeeToDelete()).toBeNull();
     });
   });
@@ -189,7 +189,7 @@ describe('EmployeesComponent', () => {
     it('debe truncar texto mayor a 35 caracteres', () => {
       const result = component.getShortText('Este texto es demasiado largo para mostrarlo completo');
       expect(result.length).toBeLessThanOrEqual(36);
-      expect(result.endsWith('…')).toBeTrue();
+      expect(result.endsWith('…')).toBe(true);
     });
 
     it('debe devolver texto corto sin modificar', () => {

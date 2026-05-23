@@ -15,7 +15,7 @@ describe('PublicLayoutComponent', () => {
 
     fixture = TestBed.createComponent(PublicLayoutComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {

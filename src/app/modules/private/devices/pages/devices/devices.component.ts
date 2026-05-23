@@ -7,7 +7,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { AsyncPipe, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -31,7 +31,8 @@ import { DevicesStore } from '../../store/devices.store';
 @Component({
   selector: 'app-devices',
   imports: [
-    CommonModule,
+    AsyncPipe,
+    DecimalPipe,
     FormsModule,
     DeviceCreateEditModalComponent,
     DeviceDeleteModalComponent,

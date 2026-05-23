@@ -16,12 +16,6 @@ interface DevicesState {
   error: string | null;
 }
 
-/**
- * Store para gestionar el estado de los dispositivos, incluyendo la carga,
- * actualización y eliminación de dispositivos, así como el manejo de errores.
- * @since 2026-05-11
- * @author BunnyString
- */
 export const DevicesStore = signalStore(
   { providedIn: 'root' },
   withState<DevicesState>({
@@ -66,7 +60,6 @@ export const DevicesStore = signalStore(
           }),
           tap((devices) => patchState(store, { devices, isLoading: false })),
           catchError((err) => {
-            console.error('Error al cargar dispositivos:', err);
             patchState(store, { error: 'Error al cargar dispositivos', isLoading: false });
             return of([]);
           }),

@@ -193,7 +193,6 @@ export class RegisterComponent implements OnInit {
   }
 
   private handleRegisterError(err: any): Observable<null> {
-    console.error('Error en registro:', err);
     const msg = err?.error?.message || 'Error al crear la cuenta. Por favor, inténtalo de nuevo.';
     this.error.set(msg);
     toast.error('Error de registro', { description: msg, duration: 4000 });

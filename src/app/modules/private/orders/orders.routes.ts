@@ -1,13 +1,6 @@
 import { Routes } from "@angular/router";
 import { ordersResolver } from "./resolvers/orders-resolver";
 
-/**
- * Rutas del módulo de órdenes con lazy loading
- *
- * @author Bunnystring
- * @since 2026-02-19
- * @version 2.0
- */
 export const ORDERS_ROUTES: Routes = [
   {
     path: '',

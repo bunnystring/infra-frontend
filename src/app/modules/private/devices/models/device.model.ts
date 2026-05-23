@@ -1,6 +1,3 @@
-/**
- * Request para crear un nuevo dispositivo
- */
 export interface CreateDeviceRq {
   name: string;
   brand: string;
@@ -8,9 +5,6 @@ export interface CreateDeviceRq {
   status: DeviceStatus;
 }
 
-/**
- * Modelo que representa un dispositivo
- */
 export interface Device {
   id: string;
   name: string;
@@ -23,8 +17,6 @@ export interface Device {
   selected?: boolean;
 }
 
-/** Estados posibles de un dispositivo
- */
 export enum DeviceStatus {
   GOOD_CONDITION = 'GOOD_CONDITION',
   OCCUPIED = 'OCCUPIED',
@@ -32,9 +24,6 @@ export enum DeviceStatus {
   FAIR = 'FAIR',
 }
 
-/**
- * Labels para mostrar en UI
- */
 export const DeviceStatusLabels: { [key in DeviceStatus]: string } = {
   [DeviceStatus.GOOD_CONDITION]: 'Buenas Condiciones',
   [DeviceStatus.OCCUPIED]: 'Ocupado',
@@ -42,9 +31,6 @@ export const DeviceStatusLabels: { [key in DeviceStatus]: string } = {
   [DeviceStatus.FAIR]: 'Regular'
 };
 
-/**
- * Colores para badges en UI
- */
 export const DeviceStatusColors: { [key in DeviceStatus]: string } = {
   [DeviceStatus.GOOD_CONDITION]: 'success',
   [DeviceStatus.FAIR]: 'warning',
@@ -52,33 +38,22 @@ export const DeviceStatusColors: { [key in DeviceStatus]: string } = {
   [DeviceStatus.NEEDS_REPAIR]: 'danger'
 };
 
-/** Request para actualizar el estado de múltiples dispositivos
- */
 export interface UpdateDevicesStateRq {
   ids: string[];
   status: DeviceStatus;
   orderId?: string;
 }
 
-/**
- * Request DTO para restaurar estados originales de devices.
- * Mapea a RestoreDevicesRq del backend.
- */
 export interface RestoreDevicesRq {
   items: RestoreDeviceItem[];
 }
 
-/** Item para restaurar el estado original de un dispositivo
- */
 export interface RestoreDeviceItem {
   id: string;
   originalStatus: DeviceStatus;
 }
 
 
-/**
- * Response de operaciones por lotes
- */
 export interface BatchOperationResponse {
   success: Device[];
   failed: Array<{
@@ -90,9 +65,6 @@ export interface BatchOperationResponse {
   failedCount: number;
 }
 
-/**
- * Filtros para búsqueda y filtrado de dispositivos
- */
 export interface DeviceFilters {
   search?: string;
   status?: DeviceStatus | 'ALL';
@@ -101,9 +73,6 @@ export interface DeviceFilters {
   dateTo?: string;
 }
 
-/**
- * Estadísticas calculadas de dispositivos
- */
 export interface DeviceStats {
   totalDevices: number;
   goodCondition: number;
@@ -115,9 +84,6 @@ export interface DeviceStats {
   recentlyUpdated?: Device[];
 }
 
-/**
- * Parámetros de paginación para listas grandes
- */
 export interface PaginationParams {
   page: number;
   limit: number;
@@ -125,9 +91,6 @@ export interface PaginationParams {
   sortOrder?: 'asc' | 'desc';
 }
 
-/**
- * Response paginada de dispositivos
- */
 export interface PaginatedDevicesResponse {
   data: Device[];
   pagination: {
@@ -140,9 +103,6 @@ export interface PaginatedDevicesResponse {
   };
 }
 
-/**
- * Opciones para exportar dispositivos
- */
 export interface ExportOptions {
   format: 'csv' | 'excel' | 'pdf';
   filters?: DeviceFilters;
@@ -176,16 +136,10 @@ export interface DeviceUpdateBatchRq {
   state: DeviceStatus;
 }
 
-/**
- * Request para obtener un lote de dispositivos por sus IDs
- */
 export interface DevicesBatchRq {
   "ids": string[];
 }
 
-/**
- * Response de la verificación de asignación activa para múltiples dispositivos
- */
 export interface DevicesBatchAssignmentRs {
   deviceId: string;
   active: boolean;

@@ -18,12 +18,6 @@ import { GroupDeleteModalComponent } from '../../modals/group-delete-modal/group
 import { LoadingService } from '../../../../../core/services/loading.service';
 import { GroupsStore } from '../../store/groups.store';
 
-/**
- * Componente principal del módulo de grupos
- *
- * @since 2026-05-13
- * @author Bunnystring
- */
 @Component({
   selector: 'app-groups',
   standalone: true,

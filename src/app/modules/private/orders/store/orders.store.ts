@@ -21,11 +21,6 @@ import { EmployeesService } from '../../employees/services/employees.service';
 import { GroupsService } from '../../groups/services/groups.service';
 
 
-/**
- * Store para gestionar el estado de las órdenes, incluyendo la carga, actualización y eliminación de órdenes, así como el manejo de errores y estados de carga.
- * @since 2026-05-11
- * @author BunnyString
- */
 export const OrdersStore = signalStore(
   { providedIn: 'root' },
   withState<OrdersState>({
@@ -78,7 +73,6 @@ export const OrdersStore = signalStore(
           }),
           tap((orders) => patchState(store, { orders, isLoading: false })),
           catchError((err) => {
-            console.error('Error al cargar órdenes:', err);
             patchState(store, { error: 'Error al cargar órdenes', isLoading: false });
             return of([]);
           }),

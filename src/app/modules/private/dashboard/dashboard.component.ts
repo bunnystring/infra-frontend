@@ -20,11 +20,6 @@ import { LoadingService } from '../../../core/services/loading.service';
 import { Alerta, DashboardStatsType, DEFAULT_STATS } from './models/dashboard-stats.model';
 
 
-/**
- * Componente principal del dashboard que muestra estadísticas clave, alertas, y resúmenes de dispositivos y órdenes recientes. Gestiona la carga de datos, manejo de errores y proporciona funcionalidades para refrescar la información.
- * @since 1.0.0
- * @author Bunnystring
- */
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -73,7 +68,6 @@ export class DashboardComponent implements OnInit {
     forkJoin({
       devices: this.devicesService.getAllDevices().pipe(
         catchError((error) => {
-          console.error('Error al cargar dispositivos:', error);
           this.deviceError.set(true);
           this.deviceErrorMessage.set(error.message || 'Error al cargar dispositivos');
           return of([] as Device[]);
@@ -81,7 +75,6 @@ export class DashboardComponent implements OnInit {
       ),
       orders: this.ordersStore.loadOrders().pipe(
         catchError((error) => {
-          console.error('Error al cargar órdenes:', error);
           this.orderError.set(true);
           this.orderErrorMessage.set(error.message || 'Error al cargar órdenes');
           return of([] as Order[]);
@@ -112,7 +105,6 @@ export class DashboardComponent implements OnInit {
       .getAllDevices()
       .pipe(
         catchError((error) => {
-          console.error('Error al cargar dispositivos:', error);
           this.deviceError.set(true);
           this.deviceErrorMessage.set(this.extractErrorMessage(error, 'dispositivos'));
           this.isRetrying.set(false);
@@ -141,7 +133,6 @@ export class DashboardComponent implements OnInit {
       .loadOrders()
       .pipe(
         catchError((error) => {
-          console.error('Error al cargar órdenes:', error);
           this.orderError.set(true);
           this.orderErrorMessage.set(this.extractErrorMessage(error, 'órdenes'));
           this.isRetrying.set(false);

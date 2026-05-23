@@ -8,10 +8,8 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
 export class LoadingService {
   private readonly _loading = signal(false);
 
-  /** Signal directo — prefer this over loading$ in new code */
   readonly loading = this._loading.asReadonly();
 
-  /** Observable con debounce para compatibilidad con async pipe y toSignal existentes */
   readonly loading$ = toObservable(this._loading).pipe(
     debounceTime(200),
     distinctUntilChanged(),

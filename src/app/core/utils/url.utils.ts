@@ -1,9 +1,9 @@
 const DEFAULT_RETURN_URL = '/app/dashboard';
 
 /**
- * Validates that a returnUrl is a safe internal path to prevent open-redirect attacks.
- * Accepts only relative paths starting with a single "/" — rejects external URLs,
- * protocol-relative URLs (//evil.com), and anything else that could redirect off-site.
+ * Función para sanitizar URLs de retorno, asegurando que sean rutas internas seguras.
+ * @param url La URL a sanitizar.
+ * @returns Una URL interna segura o la URL de retorno predeterminada.
  */
 export function sanitizeReturnUrl(url: string | undefined | null): string {
   if (!url) return DEFAULT_RETURN_URL;

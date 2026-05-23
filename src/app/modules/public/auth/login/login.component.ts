@@ -20,6 +20,7 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { toast } from 'ngx-sonner';
 import { AuthService } from '../../../../core/services/auth.service';
+import { sanitizeReturnUrl } from '../../../../core/utils/url.utils';
 import { AnimatedPetComponent } from '../../../../shared/animated-pet/animated-pet.component';
 
 @Component({
@@ -39,8 +40,9 @@ export class LoginComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
-  private readonly returnUrl =
-    this.route.snapshot.queryParams['returnUrl'] ?? '/app/dashboard';
+  private readonly returnUrl = sanitizeReturnUrl(
+    this.route.snapshot.queryParams['returnUrl'],
+  );
 
   isPasswordFocused = false;
   isEmailFocused = false;

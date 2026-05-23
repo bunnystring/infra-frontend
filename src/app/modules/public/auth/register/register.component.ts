@@ -38,6 +38,7 @@ import {
   Observable,
 } from 'rxjs';
 import { AuthResponse } from '../models/auth.model';
+import { sanitizeReturnUrl } from '../../../../core/utils/url.utils';
 
 /**
  * Componente de Registro
@@ -203,8 +204,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
    * @returns void
    */
   private getReturnUrl(): void {
-    const urlParam = this.route.snapshot.queryParams['returnUrl'];
-    this.returnUrl = urlParam || '/app/dashboard';
+    this.returnUrl = sanitizeReturnUrl(this.route.snapshot.queryParams['returnUrl']);
   }
 
   /**

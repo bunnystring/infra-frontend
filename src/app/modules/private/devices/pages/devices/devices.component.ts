@@ -7,10 +7,10 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { AsyncPipe, DecimalPipe } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { catchError, of } from 'rxjs';
 import {
   Device,
@@ -31,7 +31,6 @@ import { DevicesStore } from '../../store/devices.store';
 @Component({
   selector: 'app-devices',
   imports: [
-    AsyncPipe,
     DecimalPipe,
     FormsModule,
     DeviceCreateEditModalComponent,
@@ -49,25 +48,23 @@ export class DevicesComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly devicesService = inject(DevicesService);
 
-  readonly loading$ = inject(LoadingService).loading$;
+  readonly isLoading = toSignal(inject(LoadingService).loading$, { initialValue: false });
 
   // Template enums
   readonly DeviceStatus = DeviceStatus;
   readonly DeviceStatusLabels = DeviceStatusLabels;
   readonly DeviceStatusColors = DeviceStatusColors;
 
-  // Modal state (ephemeral UI)
-  showCreateModal = false;
-  showEditModal = false;
-  showDeleteModal = false;
-  showBulkUploadModal = false;
-  deviceToEdit: Device | null = null;
-  deviceToDelete: Device | null = null;
-  formMode: 'create' | 'edit' = 'create';
+  readonly showCreateModal = signal(false);
+  readonly showEditModal = signal(false);
+  readonly showDeleteModal = signal(false);
+  readonly showBulkUploadModal = signal(false);
+  readonly deviceToEdit = signal<Device | null>(null);
+  readonly deviceToDelete = signal<Device | null>(null);
+  readonly formMode = signal<'create' | 'edit'>('create');
 
-  // Bulk update state
-  bulkMode = false;
-  bulkStatus: DeviceStatus | null = null;
+  readonly bulkMode = signal(false);
+  readonly bulkStatus = signal<DeviceStatus | null>(null);
 
   // Filter & pagination state
   readonly search = signal('');
@@ -183,11 +180,11 @@ export class DevicesComponent implements OnInit {
 
   updateDevicesStatus(): void {
     const selectedIds = [...this._selectedIds()];
-    if (!this.bulkStatus || selectedIds.length === 0) return;
+    if (!this.bulkStatus() || selectedIds.length === 0) return;
 
     const request: DeviceUpdateBatchRq = {
       deviceIds: selectedIds,
-      state: this.bulkStatus,
+      state: this.bulkStatus()!,
     };
 
     this.devicesService
@@ -202,8 +199,8 @@ export class DevicesComponent implements OnInit {
       .subscribe((result) => {
         if (result) {
           toast.success('Estados actualizados correctamente');
-          this.bulkStatus = null;
-          this.bulkMode = false;
+          this.bulkStatus.set(null);
+          this.bulkMode.set(false);
           this._selectedIds.set(new Set());
           this.loadDevices();
         }
@@ -211,51 +208,51 @@ export class DevicesComponent implements OnInit {
   }
 
   activateBulkMode(): void {
-    this.bulkMode = true;
+    this.bulkMode.set(true);
   }
 
   cancelBulkMode(): void {
-    this.bulkMode = false;
-    this.bulkStatus = null;
+    this.bulkMode.set(false);
+    this.bulkStatus.set(null);
     this._selectedIds.set(new Set());
   }
 
   openCreateModal(): void {
-    this.formMode = 'create';
-    this.deviceToEdit = null;
-    this.showCreateModal = true;
-    this.showEditModal = false;
+    this.formMode.set('create');
+    this.deviceToEdit.set(null);
+    this.showCreateModal.set(true);
+    this.showEditModal.set(false);
   }
 
   openEditModal(device: Device): void {
-    this.formMode = 'edit';
-    this.deviceToEdit = device;
-    this.showEditModal = true;
-    this.showCreateModal = false;
+    this.formMode.set('edit');
+    this.deviceToEdit.set(device);
+    this.showEditModal.set(true);
+    this.showCreateModal.set(false);
   }
 
   openDeleteModal(device: Device): void {
-    this.deviceToDelete = device;
-    this.showDeleteModal = true;
+    this.deviceToDelete.set(device);
+    this.showDeleteModal.set(true);
   }
 
   onDeviceDeleted(): void {
-    this.showDeleteModal = false;
-    this.deviceToDelete = null;
+    this.showDeleteModal.set(false);
+    this.deviceToDelete.set(null);
     this.loadDevices();
   }
 
   cancelDelete(): void {
-    this.showDeleteModal = false;
-    this.deviceToDelete = null;
+    this.showDeleteModal.set(false);
+    this.deviceToDelete.set(null);
   }
 
   closeModals(): void {
-    this.showCreateModal = false;
-    this.showEditModal = false;
-    this.showDeleteModal = false;
-    this.deviceToEdit = null;
-    this.deviceToDelete = null;
+    this.showCreateModal.set(false);
+    this.showEditModal.set(false);
+    this.showDeleteModal.set(false);
+    this.deviceToEdit.set(null);
+    this.deviceToDelete.set(null);
   }
 
   handleModalSave({ mode }: DeviceFormResult): void {
@@ -273,11 +270,11 @@ export class DevicesComponent implements OnInit {
   }
 
   openBulkUploadModal(): void {
-    this.showBulkUploadModal = true;
+    this.showBulkUploadModal.set(true);
   }
 
   closeBulkUploadModal(): void {
-    this.showBulkUploadModal = false;
+    this.showBulkUploadModal.set(false);
   }
 
   onBulkUploadSuccess(uploadedDevices: Device[]): void {

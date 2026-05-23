@@ -36,12 +36,11 @@ export class OrdersComponent implements OnInit {
   readonly OrderStateLabels = OrderStateLabels;
   readonly OrderStatusColors = OrderStatusColors;
 
-  // Modal state (ephemeral UI — plain properties are fine)
-  showCreateModal = false;
-  showEditModal = false;
-  showDeleteModal = false;
-  orderToEdit: Order | null = null;
-  orderToDelete: Order | null = null;
+  readonly showCreateModal = signal(false);
+  readonly showEditModal = signal(false);
+  readonly showDeleteModal = signal(false);
+  readonly orderToEdit = signal<Order | null>(null);
+  readonly orderToDelete = signal<Order | null>(null);
 
   // Signals para filtros y paginación
   private readonly _search = signal('');
@@ -116,11 +115,11 @@ export class OrdersComponent implements OnInit {
   }
 
   closeModals(): void {
-    this.showCreateModal = false;
-    this.showEditModal = false;
-    this.showDeleteModal = false;
-    this.orderToEdit = null;
-    this.orderToDelete = null;
+    this.showCreateModal.set(false);
+    this.showEditModal.set(false);
+    this.showDeleteModal.set(false);
+    this.orderToEdit.set(null);
+    this.orderToDelete.set(null);
   }
 
   handleModalSave({ mode }: OrderFormResult): void {
@@ -134,14 +133,14 @@ export class OrdersComponent implements OnInit {
   }
 
   onOrderDeleted(): void {
-    this.showDeleteModal = false;
-    this.orderToDelete = null;
+    this.showDeleteModal.set(false);
+    this.orderToDelete.set(null);
     this.loadOrders();
   }
 
   cancelDelete(): void {
-    this.showDeleteModal = false;
-    this.orderToDelete = null;
+    this.showDeleteModal.set(false);
+    this.orderToDelete.set(null);
   }
 
   goToAssignee(order: Order): void {

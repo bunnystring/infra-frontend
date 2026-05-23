@@ -2,7 +2,6 @@ import { RegisterRequest } from './../models/auth.model';
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
   ElementRef,
   OnInit,
   ViewChild,
@@ -10,47 +9,24 @@ import {
   signal,
 } from '@angular/core';
 import { AnimatedPetComponent } from '../../../../shared/animated-pet/animated-pet.component';
-import {
-  ReactiveFormsModule,
-  FormBuilder,
-  FormGroup,
-  Validators,
-} from '@angular/forms';
+import { FormField, email, form, minLength, required, submit, validate } from '@angular/forms/signals';
 import { RouterLink, Router, ActivatedRoute } from '@angular/router';
 import { toast } from 'ngx-sonner';
 import { AuthService } from '../../../../core/services/auth.service';
-import {
-  passwordMatchValidator,
-  strongPasswordValidator,
-  fullNameValidator,
-} from '../../../../core/utils/form-validators.utils';
-import {
-  Subject,
-  finalize,
-  catchError,
-  of,
-  tap,
-  switchMap,
-  filter,
-  Observable,
-} from 'rxjs';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { AuthResponse } from '../models/auth.model';
+import { firstValueFrom } from 'rxjs';
 import { sanitizeReturnUrl } from '../../../../core/utils/url.utils';
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, RouterLink, AnimatedPetComponent],
+  imports: [FormField, RouterLink, AnimatedPetComponent],
   templateUrl: './register.component.html',
   styleUrl: './register.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RegisterComponent implements OnInit {
-  private readonly formBuilder = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
-  private readonly destroyRef = inject(DestroyRef);
 
   @ViewChild(AnimatedPetComponent) mascot!: AnimatedPetComponent;
   @ViewChild('passwordInput') passwordInput!: ElementRef<HTMLInputElement>;
@@ -64,8 +40,6 @@ export class RegisterComponent implements OnInit {
   private isTogglingPassword = false;
   private isTogglingConfirmPassword = false;
 
-  registerForm!: FormGroup;
-
   readonly loading = signal(false);
   readonly submitted = signal(false);
   readonly error = signal('');
@@ -74,56 +48,63 @@ export class RegisterComponent implements OnInit {
 
   returnUrl = '/app/dashboard';
 
-  private readonly registerSubject$ = new Subject<void>();
+  readonly registerModel = signal({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  });
+
+  readonly registerForm = form(this.registerModel, (s) => {
+    required(s.name, { message: 'El nombre es requerido' });
+    minLength(s.name, 3, { message: 'Mínimo 3 caracteres' });
+    validate(s.name, ({ value }) => {
+      const v = value().trim();
+      if (!v) return undefined;
+      const words = v.split(/\s+/).filter((w: string) => w.length > 0);
+      if (words.length < 2 || !words.every((w: string) => w.length >= 2)) {
+        return { kind: 'invalidFullName', message: 'Ingresa tu nombre completo (nombre y apellido)' };
+      }
+      return undefined;
+    });
+
+    required(s.email, { message: 'El correo es requerido' });
+    email(s.email, { message: 'Ingresa un correo válido' });
+
+    required(s.password, { message: 'La contraseña es requerida' });
+    minLength(s.password, 8, { message: 'Mínimo 8 caracteres' });
+    validate(s.password, ({ value }) => {
+      const v = value();
+      if (!v) return undefined;
+      if (!/[A-Z]/.test(v) || !/[a-z]/.test(v) || !/[0-9]/.test(v)) {
+        return { kind: 'weakPassword', message: 'Debe tener mayúsculas, minúsculas y números' };
+      }
+      return undefined;
+    });
+
+    required(s.confirmPassword, { message: 'Confirma tu contraseña' });
+    validate(s.confirmPassword, ({ value, valueOf }) => {
+      const v = value();
+      if (!v) return undefined;
+      if (v !== valueOf(s.password)) {
+        return { kind: 'passwordMismatch', message: 'Las contraseñas no coinciden' };
+      }
+      return undefined;
+    });
+  });
+
+  get f() {
+    return {
+      name: this.registerForm.name,
+      email: this.registerForm.email,
+      password: this.registerForm.password,
+      confirmPassword: this.registerForm.confirmPassword,
+    };
+  }
 
   ngOnInit(): void {
-    this.initForm();
     this.getReturnUrl();
     this.checkAuthenticationStatus();
-    this.setupRegisterStream();
-  }
-
-  initForm(): void {
-    this.registerForm = this.formBuilder.group(
-      {
-        name: ['', [Validators.required, Validators.minLength(3), fullNameValidator()]],
-        email: ['', [Validators.required, Validators.email]],
-        password: ['', [Validators.required, Validators.minLength(8), strongPasswordValidator()]],
-        confirmPassword: ['', Validators.required],
-      },
-      { validators: passwordMatchValidator('password', 'confirmPassword') },
-    );
-  }
-
-  private setupRegisterStream(): void {
-    this.registerSubject$
-      .pipe(
-        filter(() => this.validateForm()),
-        tap(() => this.loading.set(true)),
-        switchMap(() => this.performRegister()),
-        filter((response) => response !== null),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe({
-        next: () => this.handleRegisterSuccess(),
-        error: (err) => {
-          this.handleRegisterError(err);
-          this.loading.set(false);
-        },
-      });
-  }
-
-  private validateForm(): boolean {
-    this.submitted.set(true);
-    this.error.set('');
-    if (this.registerForm.invalid) {
-      toast.error('Formulario inválido', {
-        description: 'Por favor completa todos los campos correctamente',
-        duration: 3000,
-      });
-      return false;
-    }
-    return true;
   }
 
   private getReturnUrl(): void {
@@ -136,34 +117,38 @@ export class RegisterComponent implements OnInit {
     }
   }
 
-  private handleRegisterSuccess(): void {
-    toast.success('¡Cuenta creada!', {
-      description: 'Redirigiendo al dashboard...',
-      duration: 2000,
-    });
-    setTimeout(() => {
-      this.router.navigate([this.returnUrl]);
-    }, 1000);
-  }
-
-  get f() {
-    return this.registerForm.controls;
-  }
-
   onSubmit(): void {
-    this.registerSubject$.next();
+    this.submitted.set(true);
+    this.error.set('');
+    submit(this.registerForm, async () => {
+      this.loading.set(true);
+      const model = this.registerModel();
+      const registerData: RegisterRequest = {
+        name: model.name,
+        email: model.email,
+        password: model.password,
+      };
+      try {
+        await firstValueFrom(this.authService.register(registerData));
+        toast.success('¡Cuenta creada!', { description: 'Redirigiendo al dashboard...', duration: 2000 });
+        setTimeout(() => this.router.navigate([this.returnUrl]), 1000);
+      } catch (err: unknown) {
+        const anyErr = err as { error?: { message?: string }; message?: string };
+        const msg = anyErr?.error?.message || 'Error al crear la cuenta. Por favor, inténtalo de nuevo.';
+        this.error.set(msg);
+        toast.error('Error de registro', { description: msg, duration: 4000 });
+      } finally {
+        this.loading.set(false);
+      }
+    });
   }
 
   togglePasswordVisibility(): void {
     this.isTogglingPassword = true;
     this.showPassword.update((v) => !v);
     setTimeout(() => {
-      if (this.passwordInput?.nativeElement) {
-        this.passwordInput.nativeElement.focus();
-      }
-      setTimeout(() => {
-        this.isTogglingPassword = false;
-      }, 50);
+      if (this.passwordInput?.nativeElement) this.passwordInput.nativeElement.focus();
+      setTimeout(() => { this.isTogglingPassword = false; }, 50);
     }, 0);
   }
 
@@ -171,36 +156,13 @@ export class RegisterComponent implements OnInit {
     this.isTogglingConfirmPassword = true;
     this.showConfirmPassword.update((v) => !v);
     setTimeout(() => {
-      if (this.confirmPasswordInput?.nativeElement) {
-        this.confirmPasswordInput.nativeElement.focus();
-      }
-      setTimeout(() => {
-        this.isTogglingConfirmPassword = false;
-      }, 50);
+      if (this.confirmPasswordInput?.nativeElement) this.confirmPasswordInput.nativeElement.focus();
+      setTimeout(() => { this.isTogglingConfirmPassword = false; }, 50);
     }, 0);
   }
 
-  private performRegister(): Observable<AuthResponse | null> {
-    const registerData: RegisterRequest = {
-      name: this.registerForm.value.name,
-      email: this.registerForm.value.email,
-      password: this.registerForm.value.password,
-    };
-    return this.authService.register(registerData).pipe(
-      catchError((err) => this.handleRegisterError(err)),
-      finalize(() => this.loading.set(false)),
-    );
-  }
-
-  private handleRegisterError(err: any): Observable<null> {
-    const msg = err?.error?.message || 'Error al crear la cuenta. Por favor, inténtalo de nuevo.';
-    this.error.set(msg);
-    toast.error('Error de registro', { description: msg, duration: 4000 });
-    return of(null);
-  }
-
   resetForm(): void {
-    this.registerForm.reset();
+    this.registerModel.set({ name: '', email: '', password: '', confirmPassword: '' });
     this.submitted.set(false);
     this.error.set('');
     this.isNameFocused.set(false);

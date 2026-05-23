@@ -16,48 +16,33 @@
         </svg>
         {{ device() ? 'Editar dispositivo' : 'Nuevo dispositivo' }}
       </h3>
-      <form [formGroup]="deviceForm" (ngSubmit)="submit()" class="space-y-6">
+      <form (submit)="onSubmit(); $event.preventDefault()" class="space-y-6">
         <!-- Nombre -->
         <div>
           <label class="label text-base font-semibold text-blue-700 mb-2">Nombre</label>
           <div class="relative">
             <input
               class="input input-bordered w-full pr-12 text-lg transition-all focus:ring-2 focus:ring-blue-400 bg-white/70"
-              formControlName="name" placeholder="Nombre completo"
-              [class.input-error]="submitted() && deviceForm.get('name')?.invalid" autocomplete="off" />
-            @if (deviceForm.get('name')?.valid && deviceForm.get('name')?.touched) {
-              <svg
-                class="h-5 w-5 text-success absolute right-5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor"
-                stroke-width="2" viewBox="0 0 24 24">
+              [formField]="deviceForm.name" placeholder="Nombre completo"
+              [class.input-error]="deviceForm.name().touched() && deviceForm.name().errors().length"
+              autocomplete="off" />
+            @if (deviceForm.name().touched() && deviceForm.name().valid()) {
+              <svg class="h-5 w-5 text-success absolute right-5 top-1/2 -translate-y-1/2" fill="none"
+                stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             }
-            @if (submitted() && deviceForm.get('name')?.invalid) {
-              <svg
-                class="h-5 w-5 text-error absolute right-5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor"
-                stroke-width="2" viewBox="0 0 24 24">
+            @if (deviceForm.name().touched() && deviceForm.name().errors().length) {
+              <svg class="h-5 w-5 text-error absolute right-5 top-1/2 -translate-y-1/2" fill="none"
+                stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             }
           </div>
-          @if (submitted() && deviceForm.get('name')?.hasError('invalidFullName')) {
-            <div class="text-xs text-error mt-2 transition-all"
-              >¡Escribe nombre y apellido válidos!
-            </div>
-          }
-          @if (submitted() && deviceForm.get('name')?.hasError('invalidName')) {
-            <div class="text-xs text-error mt-2 transition-all"
-              >No se permiten números en el nombre.
-            </div>
-          }
-          @if (submitted() && deviceForm.get('name')?.hasError('whitespace')) {
-            <div class="text-xs text-error mt-2 transition-all"
-              >No debe contener solo espacios en
-            blanco.</div>
-          }
-          @if (submitted() && deviceForm.get('name')?.hasError('required')) {
-            <div class="text-xs text-error mt-2 transition-all"
-            >Campo obligatorio.</div>
+          @if (deviceForm.name().touched()) {
+            @for (error of deviceForm.name().errors(); track error.kind) {
+              <div class="text-xs text-error mt-2 transition-all">{{ error.message }}</div>
+            }
           }
         </div>
         <!-- Marca -->
@@ -66,31 +51,26 @@
           <div class="relative">
             <input
               class="input input-bordered w-full pr-12 text-lg transition-all focus:ring-2 focus:ring-blue-400 bg-white/70"
-              formControlName="brand" placeholder="Marca"
-              [class.input-error]="submitted() && deviceForm.get('brand')?.invalid" autocomplete="off" />
-            @if (deviceForm.get('brand')?.valid && deviceForm.get('brand')?.touched) {
-              <svg
-                class="h-5 w-5 text-success absolute right-5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor"
-                stroke-width="2" viewBox="0 0 24 24">
+              [formField]="deviceForm.brand" placeholder="Marca"
+              [class.input-error]="deviceForm.brand().touched() && deviceForm.brand().errors().length"
+              autocomplete="off" />
+            @if (deviceForm.brand().touched() && deviceForm.brand().valid()) {
+              <svg class="h-5 w-5 text-success absolute right-5 top-1/2 -translate-y-1/2" fill="none"
+                stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             }
-            @if (submitted() && deviceForm.get('brand')?.invalid) {
-              <svg
-                class="h-5 w-5 text-error absolute right-5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor"
-                stroke-width="2" viewBox="0 0 24 24">
+            @if (deviceForm.brand().touched() && deviceForm.brand().errors().length) {
+              <svg class="h-5 w-5 text-error absolute right-5 top-1/2 -translate-y-1/2" fill="none"
+                stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             }
           </div>
-          @if (submitted() && deviceForm.get('brand')?.hasError('required')) {
-            <div class="text-xs text-error mt-2 transition-all"
-            >Campo obligatorio.</div>
-          }
-          @if (submitted() && deviceForm.get('brand')?.hasError('whitespace')) {
-            <div class="text-xs text-error mt-2 transition-all"
-              >No debe contener solo espacios en
-            blanco.</div>
+          @if (deviceForm.brand().touched()) {
+            @for (error of deviceForm.brand().errors(); track error.kind) {
+              <div class="text-xs text-error mt-2 transition-all">{{ error.message }}</div>
+            }
           }
         </div>
         <!-- Código de barras -->
@@ -99,41 +79,32 @@
           <div class="relative">
             <input
               class="input input-bordered w-full pr-12 text-lg transition-all focus:ring-2 focus:ring-blue-400 bg-white/70"
-              formControlName="barcode" placeholder="Ej: 123456"
-              [class.input-error]="submitted() && deviceForm.get('barcode')?.invalid" autocomplete="off" />
-            @if (deviceForm.get('barcode')?.valid && deviceForm.get('barcode')?.touched) {
-              <svg
-                class="h-5 w-5 text-success absolute right-5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor"
-                stroke-width="2" viewBox="0 0 24 24">
+              [formField]="deviceForm.barcode" placeholder="Ej: 123456"
+              [class.input-error]="deviceForm.barcode().touched() && deviceForm.barcode().errors().length"
+              autocomplete="off" />
+            @if (deviceForm.barcode().touched() && deviceForm.barcode().valid()) {
+              <svg class="h-5 w-5 text-success absolute right-5 top-1/2 -translate-y-1/2" fill="none"
+                stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             }
-            @if (submitted() && deviceForm.get('barcode')?.invalid) {
-              <svg
-                class="h-5 w-5 text-error absolute right-5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor"
-                stroke-width="2" viewBox="0 0 24 24">
+            @if (deviceForm.barcode().touched() && deviceForm.barcode().errors().length) {
+              <svg class="h-5 w-5 text-error absolute right-5 top-1/2 -translate-y-1/2" fill="none"
+                stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             }
           </div>
-          @if (submitted() && deviceForm.get('barcode')?.hasError('required')) {
-            <div class="text-xs text-error mt-2 transition-all"
-            >Campo obligatorio.</div>
-          }
-          @if (submitted() && deviceForm.get('barcode')?.hasError('minlength')) {
-            <div class="text-xs text-error mt-2 transition-all"
-            >Mínimo 6 caracteres.</div>
-          }
-          @if (submitted() && deviceForm.get('barcode')?.hasError('whitespace')) {
-            <div class="text-xs text-error mt-2 transition-all"
-              >No debe contener solo espacios en
-            blanco.</div>
+          @if (deviceForm.barcode().touched()) {
+            @for (error of deviceForm.barcode().errors(); track error.kind) {
+              <div class="text-xs text-error mt-2 transition-all">{{ error.message }}</div>
+            }
           }
         </div>
         <!-- Estado -->
         <div>
           <label class="label text-base font-semibold text-blue-700 mb-2">Estado</label>
-          <select class="select select-bordered w-full text-lg bg-white/70" formControlName="status">
+          <select class="select select-bordered w-full text-lg bg-white/70" [formField]="deviceForm.status">
             @for (entry of deviceStatusEntries; track entry) {
               <option [value]="entry[1]">
                 {{ DeviceStatusLabels[entry[1]] }}
@@ -142,8 +113,7 @@
           </select>
         </div>
         @if (device()?.assignmentActive) {
-          <div
-            class="bg-blue-100 border border-blue-300 rounded px-3 py-2 mb-2 text-blue-800 text-sm">
+          <div class="bg-blue-100 border border-blue-300 rounded px-3 py-2 mb-2 text-blue-800 text-sm">
             <strong>Dispositivo asignado:</strong> No puedes editar el estado ni modificar datos mientras el dispositivo
             esté asignado.
           </div>
@@ -151,7 +121,7 @@
         <!-- Loader y error global -->
         @if (formLoading()) {
           <div class="flex justify-center mt-6">
-            <span class="loading loading-spinner loading-lg"></span> {{formLoading()}}
+            <span class="loading loading-spinner loading-lg"></span>
           </div>
         }
         @if (formError()) {
@@ -168,7 +138,7 @@
             Cancelar
           </button>
           @if (!device()?.assignmentActive) {
-            <button type="submit" class="btn btn-primary btn-lg shadow-lg" [disabled]="formLoading() || deviceForm.invalid">
+            <button type="submit" class="btn btn-primary btn-lg shadow-lg" [disabled]="formLoading() || deviceForm().invalid()">
               @if (formLoading()) {
                 <span class="loading loading-spinner loading-xs mr-2"></span>
               }

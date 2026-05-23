@@ -1,25 +1,18 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   DestroyRef,
   OnInit,
-  effect,
+  computed,
   inject,
   input,
+  linkedSignal,
   output,
   signal,
-  untracked,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import {
-  FormBuilder,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
-import { switchMap, of, map, finalize } from 'rxjs';
+import { switchMap, of, map, firstValueFrom } from 'rxjs';
+import { FormField, form, required, submit, validate } from '@angular/forms/signals';
 import { Device, DevicesBatchRq, DeviceStatus } from '../../../devices/models/device.model';
 import { DevicesService } from '../../../devices/services/devices.service';
 import { Employee, EmployeeStatus } from '../../../employees/models/employee.model';
@@ -34,14 +27,13 @@ import {
   OrderStateLabels,
   OrderStates,
 } from '../../models/orders.model';
-import { noWhitespaceValidator } from '../../../../../core/utils/form-validators.utils';
 import { toast } from 'ngx-sonner';
 
 @Component({
   selector: 'app-order-create-edit-modal',
   templateUrl: './order-create-edit-modal.component.html',
   styleUrls: ['./order-create-edit-modal.component.css'],
-  imports: [ReactiveFormsModule, FormsModule],
+  imports: [FormField],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -49,8 +41,6 @@ export class OrderCreateEditModalComponent implements OnInit {
   private readonly devicesService = inject(DevicesService);
   private readonly groupsService = inject(GroupsService);
   private readonly employeesService = inject(EmployeesService);
-  private readonly fb = inject(FormBuilder);
-  private readonly cd = inject(ChangeDetectorRef);
   private readonly ordersService = inject(OrdersService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -58,43 +48,66 @@ export class OrderCreateEditModalComponent implements OnInit {
   readonly close = output<void>();
   readonly save = output<OrderFormResult>();
 
-  orderForm!: FormGroup;
-  readonly submitted = signal(false);
   readonly formLoading = signal(false);
   readonly formError = signal('');
 
   readonly OrderStates = OrderStates;
   readonly OrderStatesLabels = OrderStateLabels;
 
-  devices: Device[] = [];
-  employees: Employee[] = [];
-  groups: Group[] = [];
   readonly assignedType = [
     { label: 'Empleado', value: 'EMPLOYEE' },
     { label: 'Grupo', value: 'GROUP' },
   ];
 
-  showDeviceDropdown = false;
-  deviceSearch = '';
-  filteredDevices: Device[] = [];
-  deviceNameMap: { [id: string]: string } = {};
+  readonly devices = signal<Device[]>([]);
+  readonly employees = signal<Employee[]>([]);
+  readonly groups = signal<Group[]>([]);
+  readonly showDeviceDropdown = signal(false);
+  readonly deviceSearch = signal('');
 
-  constructor() {
-    effect(() => {
-      this.order();
-      untracked(() => {
-        if (this.orderForm) {
-          this.initForm();
-          this.loadDevices();
-          this.loadGroups();
-          this.loadEmployees();
-        }
-      });
+  readonly orderModel = linkedSignal({
+    source: this.order,
+    computation: (order: Order | null) => ({
+      description: order?.description ?? '',
+      assignedType: order?.assigneeType ?? '',
+      assigneeId: order?.assigneeId ?? '',
+      devicesIds: (order?.items.map((d) => d.deviceId) ?? []) as string[],
+    }),
+  });
+
+  readonly filteredDevices = computed(() => {
+    const selected = this.orderModel().devicesIds;
+    const search = this.deviceSearch().toLowerCase().trim();
+    return this.devices().filter(
+      (d) =>
+        !selected.includes(d.id) &&
+        (!search || d.name?.toLowerCase().includes(search) || d.brand?.toLowerCase().includes(search)),
+    );
+  });
+
+  readonly deviceNameMap = computed(() => {
+    const map: { [id: string]: string } = {};
+    for (const device of this.devices()) {
+      map[device.id] = device.name;
+    }
+    return map;
+  });
+
+  readonly orderForm = form(this.orderModel, (s) => {
+    required(s.description, { message: 'Campo obligatorio.' });
+    validate(s.description, ({ value }) => {
+      if (!value().trim()) return { kind: 'whitespace', message: 'No debe contener solo espacios en blanco.' };
+      return undefined;
     });
-  }
+    required(s.assignedType, { message: 'Selecciona el tipo de asignación.' });
+    required(s.assigneeId, { message: 'Selecciona un responsable.' });
+    validate(s.devicesIds, ({ value }) => {
+      if (!value().length) return { kind: 'required', message: 'Selecciona al menos un dispositivo.' };
+      return undefined;
+    });
+  });
 
   ngOnInit(): void {
-    this.initForm();
     this.loadDevices();
     this.loadGroups();
     this.loadEmployees();
@@ -121,16 +134,8 @@ export class OrderCreateEditModalComponent implements OnInit {
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
-        next: (devices) => {
-          this.devices = devices;
-          this.filterDevices();
-          this.updateDeviceNameMap();
-          this.cd.detectChanges();
-        },
-        error: () => {
-          this.devices = [];
-          this.cd.detectChanges();
-        },
+        next: (devices) => this.devices.set(devices),
+        error: () => this.devices.set([]),
       });
   }
 
@@ -142,8 +147,8 @@ export class OrderCreateEditModalComponent implements OnInit {
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
-        next: (groups) => { this.groups = groups; this.cd.detectChanges(); },
-        error: () => { this.groups = []; this.cd.detectChanges(); },
+        next: (groups) => this.groups.set(groups),
+        error: () => this.groups.set([]),
       });
   }
 
@@ -152,106 +157,59 @@ export class OrderCreateEditModalComponent implements OnInit {
       .getAllEmployees()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (employees) => { this.employees = employees; this.cd.detectChanges(); },
-        error: () => { this.employees = []; this.cd.detectChanges(); },
+        next: (employees) => this.employees.set(employees),
+        error: () => this.employees.set([]),
       });
-  }
-
-  filterDevices(): void {
-    const selected = this.orderForm?.get('devicesIds')?.value || [];
-    const search = (this.deviceSearch || '').toLowerCase().trim();
-    this.filteredDevices = this.devices.filter(
-      (d) =>
-        !selected.includes(d.id) &&
-        (!search || d.name?.toLowerCase().includes(search) || d.brand?.toLowerCase().includes(search)),
-    );
   }
 
   addDevice(deviceId: string): void {
-    const selected = this.orderForm.get('devicesIds')?.value || [];
-    this.orderForm.get('devicesIds')?.setValue([...selected, deviceId]);
-    this.deviceSearch = '';
-    this.filterDevices();
+    this.orderModel.update((m) => ({ ...m, devicesIds: [...m.devicesIds, deviceId] }));
+    this.deviceSearch.set('');
+    this.showDeviceDropdown.set(false);
   }
 
   removeDevice(deviceId: string): void {
-    const selected = this.orderForm.controls['devicesIds'].value || [];
-    this.orderForm.controls['devicesIds'].setValue(selected.filter((id: string) => id !== deviceId));
-    this.filterDevices();
-  }
-
-  private initForm(): void {
-    const order = this.order();
-    this.orderForm = this.fb.group({
-      description: [order?.description ?? '', [Validators.required, noWhitespaceValidator()]],
-      assignedType: [order?.assigneeType ?? '', [Validators.required]],
-      assigneeId: [order?.assigneeId ?? '', [Validators.required]],
-      devicesIds: [order?.items.map((d) => d.deviceId) ?? [], [Validators.required]],
-    });
-    this.filterDevices();
-    this.orderForm.get('assignedType')?.valueChanges.subscribe(() => {
-      this.orderForm.patchValue({ assigneeId: '' });
-    });
-    this.orderForm.get('devicesIds')?.valueChanges.subscribe(() => {
-      this.filterDevices();
-    });
-  }
-
-  onSubmit(): void {
-    this.submitted.set(true);
-    this.formError.set('');
-
-    const order = this.order();
-    if (order?.id && !this.hasChanges()) {
-      toast.warning('No se detectaron cambios en la orden');
-      this.cd.markForCheck();
-      return;
-    }
-    if (this.orderForm.invalid) return;
-
-    this.formLoading.set(true);
-    this.cd.markForCheck();
-    const formValue = this.orderForm.value;
-    const isEdit = !!order;
-    const result: CreateOrderRequest = {
-      description: formValue.description.trim(),
-      assigneeType: formValue.assignedType,
-      assigneeId: formValue.assigneeId,
-      devicesIds: formValue.devicesIds,
-    };
-    const op$ = order
-      ? this.ordersService.updateOrder(order.id, result)
-      : this.ordersService.createOrder(result);
-
-    op$
-      .pipe(
-        takeUntilDestroyed(this.destroyRef),
-        finalize(() => {
-          this.formLoading.set(false);
-          this.cd.markForCheck();
-        }),
-      )
-      .subscribe({
-        next: (savedOrder: Order) => {
-          this.save.emit({ order: savedOrder, mode: isEdit ? 'edit' : 'create' });
-        },
-        error: (err) => {
-          const msg = err?.error?.message || err?.message || 'Error al guardar la orden';
-          this.formError.set(msg);
-          toast.error('Error al guardar la orden', { description: msg });
-        },
-      });
+    this.orderModel.update((m) => ({ ...m, devicesIds: m.devicesIds.filter((id) => id !== deviceId) }));
   }
 
   onAssignedTypeChange(): void {
-    this.orderForm.patchValue({ assigneeId: '' });
+    this.orderModel.update((m) => ({ ...m, assigneeId: '' }));
   }
 
-  onSeleccionarDispositivo(deviceId: string): void {
-    const selected = this.orderForm.get('devicesIds')?.value || [];
-    this.orderForm.get('devicesIds')?.setValue([...selected, deviceId]);
-    this.deviceSearch = '';
-    this.filterDevices();
+  onSubmit(): void {
+    submit(this.orderForm, async () => {
+      const order = this.order();
+      if (order?.id && !this.orderForm().dirty()) {
+        toast.warning('No se detectaron cambios en la orden');
+        return;
+      }
+
+      this.formLoading.set(true);
+      this.formError.set('');
+      const model = this.orderModel();
+      const isEdit = !!order;
+      const result: CreateOrderRequest = {
+        description: model.description.trim(),
+        assigneeType: model.assignedType,
+        assigneeId: model.assigneeId,
+        devicesIds: model.devicesIds,
+      };
+      const op$ = order
+        ? this.ordersService.updateOrder(order.id, result)
+        : this.ordersService.createOrder(result);
+
+      try {
+        const savedOrder = await firstValueFrom(op$);
+        this.save.emit({ order: savedOrder, mode: isEdit ? 'edit' : 'create' });
+      } catch (err: unknown) {
+        const anyErr = err as { error?: { message?: string }; message?: string };
+        const msg = anyErr?.error?.message || anyErr?.message || 'Error al guardar la orden';
+        this.formError.set(msg);
+        toast.error('Error al guardar la orden', { description: msg });
+      } finally {
+        this.formLoading.set(false);
+      }
+    });
   }
 
   validateDevices(devices: Device[]): Device[] {
@@ -267,27 +225,5 @@ export class OrderCreateEditModalComponent implements OnInit {
     return groups.filter(
       (g) => Array.isArray(g.employees) && g.employees.some((e) => e.status === EmployeeStatus.ACTIVE),
     );
-  }
-
-  private hasChanges(): boolean {
-    const order = this.order();
-    if (!order) return true;
-    const current = this.orderForm.value;
-    const originalIds = order.items.map((d) => d.deviceId).sort();
-    const currentIds = [...(current.devicesIds ?? [])].sort();
-    return (
-      current.description?.trim() !== order.description ||
-      current.assignedType !== order.assigneeType ||
-      current.assigneeId !== order.assigneeId ||
-      originalIds.length !== currentIds.length ||
-      !originalIds.every((id, i) => id === currentIds[i])
-    );
-  }
-
-  private updateDeviceNameMap(): void {
-    this.deviceNameMap = {};
-    for (const device of this.devices) {
-      this.deviceNameMap[device.id] = device.name;
-    }
   }
 }

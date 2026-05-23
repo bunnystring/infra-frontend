@@ -94,7 +94,7 @@ describe('OrderCreateEditModalComponent', () => {
 
     fixture = TestBed.createComponent(OrderCreateEditModalComponent);
     component = fixture.componentInstance;
-    if (order) component.order = order;
+    if (order) fixture.componentRef.setInput('order', order);
     await fixture.whenStable();
     await fixture.whenStable();
   }
@@ -313,7 +313,7 @@ describe('OrderCreateEditModalComponent', () => {
 
       fixture = TestBed.createComponent(OrderCreateEditModalComponent);
       component = fixture.componentInstance;
-      component.order = mockOrder;
+      fixture.componentRef.setInput('order', mockOrder);
       await fixture.whenStable();
       await fixture.whenStable();
 
@@ -356,7 +356,7 @@ describe('OrderCreateEditModalComponent', () => {
       component.onSubmit();
       await fixture.whenStable();
 
-      expect(component.formError).toBe('Error del servidor');
+      expect(component.formError()).toBe('Error del servidor');
     });
   });
 
@@ -364,7 +364,7 @@ describe('OrderCreateEditModalComponent', () => {
   describe('onAssignedTypeChange', () => {
     it('limpia assigneeId al cambiar el tipo de asignación', async () => {
       await setup(mockOrder);
-      component.onAssignedTypeChange({});
+      component.onAssignedTypeChange();
       expect(component.orderForm.get('assigneeId')?.value).toBe('');
     });
   });
@@ -382,17 +382,17 @@ describe('OrderCreateEditModalComponent', () => {
   describe('estado inicial', () => {
     it('submitted inicia en false', async () => {
       await setup();
-      expect(component.submitted).toBe(false);
+      expect(component.submitted()).toBe(false);
     });
 
     it('formLoading inicia en false', async () => {
       await setup();
-      expect(component.formLoading).toBe(false);
+      expect(component.formLoading()).toBe(false);
     });
 
     it('formError inicia como cadena vacía', async () => {
       await setup();
-      expect(component.formError).toBe('');
+      expect(component.formError()).toBe('');
     });
   });
 });

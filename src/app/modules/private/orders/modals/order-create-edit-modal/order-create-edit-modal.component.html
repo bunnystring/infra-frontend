@@ -13,7 +13,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
         </svg>
-        {{ order ? 'Editar Orden' : 'Nueva Orden' }}
+        {{ order() ? 'Editar Orden' : 'Nueva Orden' }}
       </h3>
 
       <form [formGroup]="orderForm" (ngSubmit)="onSubmit()" class="space-y-6">
@@ -23,7 +23,7 @@
           <div class="relative">
             <input formControlName="description" type="text"
               class="input input-bordered w-full pr-12 text-lg bg-white/70 focus:ring-2 focus:ring-blue-400 transition-all"
-              placeholder="Breve descripción" [class.input-error]="submitted && orderForm.get('description')?.invalid"
+              placeholder="Breve descripción" [class.input-error]="submitted() && orderForm.get('description')?.invalid"
               autocomplete="off" />
             @if (orderForm.get('description')?.valid && orderForm.get('description')?.touched) {
               <svg
@@ -32,7 +32,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             }
-            @if (submitted && orderForm.get('description')?.invalid) {
+            @if (submitted() && orderForm.get('description')?.invalid) {
               <svg
                 class="h-5 w-5 text-error absolute right-5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor"
                 stroke-width="2" viewBox="0 0 24 24">
@@ -40,12 +40,12 @@
               </svg>
             }
           </div>
-          @if (submitted && orderForm.get('description')?.hasError('whitespace')) {
+          @if (submitted() && orderForm.get('description')?.hasError('whitespace')) {
             <div class="text-xs text-error mt-2 transition-all"
               >No debe contener solo espacios
             en blanco.</div>
           }
-          @if (submitted && orderForm.get('description')?.hasError('required')) {
+          @if (submitted() && orderForm.get('description')?.hasError('required')) {
             <div class="text-xs text-error mt-2 transition-all"
             >Campo obligatorio.</div>
           }
@@ -61,7 +61,7 @@
               </option>
             }
           </select>
-          @if (orderForm.get('assignedType')?.invalid && submitted) {
+          @if (orderForm.get('assignedType')?.invalid && submitted()) {
             <div class="text-xs text-error mt-2">Selecciona
             el tipo de asignación.</div>
           }
@@ -76,7 +76,7 @@
                 <option [value]="group.id">{{ group.name }}</option>
               }
             </select>
-            @if (orderForm.get('assigneeId')?.invalid && submitted) {
+            @if (orderForm.get('assigneeId')?.invalid && submitted()) {
               <div class="text-xs text-error mt-2">Selecciona un
               grupo.</div>
             }
@@ -92,7 +92,7 @@
                 <option [value]="emp.id">{{ emp.fullName }}</option>
               }
             </select>
-            @if (orderForm.get('assigneeId')?.invalid && submitted) {
+            @if (orderForm.get('assigneeId')?.invalid && submitted()) {
               <div class="text-xs text-error mt-2">Selecciona un
               empleado.</div>
             }
@@ -156,7 +156,7 @@
               </div>
             }
           </div>
-          @if (orderForm.get('devicesIds')?.invalid && submitted) {
+          @if (orderForm.get('devicesIds')?.invalid && submitted()) {
             <div class="text-xs text-error mt-2">
               Selecciona al menos un dispositivo.
             </div>
@@ -176,7 +176,7 @@
               stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
             </svg>
-            {{ order ? 'Guardar cambios' : 'Crear orden' }}
+            {{ order() ? 'Guardar cambios' : 'Crear orden' }}
           </button>
         </div>
       </form>

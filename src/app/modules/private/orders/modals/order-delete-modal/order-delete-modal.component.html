@@ -16,7 +16,7 @@
 
     <p class="mb-4 text-base text-base-content/80">
       ¿Estás seguro de que deseas eliminar la orden
-      <b class="text-error">{{ order?.description || order?.id }}</b>?
+      <b class="text-error">{{ order()?.description || order()?.id }}</b>?
     </p>
 
     <div class="alert alert-warning mb-6 text-sm flex gap-2 items-start">
@@ -26,30 +26,30 @@
       Esta acción no se puede deshacer. Se eliminarán todos los dispositivos asociados a la orden.
     </div>
 
-    @if (error) {
+    @if (error()) {
       <div class="alert alert-error mb-4 text-sm flex gap-2 items-center">
         <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
         </svg>
-        {{ error }}
+        {{ error() }}
       </div>
     }
 
-    @if (loading) {
+    @if (loading()) {
       <div class="flex justify-center mb-4">
         <span class="loading loading-spinner loading-lg text-error"></span>
       </div>
     }
 
     <div class="modal-action flex flex-col sm:flex-row justify-end gap-3">
-      <button class="btn btn-ghost btn-lg w-full sm:w-auto" (click)="cancelDelete()" [disabled]="loading">
+      <button class="btn btn-ghost btn-lg w-full sm:w-auto" (click)="cancelDelete()" [disabled]="loading()">
         <svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
         </svg>
         Cancelar
       </button>
-      <button class="btn btn-error btn-lg w-full sm:w-auto" (click)="deleted.emit()" [disabled]="loading">
-        @if (loading) {
+      <button class="btn btn-error btn-lg w-full sm:w-auto" (click)="deleted.emit()" [disabled]="loading()">
+        @if (loading()) {
           <span class="loading loading-spinner loading-xs mr-1"></span>
         }
         <svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">

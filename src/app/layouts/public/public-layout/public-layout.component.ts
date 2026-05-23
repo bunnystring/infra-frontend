@@ -1,15 +1,7 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
-
 import { ThemeService } from '../../../core/services/theme.service';
 
-/**
- * Componente de Layout Público
- * Proporciona la estructura de navegación y layout para las rutas públicas de la aplicación
- *
- * @author Bunnystring
- * @since 2026-02-06
- */
 @Component({
   selector: 'app-public-layout',
   standalone: true,
@@ -19,12 +11,7 @@ import { ThemeService } from '../../../core/services/theme.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PublicLayoutComponent {
+  protected readonly themeService = inject(ThemeService);
 
-  // Año actual para mostrar en el footer
-  currentYear = new Date().getFullYear();
-
-  constructor(
-    private themeService: ThemeService
-  ) {
-  }
+  readonly currentYear = new Date().getFullYear();
 }

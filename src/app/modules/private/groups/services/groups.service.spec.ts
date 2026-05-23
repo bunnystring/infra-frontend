@@ -3,7 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideHttpClient } from '@angular/common/http';
 import { GroupsService } from './groups.service';
 import { Group, CreateGroupRq } from '../models/groups.model';
-import { EmployeeStatus } from '../../employees/models/employe.model';
+import { EmployeeStatus } from '../../employees/models/employee.model';
 import { environment } from '../../../../../environments/environment';
 
 const BASE = environment.apiUrl;

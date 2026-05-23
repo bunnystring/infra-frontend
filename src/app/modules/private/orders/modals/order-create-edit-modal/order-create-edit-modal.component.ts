@@ -16,7 +16,7 @@ import {
   OrderFormResult,
   OrderStateLabels,
   OrderStates,
-} from '../../models/Orders';
+} from '../../models/orders.model';
 
 import { FormGroup, FormsModule, Validators } from '@angular/forms';
 import {
@@ -33,13 +33,13 @@ import { GroupsService } from '../../../groups/services/groups.service';
 import { EmployeesService } from '../../../employees/services/employees.service';
 import { FormBuilder } from '@angular/forms';
 import { ChangeDetectorRef, SimpleChanges } from '@angular/core';
-import { Employee } from '../../../employees/models/employe.model';
+import { Employee } from '../../../employees/models/employee.model';
 import { Group } from '../../../groups/models/groups.model';
 import { noWhitespaceValidator } from '../../../../../core/utils/form-validators.utils';
 import { ReactiveFormsModule } from '@angular/forms';
 import { OrdersService } from '../../services/orders.service';
 import { toast } from 'ngx-sonner';
-import { EmployeeStatus } from '../../../employees/models/employe.model';
+import { EmployeeStatus } from '../../../employees/models/employee.model';
 
 /**
  * Componente modal para crear o editar una orden, con un formulario que incluye campos para descripción, tipo de asignación, asignado a y dispositivos asociados. Gestiona la carga de datos necesarios para el formulario, validaciones, y emite eventos para guardar los cambios o cerrar el modal.

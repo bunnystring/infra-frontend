@@ -17,6 +17,4 @@ import { NgxSonnerToaster } from 'ngx-sonner';
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './app.component.css'
 })
-export class AppComponent {
-  title = 'infragest-frontend';
-}
+export class AppComponent {}

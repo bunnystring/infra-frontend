@@ -6,7 +6,7 @@ import { of } from 'rxjs';
 import { EmployeesComponent } from './employees.component';
 import { EmployeesStore } from '../../store/employees.store';
 import { EmployeesService } from '../../services/employees.service';
-import { Employee, EmployeeStatus } from '../../models/employe.model';
+import { Employee, EmployeeStatus } from '../../models/employee.model';
 
 const mockEmployees: Employee[] = [
   { id: 'e1', fullName: 'Ana García', email: 'ana@empresa.com', documentType: 'CC', documentNumber: '111', status: EmployeeStatus.ACTIVE },

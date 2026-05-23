@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, inject, signal, input, output } from '@angular/core';
-import { Employee } from '../../models/employe.model';
+import { Employee } from '../../models/employee.model';
 import { EmployeesService } from '../../services/employees.service';
 import { toast } from 'ngx-sonner';
 import { finalize } from 'rxjs';

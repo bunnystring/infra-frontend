@@ -44,8 +44,8 @@ export class LoginComponent {
     this.route.snapshot.queryParams['returnUrl'],
   );
 
-  isPasswordFocused = false;
-  isEmailFocused = false;
+  readonly isPasswordFocused = signal(false);
+  readonly isEmailFocused = signal(false);
   private isTogglingPassword = false;
 
   readonly showPassword = signal(false);
@@ -110,18 +110,18 @@ export class LoginComponent {
   }
 
   onEmailFocus(): void {
-    this.isPasswordFocused = false;
-    this.isEmailFocused = true;
+    this.isPasswordFocused.set(false);
+    this.isEmailFocused.set(true);
   }
 
   onEmailBlur(): void {
-    this.isEmailFocused = false;
+    this.isEmailFocused.set(false);
     if (this.mascot) this.mascot.resetEyePosition();
   }
 
   onPasswordAreaFocus(): void {
-    this.isPasswordFocused = true;
-    this.isEmailFocused = false;
+    this.isPasswordFocused.set(true);
+    this.isEmailFocused.set(false);
   }
 
   onPasswordAreaBlur(event: FocusEvent): void {
@@ -129,7 +129,7 @@ export class LoginComponent {
     const relatedTarget = event.relatedTarget as HTMLElement;
     const currentTarget = event.currentTarget as HTMLElement;
     if (relatedTarget && currentTarget.contains(relatedTarget)) return;
-    this.isPasswordFocused = false;
+    this.isPasswordFocused.set(false);
   }
 
   onRememberMeChange(event: Event): void {

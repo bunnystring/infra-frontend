@@ -14,7 +14,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
         </svg>
-        {{ device ? 'Editar dispositivo' : 'Nuevo dispositivo' }}
+        {{ device() ? 'Editar dispositivo' : 'Nuevo dispositivo' }}
       </h3>
       <form [formGroup]="deviceForm" (ngSubmit)="submit()" class="space-y-6">
         <!-- Nombre -->
@@ -24,7 +24,7 @@
             <input
               class="input input-bordered w-full pr-12 text-lg transition-all focus:ring-2 focus:ring-blue-400 bg-white/70"
               formControlName="name" placeholder="Nombre completo"
-              [class.input-error]="submitted && deviceForm.get('name')?.invalid" autocomplete="off" />
+              [class.input-error]="submitted() && deviceForm.get('name')?.invalid" autocomplete="off" />
             @if (deviceForm.get('name')?.valid && deviceForm.get('name')?.touched) {
               <svg
                 class="h-5 w-5 text-success absolute right-5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor"
@@ -32,7 +32,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             }
-            @if (submitted && deviceForm.get('name')?.invalid) {
+            @if (submitted() && deviceForm.get('name')?.invalid) {
               <svg
                 class="h-5 w-5 text-error absolute right-5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor"
                 stroke-width="2" viewBox="0 0 24 24">
@@ -40,22 +40,22 @@
               </svg>
             }
           </div>
-          @if (submitted && deviceForm.get('name')?.hasError('invalidFullName')) {
+          @if (submitted() && deviceForm.get('name')?.hasError('invalidFullName')) {
             <div class="text-xs text-error mt-2 transition-all"
               >¡Escribe nombre y apellido válidos!
             </div>
           }
-          @if (submitted && deviceForm.get('name')?.hasError('invalidName')) {
+          @if (submitted() && deviceForm.get('name')?.hasError('invalidName')) {
             <div class="text-xs text-error mt-2 transition-all"
               >No se permiten números en el nombre.
             </div>
           }
-          @if (submitted && deviceForm.get('name')?.hasError('whitespace')) {
+          @if (submitted() && deviceForm.get('name')?.hasError('whitespace')) {
             <div class="text-xs text-error mt-2 transition-all"
               >No debe contener solo espacios en
             blanco.</div>
           }
-          @if (submitted && deviceForm.get('name')?.hasError('required')) {
+          @if (submitted() && deviceForm.get('name')?.hasError('required')) {
             <div class="text-xs text-error mt-2 transition-all"
             >Campo obligatorio.</div>
           }
@@ -67,7 +67,7 @@
             <input
               class="input input-bordered w-full pr-12 text-lg transition-all focus:ring-2 focus:ring-blue-400 bg-white/70"
               formControlName="brand" placeholder="Marca"
-              [class.input-error]="submitted && deviceForm.get('brand')?.invalid" autocomplete="off" />
+              [class.input-error]="submitted() && deviceForm.get('brand')?.invalid" autocomplete="off" />
             @if (deviceForm.get('brand')?.valid && deviceForm.get('brand')?.touched) {
               <svg
                 class="h-5 w-5 text-success absolute right-5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor"
@@ -75,7 +75,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             }
-            @if (submitted && deviceForm.get('brand')?.invalid) {
+            @if (submitted() && deviceForm.get('brand')?.invalid) {
               <svg
                 class="h-5 w-5 text-error absolute right-5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor"
                 stroke-width="2" viewBox="0 0 24 24">
@@ -83,11 +83,11 @@
               </svg>
             }
           </div>
-          @if (submitted && deviceForm.get('brand')?.hasError('required')) {
+          @if (submitted() && deviceForm.get('brand')?.hasError('required')) {
             <div class="text-xs text-error mt-2 transition-all"
             >Campo obligatorio.</div>
           }
-          @if (submitted && deviceForm.get('brand')?.hasError('whitespace')) {
+          @if (submitted() && deviceForm.get('brand')?.hasError('whitespace')) {
             <div class="text-xs text-error mt-2 transition-all"
               >No debe contener solo espacios en
             blanco.</div>
@@ -100,7 +100,7 @@
             <input
               class="input input-bordered w-full pr-12 text-lg transition-all focus:ring-2 focus:ring-blue-400 bg-white/70"
               formControlName="barcode" placeholder="Ej: 123456"
-              [class.input-error]="submitted && deviceForm.get('barcode')?.invalid" autocomplete="off" />
+              [class.input-error]="submitted() && deviceForm.get('barcode')?.invalid" autocomplete="off" />
             @if (deviceForm.get('barcode')?.valid && deviceForm.get('barcode')?.touched) {
               <svg
                 class="h-5 w-5 text-success absolute right-5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor"
@@ -108,7 +108,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             }
-            @if (submitted && deviceForm.get('barcode')?.invalid) {
+            @if (submitted() && deviceForm.get('barcode')?.invalid) {
               <svg
                 class="h-5 w-5 text-error absolute right-5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor"
                 stroke-width="2" viewBox="0 0 24 24">
@@ -116,15 +116,15 @@
               </svg>
             }
           </div>
-          @if (submitted && deviceForm.get('barcode')?.hasError('required')) {
+          @if (submitted() && deviceForm.get('barcode')?.hasError('required')) {
             <div class="text-xs text-error mt-2 transition-all"
             >Campo obligatorio.</div>
           }
-          @if (submitted && deviceForm.get('barcode')?.hasError('minlength')) {
+          @if (submitted() && deviceForm.get('barcode')?.hasError('minlength')) {
             <div class="text-xs text-error mt-2 transition-all"
             >Mínimo 6 caracteres.</div>
           }
-          @if (submitted && deviceForm.get('barcode')?.hasError('whitespace')) {
+          @if (submitted() && deviceForm.get('barcode')?.hasError('whitespace')) {
             <div class="text-xs text-error mt-2 transition-all"
               >No debe contener solo espacios en
             blanco.</div>
@@ -141,7 +141,7 @@
             }
           </select>
         </div>
-        @if (device?.assignmentActive) {
+        @if (device()?.assignmentActive) {
           <div
             class="bg-blue-100 border border-blue-300 rounded px-3 py-2 mb-2 text-blue-800 text-sm">
             <strong>Dispositivo asignado:</strong> No puedes editar el estado ni modificar datos mientras el dispositivo
@@ -149,13 +149,13 @@
           </div>
         }
         <!-- Loader y error global -->
-        @if (formLoading) {
+        @if (formLoading()) {
           <div class="flex justify-center mt-6">
-            <span class="loading loading-spinner loading-lg"></span> {{formLoading}}
+            <span class="loading loading-spinner loading-lg"></span> {{formLoading()}}
           </div>
         }
-        @if (formError) {
-          <div class="text-error text-center mb-4 text-base font-semibold">{{ formError }}</div>
+        @if (formError()) {
+          <div class="text-error text-center mb-4 text-base font-semibold">{{ formError() }}</div>
         }
 
         <!-- Botones -->
@@ -167,16 +167,16 @@
             </svg>
             Cancelar
           </button>
-          @if (!device?.assignmentActive) {
-            <button type="submit" class="btn btn-primary btn-lg shadow-lg" [disabled]="formLoading || deviceForm.invalid">
-              @if (formLoading) {
+          @if (!device()?.assignmentActive) {
+            <button type="submit" class="btn btn-primary btn-lg shadow-lg" [disabled]="formLoading() || deviceForm.invalid">
+              @if (formLoading()) {
                 <span class="loading loading-spinner loading-xs mr-2"></span>
               }
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
               </svg>
-              {{ device ? 'Actualizar' : 'Guardar' }}
+              {{ device() ? 'Actualizar' : 'Guardar' }}
             </button>
           }
         </div>

@@ -1,23 +1,22 @@
-import { Device } from '../../models/device.model';
-import { DevicesService } from './../../services/devices.service';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, Output } from '@angular/core';
-import { EventEmitter } from '@angular/core';
-
-import { Subject, of } from 'rxjs';
 import {
-  takeUntil,
-  finalize,
-  catchError,
-  tap,
-  switchMap,
-} from 'rxjs/operators';
-import { isXlsxFile } from '../../../../../core/utils/form-validators.utils';
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  inject,
+  output,
+  signal,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   FormBuilder,
   FormGroup,
-  Validators,
   ReactiveFormsModule,
+  Validators,
 } from '@angular/forms';
+import { of, switchMap, tap, catchError, finalize } from 'rxjs';
+import { Device } from '../../models/device.model';
+import { DevicesService } from '../../services/devices.service';
+import { isXlsxFile } from '../../../../../core/utils/form-validators.utils';
 import { toast } from 'ngx-sonner';
 
 @Component({
@@ -27,65 +26,45 @@ import { toast } from 'ngx-sonner';
   imports: [ReactiveFormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DeviceBulkUploadModalComponent implements OnInit, OnDestroy {
-  // Outputs para comunicar el resultado de la carga masiva y el cierre del modal
-  @Output() uploaded = new EventEmitter<Device[]>();
-  @Output() close = new EventEmitter<void>();
+export class DeviceBulkUploadModalComponent {
+  private readonly devicesService = inject(DevicesService);
+  private readonly fb = inject(FormBuilder);
+  private readonly destroyRef = inject(DestroyRef);
 
-  // Estado del formulario, carga y error
-  loading = false;
-  formError = '';
-  form!: FormGroup;
+  readonly uploaded = output<Device[]>();
+  readonly close = output<void>();
 
-  private readonly destroy$ = new Subject<void>();
+  readonly loading = signal(false);
+  readonly formError = signal('');
 
-  constructor(
-    private devicesService: DevicesService,
-    private fb: FormBuilder,
-    private readonly cd: ChangeDetectorRef,
-  ) {}
-
-  ngOnInit() {
-    this.initForm();
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  initForm() {
-    this.form = this.fb.group({
-      file: [null, [Validators.required, this.xlsxFileValidator]],
-    });
-  }
-
-  xlsxFileValidator = (control: any) => {
-    const file = control.value as File;
+  private readonly xlsxFileValidator = (control: { value: File | null }) => {
+    const file = control.value;
     if (!file) return null;
-    return isXlsxFile(file)
-      ? null
-      : { invalidFileType: 'El archivo debe ser .xls o .xlsx' };
+    return isXlsxFile(file) ? null : { invalidFileType: 'El archivo debe ser .xls o .xlsx' };
   };
 
-  onFileSelect(event: Event) {
+  readonly form: FormGroup = this.fb.group({
+    file: [null, [Validators.required, this.xlsxFileValidator]],
+  });
+
+  onFileSelect(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
       this.form.get('file')!.setValue(file);
       this.form.get('file')!.markAsTouched();
-      this.formError = '';
+      this.formError.set('');
     }
   }
 
-  uploadDevices() {
+  uploadDevices(): void {
     if (this.form.invalid) {
-      this.formError = 'Debe seleccionar un archivo válido (.xlsx o .xls)';
+      this.formError.set('Debe seleccionar un archivo válido (.xlsx o .xls)');
       return;
     }
 
-    this.loading = true;
-    this.formError = '';
+    this.loading.set(true);
+    this.formError.set('');
     const file: File = this.form.get('file')!.value;
 
     of(null)
@@ -94,38 +73,29 @@ export class DeviceBulkUploadModalComponent implements OnInit, OnDestroy {
           this.devicesService.uploadBulkDevices(file).pipe(
             tap((devices) => {
               this.uploaded.emit(devices);
-              toast.success(
-                `${devices.length} dispositivos cargados exitosamente`,
-              );
+              toast.success(`${devices.length} dispositivos cargados exitosamente`);
             }),
             catchError((err) => {
-              const msg =
-                err?.error?.message ||
-                err?.message ||
-                'Error al guardar el dispositivo';
-
-              this.formError = msg;
-              toast.error('Error al guardar el dispositivo', {
-                description: msg,
-              });
-              return of([]); // Para terminar el stream
+              const msg = err?.error?.message || err?.message || 'Error al cargar los dispositivos';
+              this.formError.set(msg);
+              toast.error('Error al cargar los dispositivos', { description: msg });
+              return of([]);
             }),
           ),
         ),
-        finalize(() => { this.loading = false; this.cd.markForCheck(); }),
-        takeUntil(this.destroy$),
+        finalize(() => this.loading.set(false)),
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe();
   }
 
-  closeModal() {
+  closeModal(): void {
     this.close.emit();
   }
 
   get fileErrorMsg(): string | null {
     const control = this.form.get('file');
-    if (control?.hasError('invalidFileType'))
-      return control.getError('invalidFileType');
+    if (control?.hasError('invalidFileType')) return control.getError('invalidFileType');
     if (control?.hasError('required')) return 'Debe seleccionar un archivo';
     return null;
   }

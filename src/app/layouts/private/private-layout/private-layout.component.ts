@@ -1,5 +1,4 @@
-
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { toast } from 'ngx-sonner';
@@ -13,16 +12,13 @@ import { ThemeService, Theme } from '../../../core/services/theme.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PrivateLayoutComponent {
+  protected readonly authService = inject(AuthService);
+  protected readonly themeService = inject(ThemeService);
+
   isSidebarOpen = true;
 
-  /** Lectura directa del signal — Angular rastrea la dependencia en el template */
   get currentTheme(): Theme { return this.themeService.currentTheme(); }
   get user() { return this.authService.currentUser(); }
-
-  constructor(
-    public authService: AuthService,
-    public themeService: ThemeService,
-  ) {}
 
   logout(): void {
     toast.promise(
